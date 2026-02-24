@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ApiTaller.api/ApiTaller.api.csproj" />
+  <Project Path="ApiTaller.Core/ApiTaller.Core.csproj" />
+  <Project Path="ApiTaller.Domain/ApiTaller.Domain.csproj" />
+  <Project Path="ApiTaller.Infrastructure/ApiTaller.Infrastructure.csproj" />
+</Solution>
