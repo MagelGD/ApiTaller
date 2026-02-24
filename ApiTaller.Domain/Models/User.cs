@@ -5,7 +5,7 @@ namespace ApiTaller.Domain.Models;
 
 public partial class User : GeneralEntity
 {
-    public int RoleId { get; set; }
+    public int UserRoleId { get; set; }
     public int IdentificationTypeId { get; set; }
     public string IdentificationNumber { get; set; }
     public string FirstName { get; set; }

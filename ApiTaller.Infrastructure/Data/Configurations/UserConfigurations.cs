@@ -17,81 +17,81 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 
                 entity.ToTable("user");
 
-                entity.HasIndex(e => e.IdRol, "FK_USUARIO_ROL");
+                entity.HasIndex(e => e.UserRoleId, "FK_USER_USER_ROLE");
 
-                entity.HasIndex(e => e.IdTipoIdentificacion, "FK_USUARIO_TIPO_IDENTIFICACION");
+                entity.HasIndex(e => e.IdentificationTypeId, "FK_USER_TYPE_IDENTIFICATION");
 
-                entity.Property(e => e.IdUsuario)
+                entity.Property(e => e.Id)
                     .HasColumnType("int(11)")
-                    .HasColumnName("ID_USUARIO");
-                entity.Property(e => e.Correo)
+                    .HasColumnName("id");
+                entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("CORREO");
-                entity.Property(e => e.Estado)
+                    .HasColumnName("email");
+                entity.Property(e => e.IsActive)
                     .HasColumnType("bit(1)")
-                    .HasColumnName("ESTADO");
-                entity.Property(e => e.FechaAsignacion)
+                    .HasColumnName("is_activa");
+                entity.Property(e => e.AssignmentDate)
                     .HasColumnType("datetime")
-                    .HasColumnName("FECHA_ASIGNACION");
-                entity.Property(e => e.FechaCreacion)
+                    .HasColumnName("assignment_date");
+                entity.Property(e => e.CreatedAt)
                     .HasColumnType("datetime")
-                    .HasColumnName("FECHA_CREACION");
-                entity.Property(e => e.FechaExpiracion)
+                    .HasColumnName("created_at");
+                entity.Property(e => e.ExpirationDate)
                     .HasColumnType("datetime")
-                    .HasColumnName("FECHA_EXPIRACION");
-                entity.Property(e => e.FechaModificacion)
+                    .HasColumnName("expiration_date");
+                entity.Property(e => e.UpdatedAt)
                     .HasColumnType("datetime")
-                    .HasColumnName("FECHA_MODIFICACION");
-                entity.Property(e => e.IdRol)
+                    .HasColumnName("updated_at");
+                entity.Property(e => e.UserRoleId)
                     .HasColumnType("int(11)")
-                    .HasColumnName("ID_ROL");
-                entity.Property(e => e.IdTipoIdentificacion)
+                    .HasColumnName("user_role_id");
+                entity.Property(e => e.IdentificationTypeId)
                     .HasColumnType("int(11)")
-                    .HasColumnName("ID_TIPO_IDENTIFICACION");
-                entity.Property(e => e.NombreCompleto)
+                    .HasColumnName("identification_type_id");
+                entity.Property(e => e.FullName)
                     .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("NOMBRE_COMPLETO");
-                entity.Property(e => e.NumeroIdentificacion)
+                    .HasColumnName("full_name");
+                entity.Property(e => e.IdentificationNumber)
                     .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("NUMERO_IDENTIFICACION");
+                    .HasColumnName("identification_number");
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("PASSWORD");
-                entity.Property(e => e.PrimerApellido)
+                    .HasColumnName("password");
+                entity.Property(e => e.FirstSurname)
                     .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("PRIMER_APELLIDO");
-                entity.Property(e => e.PrimerNombre)
+                    .HasColumnName("first_surname");
+                entity.Property(e => e.FirstName)
                     .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("PRIMER_NOMBRE");
-                entity.Property(e => e.SegundoApellido)
+                    .HasColumnName("first_name");
+                entity.Property(e => e.SecondLastName)
                     .HasMaxLength(255)
-                    .HasColumnName("SEGUNDO_APELLIDO");
-                entity.Property(e => e.SegundoNombre)
+                    .HasColumnName("second_last_name");
+                entity.Property(e => e.MiddleName)
                     .HasMaxLength(255)
-                    .HasColumnName("SEGUNDO_NOMBRE");
+                    .HasColumnName("middle_name");
                 entity.Property(e => e.Token)
                     .HasMaxLength(255)
-                    .HasColumnName("TOKEN");
-                entity.Property(e => e.Usuario1)
+                    .HasColumnName("token");
+                entity.Property(e => e.Username)
                     .IsRequired()
                     .HasMaxLength(255)
-                    .HasColumnName("USUARIO");
+                    .HasColumnName("username");
 
-                entity.HasOne(d => d.IdRolNavigation).WithMany()
-                    .HasForeignKey(d => d.IdRol)
+                entity.HasOne(d => d.UserRoleIdNavigation).WithMany()
+                    .HasForeignKey(d => d.UserRoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_USUARIO_ROL");
+                    .HasConstraintName("FK_USER_USER_ROLE");
 
-                entity.HasOne(d => d.IdTipoIdentificacionNavigation).WithMany()
-                    .HasForeignKey(d => d.IdTipoIdentificacion)
+                entity.HasOne(d => d.IdentificationTypeIdNavigation).WithMany()
+                    .HasForeignKey(d => d.IdentificationTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_USUARIO_TIPO_IDENTIFICACION");
+                    .HasConstraintName("FK_USER_TYPE_IDENTIFICATION");
        
         }
     }
