@@ -7,6 +7,6 @@ namespace ApiTaller.Domain.Interfaces.Services.Auth
 {
     public interface IAuthService
     {
-        Task<User> Login(string username, string password, CancellationToken cancellation = default!);
+        Task<bool> Login(string username, string password, CancellationToken cancellation = default!);
     }
 }

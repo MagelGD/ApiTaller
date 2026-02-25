@@ -1,4 +1,5 @@
-﻿using ApiTaller.Domain.Interfaces.Services.Auth;
+﻿using ApiTaller.Domain.Dtos.Users;
+using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Domain.Models;
 using Microsoft.Extensions.Logging;
@@ -19,17 +20,14 @@ namespace ApiTaller.Core.Services.Auth
             _logger = logger;
         }
 
-        public async Task<User> Login(string username, string password, CancellationToken cancellation = default)
+        public async Task<bool> Login(string username, string password, CancellationToken cancellation = default)
         {
             try
             {
-                User? user = await _userService.GetUser(username, cancellation);
-                if (user != null)
+                GetUser? user = await _userService.GetUser(username, cancellation);
+                if (user != null && user.Password == password)
                 {
-                    if (user.Password.Equals(password))
-                    {
-                      user.Token = await Token(user, cancellation);
-                    }
+                    user.Token = await Token(user, cancellation);
                 }
             }
             catch (Exception ex)

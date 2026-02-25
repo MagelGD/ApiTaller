@@ -1,4 +1,5 @@
 ﻿using ApiTaller.Domain.Common.Constants;
+using ApiTaller.Domain.Dtos.Users;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Domain.Models;
@@ -13,22 +14,22 @@ namespace ApiTaller.Core.Services.Users
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<UserService> _logger;
-        public UserService(IUserRepository userRepository, ILogger<UserService> logger)
+        public UserService
         {
             _userRepository = userRepository;
             _logger = logger;
         }
-        public Task<User> GetUser(string username, CancellationToken cancellation = default)
+        public async Task<GetUser?> GetUser(string username, CancellationToken cancellation = default)
         {
             try
             {
-                return _userRepository.GetUser(username, cancellation);
+                return await _userRepository.GetUser(username, cancellation);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, Constants.GetUserError);
             }
-            return default;
+            return null;
         }
     }
 }
