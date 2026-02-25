@@ -7,11 +7,11 @@ using System.Text;
 
 namespace ApiTaller.Infrastructure.Data.Configurations
 {
-    internal class UserRoleModuleConfigurations : IEntityTypeConfiguration<UserRoleModules>
+    internal class UserRoleModuleConfigurations : IEntityTypeConfiguration<UserRoleModule>
     {
-        public void Configure(EntityTypeBuilder<UserRoleModules> entity)
+        public void Configure(EntityTypeBuilder<UserRoleModule> entity)
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("user_role_module");
 

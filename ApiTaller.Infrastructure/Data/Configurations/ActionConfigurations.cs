@@ -13,7 +13,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<Domain.Models.Action> entity)
         {
 
-                entity.HasKey(e => e.Id).HasName("PRIMARY");
+                entity.HasKey(e => e.Id);
 
                 entity.ToTable("action");
 
@@ -59,10 +59,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ACTION_OPERATION");
 
-                entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
-                    .HasForeignKey(d => d.UserResponsibleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_ACTION_USER");
+            entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
+                .HasForeignKey(d => d.UserResponsibleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ACTION_USER");
         }
     }
 }

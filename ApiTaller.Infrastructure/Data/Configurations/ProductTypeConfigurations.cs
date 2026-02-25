@@ -11,7 +11,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ProductType> entity)
         {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasKey(e => e.Id);
 
             entity.ToTable("product_type");
 

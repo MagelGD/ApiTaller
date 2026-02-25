@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ApiTaller.Domain.Models;
 
-public partial class UserRoleModules : GeneralEntity
+public partial class UserRoleModule : GeneralEntity
 {
 
     public int UserRoleId { get; set; }

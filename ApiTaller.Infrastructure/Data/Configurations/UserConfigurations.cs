@@ -13,7 +13,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<User> entity)
         {
            
-                entity.HasKey(e => e.Id).HasName("PRIMARY");
+                entity.HasKey(e => e.Id);
 
                 entity.ToTable("user");
 
