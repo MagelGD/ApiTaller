@@ -10,7 +10,7 @@ namespace ApiTaller.Domain.Models
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public int ResponsibleUserId { get; set; }
+        public int? ResponsibleUserId { get; set; }
         public virtual User ResponsibleUserIdNavigation { get; set; }
     }
 }

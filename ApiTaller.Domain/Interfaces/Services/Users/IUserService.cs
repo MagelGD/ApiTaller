@@ -8,5 +8,6 @@ namespace ApiTaller.Domain.Interfaces.Services.Users
     public interface IUserService
     {
         Task<User> GetUser(string username, CancellationToken cancellation = default!);
+        Task save();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using ApiTaller.Domain.Common.Constants;
+using ApiTaller.Domain.Dtos.Users;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
 using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
@@ -18,19 +19,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Users
             _context = dataContext;
             _logger = logger;
         }
-        public async Task<User> GetUser(string username, CancellationToken cancellation = default!)
+        public async Task<User?> GetUser(string username, CancellationToken cancellation = default!)
         {
-            User user = new();
             try
 			{
-                User? Query = await _context.User.Where(x => x.Username == username).FirstOrDefaultAsync(cancellation);
-                return Query ?? user;
+                GetUser? Query = await _context.User.Select(x=> new GetUser { UserName = x.Username, Password = x.Password}).FirstOrDefaultAsync(x=> x.UserName == username, cancellation);
+                return Query;
             }
 			catch (Exception ex)
 			{
                 _logger.LogError(ex, Constants.GetUserError);
             }
-            return user;
+            return null;
         }
     }
 }

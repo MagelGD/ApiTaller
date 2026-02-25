@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260225205241_Version2")]
+    partial class Version2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -506,7 +509,7 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.Property<ulong>("IsActive")
                         .HasColumnType("bit(1)")
-                        .HasColumnName("is_active");
+                        .HasColumnName("is_activa");
 
                     b.Property<string>("MiddleName")
                         .IsRequired()
@@ -520,6 +523,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("password");
 
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
+
                     b.Property<string>("SecondLastName")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -527,6 +536,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("second_last_name");
 
                     b.Property<string>("Token")
+                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("token");
@@ -546,6 +556,8 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("username");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ResponsibleUserIdNavigationId");
 
                     b.HasIndex(new[] { "IdentificationTypeId" }, "FK_USER_TYPE_IDENTIFICATION");
 
@@ -784,6 +796,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_USER_TYPE_IDENTIFICATION");
 
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ApiTaller.Domain.Models.UserRole", "UserRoleIdNavigation")
                         .WithMany()
                         .HasForeignKey("UserRoleId")
@@ -791,6 +809,8 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasConstraintName("FK_USER_USER_ROLE");
 
                     b.Navigation("IdentificationTypeIdNavigation");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
 
                     b.Navigation("UserRoleIdNavigation");
                 });

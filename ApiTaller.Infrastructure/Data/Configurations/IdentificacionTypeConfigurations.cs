@@ -31,6 +31,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnName("updated_at");
             entity.Property(e => e.ResponsibleUserId)
                 .HasColumnType("int(11)")
+                .IsRequired(false)
                 .HasColumnName("responsabilidad_user_id");
             entity.Property(e => e.Identification)
                 .IsRequired()
@@ -39,6 +40,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 
             entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId)
+                .IsRequired(false)
                 .HasConstraintName("FK_TYPE_IDENTIFICATION_USER");
         }
     }

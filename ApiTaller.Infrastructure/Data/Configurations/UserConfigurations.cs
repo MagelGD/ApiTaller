@@ -30,7 +30,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                     .HasColumnName("email");
                 entity.Property(e => e.IsActive)
                     .HasColumnType("bit(1)")
-                    .HasColumnName("is_activa");
+                    .HasColumnName("is_active");
                 entity.Property(e => e.AssignmentDate)
                     .HasColumnType("datetime")
                     .HasColumnName("assignment_date");

@@ -7,6 +7,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Users
 {
     public interface IUserRepository
     {
-        Task<User> GetUser(string username, CancellationToken cancellation = default!);
+        Task<User?> GetUser(string username, CancellationToken cancellation = default!);
+        Task save();
     }
 }
