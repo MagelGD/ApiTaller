@@ -17,8 +17,8 @@ namespace ApiTaller.api.Controllers
         [HttpGet]
         public async Task<IActionResult> Gets(CancellationToken cancellationToken)
         {
-            var ok = await _authService.Login("MagelAdmin", "admin", cancellationToken);
-            return Ok(new { ok });
+            await _authService.Login("MagelAdmin", "123456", cancellationToken);
+            return Ok();
         }
     }
 }

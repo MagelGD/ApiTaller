@@ -15,10 +15,11 @@ namespace ApiTaller.Core.Services.Auth
         private readonly ILogger<AuthService> _logger;
         private readonly JwtOptions _options;
 
-        public AuthService(IUserService userService, ILogger<AuthService> logger)
+        public AuthService(IUserService userService, ILogger<AuthService> logger, IOptions<JwtOptions> options)
         {
             _userService = userService;
             _logger = logger;
+            _options = options.Value;
         }
 
         public async Task<bool> Login(string username, string password, CancellationToken cancellation = default)
@@ -28,7 +29,7 @@ namespace ApiTaller.Core.Services.Auth
                 GetUser? user = await _userService.GetUser(username, cancellation);
                 if (user != null && user.Password == password)
                 {
-                    //user.Token = user.CreateJwt(_options);
+                    user.Token = user.CreateJwt(_options);
                 }
             }
             catch (Exception ex)
