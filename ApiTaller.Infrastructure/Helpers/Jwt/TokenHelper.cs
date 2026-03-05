@@ -1,0 +1,48 @@
+﻿using ApiTaller.Domain.Dtos.Options;
+using ApiTaller.Domain.Dtos.Users;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace ApiTaller.Infrastructure.Helpers.Jwt
+{
+    public static class TokenHelper
+    {
+        public static string CreateJwt(this GetUser user, JwtOptions options)
+        {
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(options.JwtSigningKey));
+            SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
+            string jti = NewToken();
+            DateTime expiresUtc = DateTime.UtcNow.AddMinutes(options.AccessTokenMinutes);
+            List<Claim> claims =
+            [
+                new(JwtRegisteredClaimNames.Sub, user.UserName.ToString()),
+                new(ClaimTypes.Role, user.IdUserRole.ToString()),
+                new(JwtRegisteredClaimNames.Jti, jti)
+            ];
+            JwtSecurityToken token = new(
+                issuer: options.Issuer,
+                audience: options.Audience,
+                claims: claims,
+                notBefore: DateTime.UtcNow,
+                expires: expiresUtc,
+                signingCredentials: creds
+            );
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        public static string NewToken()
+        {
+            var bytes = RandomNumberGenerator.GetBytes(64);
+            return Convert.ToBase64String(bytes)
+                .TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
+        public static string Sha256Base64(this string input)
+        {
+            using SHA256 sha = SHA256.Create();
+            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+            return Convert.ToBase64String(bytes);
+        }
+    }
+}

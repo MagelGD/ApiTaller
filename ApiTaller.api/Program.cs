@@ -1,5 +1,6 @@
 using ApiTaller.Core.Services.Auth;
 using ApiTaller.Core.Services.Users;
+using ApiTaller.Domain.Dtos.Options;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.Users;
@@ -16,6 +17,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Auth"));
+
 builder.Services.AddDbContext<DataContext>(options =>
         options.UseMySql(
             builder.Configuration.GetConnectionString("DefaultConnection"),

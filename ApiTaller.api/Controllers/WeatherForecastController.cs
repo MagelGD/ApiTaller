@@ -5,17 +5,20 @@ namespace ApiTaller.api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController(IAuthService authService) : ControllerBase
+    public class WeatherForecastController : ControllerBase
     {
-        private readonly IAuthService _authService = authService;
+        private readonly IAuthService _authService;
 
-      
+        public WeatherForecastController(IAuthService authService)
+        {
+            _authService = authService;
+        }
 
         [HttpGet]
-        public IActionResult Gets()
+        public async Task<IActionResult> Gets(CancellationToken cancellationToken)
         {
-            _authService.Login("MagelAdmin", "admin");
-            return Ok();
+            var ok = await _authService.Login("MagelAdmin", "admin", cancellationToken);
+            return Ok(new { ok });
         }
     }
 }

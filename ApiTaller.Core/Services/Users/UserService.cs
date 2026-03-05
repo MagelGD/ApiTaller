@@ -14,7 +14,7 @@ namespace ApiTaller.Core.Services.Users
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<UserService> _logger;
-        public UserService
+        public UserService(IUserRepository userRepository, ILogger<UserService> logger)
         {
             _userRepository = userRepository;
             _logger = logger;

@@ -1,11 +1,11 @@
-﻿using ApiTaller.Domain.Dtos.Users;
+﻿using ApiTaller.Domain.Dtos.Options;
+using ApiTaller.Domain.Dtos.Users;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Domain.Models;
+using ApiTaller.Infrastructure.Helpers.Jwt;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Extensions.Options;
 
 namespace ApiTaller.Core.Services.Auth
 {
@@ -13,6 +13,7 @@ namespace ApiTaller.Core.Services.Auth
     {
         private readonly IUserService _userService;
         private readonly ILogger<AuthService> _logger;
+        private readonly JwtOptions _options;
 
         public AuthService(IUserService userService, ILogger<AuthService> logger)
         {
@@ -27,7 +28,7 @@ namespace ApiTaller.Core.Services.Auth
                 GetUser? user = await _userService.GetUser(username, cancellation);
                 if (user != null && user.Password == password)
                 {
-                    user.Token = await Token(user, cancellation);
+                    //user.Token = user.CreateJwt(_options);
                 }
             }
             catch (Exception ex)

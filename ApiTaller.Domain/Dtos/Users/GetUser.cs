@@ -10,5 +10,6 @@ namespace ApiTaller.Domain.Dtos.Users
         public string UserName { get; set; }
         public string Password { get; set; }
         public string? Token { get; set; }
+        public int? IdUserRole { get; set; }
     }
 }
