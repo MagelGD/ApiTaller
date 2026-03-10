@@ -1,6 +1,7 @@
 ﻿using ApiTaller.Domain.Dtos.Options;
 using ApiTaller.Domain.Dtos.Users;
 using ApiTaller.Domain.Interfaces.Services.Auth;
+using ApiTaller.Domain.Interfaces.Services.Login;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Domain.Models;
 using ApiTaller.Infrastructure.Helpers.Jwt;
@@ -14,12 +15,14 @@ namespace ApiTaller.Core.Services.Auth
         private readonly IUserService _userService;
         private readonly ILogger<AuthService> _logger;
         private readonly JwtOptions _options;
+        private readonly ILoginService _loginService;
 
-        public AuthService(IUserService userService, ILogger<AuthService> logger, IOptions<JwtOptions> options)
+        public AuthService(IUserService userService, ILogger<AuthService> logger, IOptions<JwtOptions> options, ILoginService loginService)
         {
             _userService = userService;
             _logger = logger;
             _options = options.Value;
+            _loginService = loginService;
         }
 
         public async Task<bool> Login(string username, string password, CancellationToken cancellation = default)
@@ -27,29 +30,21 @@ namespace ApiTaller.Core.Services.Auth
             try
             {
                 GetUser? user = await _userService.GetUser(username, cancellation);
-                if (user != null && user.Password == password)
-                {
-                    user.Token = user.CreateJwt(_options);
-                }
+                if (user is null || user.Password != password)
+                    return false;
+                user.Token = user.CreateJwt(_options);
+                if (string.IsNullOrEmpty(user.Token))
+                    return false;
+                if (!await _userService.UpdateUserToken(user, cancellation))
+                    return false;
+                if (!await _loginService.AddUserLogin(user, cancellation))
+                    return false;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "");
             }
             return default;
-        }
-
-        private async Task<string> Token(User user, CancellationToken cancellation = default)
-        {
-            try
-            {
-                return "";
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "");
-                throw;
-            }
         }
     }
 }

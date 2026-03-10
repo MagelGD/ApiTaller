@@ -37,8 +37,8 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasMaxLength(255)
                 .HasColumnName("message");
 
-            entity.HasOne(d => d.UserIdNavigation).WithMany()
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
+                .HasForeignKey(d => d.ResponsibleUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LOGIN_USER");
         }

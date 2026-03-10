@@ -25,6 +25,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Users
             {
                 GetUser? Query = await _context.User.Select(x => new GetUser
                 {
+                    Id = x.Id,
                     UserName = x.Username,
                     Password = x.Password,
                     Fullname = x.FullName,
@@ -37,6 +38,24 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Users
                 _logger.LogError(ex, Constants.GetUserError);
             }
             return null;
+        }
+
+        public async Task<bool> UpdateUserToken(GetUser user, CancellationToken cancellation = default!)
+        {
+            try
+            {
+                int rows = await _context.User
+                    .Where(x => x.Id == user.Id)
+                    .ExecuteUpdateAsync(x => x
+                        .SetProperty(p => p.Token, user.Token)
+                        .SetProperty(p => p.UpdatedAt, DateTime.Now), cancellation);
+                return rows > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Constants.GetUserError);
+            }
+            return false;
         }
     }
 }

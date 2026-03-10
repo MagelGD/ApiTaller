@@ -9,5 +9,6 @@ namespace ApiTaller.Domain.Interfaces.Services.Users
     public interface IUserService
     {
         Task<GetUser?> GetUser(string username, CancellationToken cancellation = default!);
+        Task<bool> UpdateUserToken(GetUser user, CancellationToken cancellation = default!);
     }
 }

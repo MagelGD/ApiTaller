@@ -31,5 +31,18 @@ namespace ApiTaller.Core.Services.Users
             }
             return null;
         }
+
+        public async Task<bool> UpdateUserToken(GetUser user, CancellationToken cancellation = default)
+        {
+            try
+            {
+                return await _userRepository.UpdateUserToken(user, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, Constants.GetUserError);
+            }
+            return false;
+        }
     }
 }

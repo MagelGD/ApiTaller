@@ -1,10 +1,12 @@
 using ApiTaller.Core.Services.Auth;
+using ApiTaller.Core.Services.ServiceConfigurations;
 using ApiTaller.Core.Services.Users;
 using ApiTaller.Domain.Dtos.Options;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Infrastructure.Data;
+using ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +16,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+#region Inject Services
+builder.Services.AddServices();
+#endregion
+#region Inject Repositories
+builder.Services.AddRespositories();
+#endregion
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Auth"));
 
 builder.Services.AddDbContext<DataContext>(options =>
