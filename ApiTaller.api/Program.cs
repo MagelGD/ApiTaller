@@ -16,7 +16,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+#region Cors
+builder.Services.AddCors(options =>
+{
+       options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+               .WithOrigins("http://localhost:4200")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
 
+});
+#endregion
 #region Inject Services
 builder.Services.AddServices();
 #endregion
@@ -46,6 +58,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 

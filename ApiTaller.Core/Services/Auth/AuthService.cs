@@ -1,4 +1,5 @@
-﻿using ApiTaller.Domain.Dtos.Options;
+﻿using ApiTaller.Domain.Dtos.Login;
+using ApiTaller.Domain.Dtos.Options;
 using ApiTaller.Domain.Dtos.Users;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.Login;
@@ -25,26 +26,34 @@ namespace ApiTaller.Core.Services.Auth
             _loginService = loginService;
         }
 
-        public async Task<bool> Login(string username, string password, CancellationToken cancellation = default)
+        public async Task<Income> Login(Domain.Dtos.Login.Auth auth, CancellationToken cancellation = default)
         {
             try
             {
-                GetUser? user = await _userService.GetUser(username, cancellation);
-                if (user is null || user.Password != password)
-                    return false;
+                GetUser? user = await _userService.GetUser(auth.Username, cancellation);
+                if (user is null || user.Password != auth.Password)
+                    return default!;
                 user.Token = user.CreateJwt(_options);
                 if (string.IsNullOrEmpty(user.Token))
-                    return false;
+                    return default!;
                 if (!await _userService.UpdateUserToken(user, cancellation))
-                    return false;
+                    return default!;
                 if (!await _loginService.AddUserLogin(user, cancellation))
-                    return false;
+                    return default!;
+                Income income = new()
+                {
+                    Fullname = user.Fullname,
+                    Token = user.Token,
+                    Success = true,
+                    IdUser = user.Id
+                };
+                return income;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "");
+                return default!;
             }
-            return default;
         }
     }
 }
