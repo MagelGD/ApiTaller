@@ -37,6 +37,27 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoles
             return null;
         }
 
+        public async Task<GetUserRole?> GetUserRoleName(string NameRol, CancellationToken cancellation = default)
+        {
+            try
+            {
+                GetUserRole? Query = await (from ur in _context.UserRole
+                                            where ur.Role == NameRol
+                                            select new GetUserRole
+                                            {
+                                                IdUserRol = ur.Id,
+                                                RoleName = ur.Role,
+                                                IsActive = ur.IsActive
+                                            }).FirstOrDefaultAsync(cancellation);
+                return Query;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "");
+            }
+            return null;
+        }
+
         public async Task<IEnumerable<GetUserRole>> GetUserRoles(CancellationToken cancellation = default)
         {
             IEnumerable<GetUserRole> Query = [];
