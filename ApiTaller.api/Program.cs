@@ -8,7 +8,10 @@ using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Infrastructure.Data;
 using ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +46,29 @@ builder.Services.AddDbContext<DataContext>(options =>
             new MariaDbServerVersion(new Version(10, 4, 32))
         )
 );
+#region Inject JwtOptions
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Auth"));
+var jwtOptions = builder.Configuration
+    .GetSection("Auth")
+    .Get<JwtOptions>() ?? throw new InvalidOperationException("No se pudieron cargar las opciones de JWT");
+#endregion
+#region Validación de token 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidAudience = jwtOptions.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.JwtSigningKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+#endregion
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
 var app = builder.Build();
@@ -60,6 +86,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
