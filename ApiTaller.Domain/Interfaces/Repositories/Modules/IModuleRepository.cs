@@ -1,4 +1,4 @@
-﻿}using ApiTaller.Domain.Dtos.Module;
+﻿using ApiTaller.Domain.Dtos.Module;
 using ApiTaller.Domain.Models;
 using System;
 using System.Collections.Generic;

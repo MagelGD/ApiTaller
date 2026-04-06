@@ -1,8 +1,10 @@
 ﻿using ApiTaller.Core.Services.Auth;
+using ApiTaller.Core.Services.Modules;
 using ApiTaller.Core.Services.UserRoles;
 using ApiTaller.Core.Services.Users;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.Login;
+using ApiTaller.Domain.Interfaces.Services.Module;
 using ApiTaller.Domain.Interfaces.Services.UserRoles;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +23,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IUserService, UserService>();
             services.TryAddScoped<IAuthService, AuthService>();
             services.TryAddScoped<IUserRoleService, UserRoleService>();
+            services.TryAddScoped<IModuleService, ModuleService>();
             return services;
         }
     }
