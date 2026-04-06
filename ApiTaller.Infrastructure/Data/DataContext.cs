@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Module = ApiTaller.Domain.Models.Module;
 
 namespace ApiTaller.Infrastructure.Data
 {
@@ -26,6 +27,7 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<Product> Product {  get; set; }
         public DbSet<UserRole> UserRole {  get; set; }
         public DbSet<UserRoleModule> UserRoleModule {  get; set; }
+        public DbSet<Module> Module {  get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

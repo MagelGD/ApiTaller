@@ -56,6 +56,7 @@ namespace ApiTaller.Core.Services.UserRoles
                     Id = userRole.IdUserRol,
                     Role = userRole.RoleName,
                     IsActive = userRole.IsActive,
+                    CreatedAt = userRole.CreatedAt ?? new DateTime()
                 };
                 bool exist = await RolValidation(userRole.RoleName, cancellation);
                 if(data.Id == 0 && !exist)
