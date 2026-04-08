@@ -20,6 +20,7 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
             [
                 new(JwtRegisteredClaimNames.Sub, user.UserName.ToString()),
                 new(ClaimTypes.Role, user.IdUserRole.ToString()),
+                new(ClaimTypes.Sid, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Jti, jti)
             ];
             JwtSecurityToken token = new(
