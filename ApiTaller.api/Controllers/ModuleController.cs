@@ -1,5 +1,6 @@
 ﻿using ApiTaller.Domain.Dtos.Module;
 using ApiTaller.Domain.Interfaces.Services.Module;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class ModuleController : ControllerBase
     {
@@ -17,7 +19,6 @@ namespace ApiTaller.api.Controllers
             _logger = logger;
             _moduleService = moduleService;
         }
-        // GET: api/<ModuleController>
         [HttpGet("GetModules")]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
@@ -31,8 +32,6 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        // GET api/<ModuleController>/5
         [HttpGet("GetModule{id}")]
         public async Task<IActionResult> GetId(int id, CancellationToken cancellationToken)
         {
@@ -46,7 +45,6 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
         [HttpPost("SaveModule")]
         public async Task<IActionResult> Post(GetModule value, CancellationToken cancellationToken)
         {

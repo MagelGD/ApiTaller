@@ -8,6 +8,8 @@ using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Infrastructure.Data;
 using ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
+using ApiTaller.Domain.Interfaces.Services;
+using ApiTaller.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -46,6 +48,9 @@ builder.Services.AddDbContext<DataContext>(options =>
             new MariaDbServerVersion(new Version(10, 4, 32))
         )
 );
+// HttpContext accessor and current user service for per-request user info (claims)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 #region Inject JwtOptions
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Auth"));
 var jwtOptions = builder.Configuration

@@ -1,11 +1,13 @@
 ﻿using ApiTaller.Domain.Dtos.UserRole;
 using ApiTaller.Domain.Interfaces.Services.UserRoles;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class UserRoleController : ControllerBase
     {
