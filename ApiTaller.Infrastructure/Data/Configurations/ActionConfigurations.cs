@@ -17,7 +17,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 
                 entity.ToTable("action");
 
-                entity.HasIndex(e => e.AplicationModuleId, "FK_ACTION_APLICATIONMODULE");
+                entity.HasIndex(e => e.ModuleId, "FK_ACTION_APLICATIONMODULE");
 
                 entity.HasIndex(e => e.OperationId, "FK_ACTION_OPERATION");
 
@@ -30,6 +30,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                     .IsRequired()
                     .HasMaxLength(255)
                     .HasColumnName("name");
+                entity.Property(e => e.Slug)
+                    .IsRequired()
+                    .HasMaxLength(255)
+                    .HasColumnName("slug");
                 entity.Property(e => e.IsActive)
                     .HasColumnType("bit(1)")
                     .HasColumnName("is_active");
@@ -39,9 +43,9 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 entity.Property(e => e.UpdatedAt)
                     .HasColumnType("datetime")
                     .HasColumnName("updated_at");
-                entity.Property(e => e.AplicationModuleId)
+                entity.Property(e => e.ModuleId)
                     .HasColumnType("int(11)")
-                    .HasColumnName("aplication_module_id");
+                    .HasColumnName("module_id");
                 entity.Property(e => e.OperationId)
                     .HasColumnType("int(11)")
                     .HasColumnName("operation_id");
@@ -50,7 +54,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                     .HasColumnName("responsible_user_id");
 
                 entity.HasOne(d => d.ModuleIdNavigation).WithMany()
-                    .HasForeignKey(d => d.AplicationModuleId)
+                    .HasForeignKey(d => d.ModuleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ACTION_APLICATIONMODULE");
 

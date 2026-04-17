@@ -15,7 +15,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 
             entity.ToTable("user_role_module");
 
-            entity.HasIndex(e => e.ModulesRoleId, "FK_ROLE_MODULE_APLICATION_MODULE");
+            entity.HasIndex(e => e.ModulesRoleId, "FK_ROLE_MODULE_MODULE");
 
             entity.HasIndex(e => e.UserRoleId, "FK_ROLE_MODULE_USER_ROLE");
 
@@ -46,7 +46,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.HasOne(d => d.ModuleIdNavigation).WithMany()
                 .HasForeignKey(d => d.ModulesRoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ROLE_MODULE_APLICATION_MODULE");
+                .HasConstraintName("FK_ROLE_MODULE_MODULE");
 
             entity.HasOne(d => d.UserRoleIdNavigation).WithMany()
                 .HasForeignKey(d => d.UserRoleId)
