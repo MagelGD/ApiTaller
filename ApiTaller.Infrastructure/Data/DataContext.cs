@@ -16,7 +16,6 @@ namespace ApiTaller.Infrastructure.Data
 
         public DbSet<User> User {  get; set; }
         public DbSet<Domain.Models.Action> Action {  get; set; }
-        public DbSet<AplicationModule> AplicationModule {  get; set; }
         public DbSet<IdentificationType> IdentificationType {  get; set; }
         public DbSet<Inventory> Inventory {  get; set; }
         public DbSet<InventoryHistory> InventoryHistory {  get; set; }

@@ -49,7 +49,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                     .HasColumnType("int(11)")
                     .HasColumnName("responsible_user_id");
 
-                entity.HasOne(d => d.AplicationModuleIdNavigation).WithMany()
+                entity.HasOne(d => d.ModuleIdNavigation).WithMany()
                     .HasForeignKey(d => d.AplicationModuleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ACTION_APLICATIONMODULE");
