@@ -13,6 +13,6 @@ namespace ApiTaller.Domain.Interfaces.Repositories.UserRoleModules
         Task<bool> SaveUserRoleModule(UserRoleModule userRoleModule, CancellationToken cancellation = default!);
         Task<bool> UpdateUserRoleModule(UserRoleModule userRoleModule, CancellationToken cancellation = default!);
         Task<bool> ValidateExistUserRoleModule(int userRoleId, int moduleId, CancellationToken cancellation = default!);
-        Task<GetUserRoleModule?> GetuserRoleModulesCrete(int userRoleId, int moduleId, CancellationToken cancellation = default!);
+        Task<GetUserRoleModule?> GetuserRoleModulesCreate(int userRoleId, int moduleId, CancellationToken cancellation = default!);
     }
 }

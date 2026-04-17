@@ -70,7 +70,7 @@ namespace ApiTaller.Core.Services.UserRoleModules
                 {
                     await _userRoleModuleRepository.UpdateUserRoleModule(saveData, cancellation);
                 }
-
+                data = await _userRoleModuleRepository.GetuserRoleModulesCreate(saveData.UserRoleId, saveData.ModulesRoleId, cancellation) ?? new();
             }
             catch (Exception ex)
             {

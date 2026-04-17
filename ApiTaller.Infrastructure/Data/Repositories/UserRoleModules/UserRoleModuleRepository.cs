@@ -98,7 +98,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
             return userRoleModules;
         }
 
-        public async Task<GetUserRoleModule?> GetuserRoleModulesCrete(int userRoleId, int moduleId, CancellationToken cancellation = default)
+        public async Task<GetUserRoleModule?> GetuserRoleModulesCreate(int userRoleId, int moduleId, CancellationToken cancellation = default)
         {
             try
             {
