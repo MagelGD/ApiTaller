@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ApiTaller.Domain.Dtos.Login
+﻿namespace ApiTaller.Domain.Dtos.Login
 {
     public class Income
     {
-        public string Fullname { get; set; }
-        public string Token { get; set; }
+        public required string Fullname { get; set; }
+        public required string Token { get; set; }
         public bool Success { get; set; }
         public int IdUser { get; set; }
     }

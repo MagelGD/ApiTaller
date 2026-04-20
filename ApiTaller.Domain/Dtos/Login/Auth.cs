@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ApiTaller.Domain.Dtos.Login
+﻿namespace ApiTaller.Domain.Dtos.Login
 {
     public class Auth
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public required string Username { get; set; }
+        public required string Password { get; set; }
     }
 }

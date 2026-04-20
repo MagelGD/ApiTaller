@@ -1,23 +1,19 @@
 ﻿using ApiTaller.Domain.Dtos.Module;
 using ApiTaller.Domain.Dtos.Operation;
-using ApiTaller.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ApiTaller.Domain.Dtos.Action
 {
     public class GetActions
     {
         public int Id { get; set; }
-        public GetModule Module { get; set; }
-        public GetOperation Operation { get; set; }
-        public string Name { get; set; }
-        public string Slug { get; set; }
+        public required GetModule Module { get; set; }
+        public required GetOperation Operation { get; set; }
+        public required string Name { get; set; }
+        public required string Slug { get; set; }
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public string ResponsibleUser { get; set; }
+        public required string ResponsibleUser { get; set; }
     }
 }
 
