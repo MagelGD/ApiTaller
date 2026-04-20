@@ -22,6 +22,59 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
             _logger = logger;
             _currentUser = currentUser;
         }
+
+        public async Task<bool> GetActionByExist(string name, int idModule, int idOperation, CancellationToken cancellation = default)
+        {
+            try
+            {
+                bool Query = await _context.Action.Where(x => x.ModuleId == idModule && x.OperationId == idOperation && x.Name == name).AnyAsync(cancellationToken: cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener la acción por slug");
+            }
+            return false;
+        }
+
+        public async Task<GetActions> GetActionByName(string name, int idModule, int idOperation, CancellationToken cancellation = default)
+        {
+            try
+            {
+                GetActions Query = await _context.Action.Where(x => x.ModuleId == idModule && x.OperationId == idOperation && x.Name == name).Select(x => new GetActions
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Slug = x.Slug,
+                    Module = new GetModule
+                    {
+                        Id = x.ModuleIdNavigation.Id,
+                        Name = x.ModuleIdNavigation.Name,
+                        IsActive = x.ModuleIdNavigation.IsActive,
+                        CreatedAt = x.ModuleIdNavigation.CreatedAt,
+                        UpdatedAt = x.ModuleIdNavigation.UpdatedAt
+                    },
+                    Operation = new GetOperation
+                    {
+                        Id = x.OperationIdNavigation.Id,
+                        Name = x.OperationIdNavigation.Name,
+                        IsActive = x.OperationIdNavigation.IsActive,
+                        CreatedAt = x.OperationIdNavigation.CreatedAt,
+                        UpdatedAt = x.OperationIdNavigation.UpdatedAt
+                    },
+                    IsActive = x.IsActive,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = x.UpdatedAt,
+                    ResponsibleUser = x.ResponsibleUserIdNavigation.Username
+                }).FirstOrDefaultAsync(cancellation) ?? new();
+                return Query;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener la acción por slug");
+            }
+            return new();
+        }
+
         public async Task<IEnumerable<GetActions>> GetActions(CancellationToken cancellation = default)
         {
             IEnumerable<GetActions> actions = [];
@@ -104,7 +157,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
         {
             try
             {
-                if(int.TryParse(_currentUser.UserId, out int userId))
+                if (int.TryParse(_currentUser.UserId, out int userId))
                 {
                     action.ResponsibleUserId = userId;
                 }
@@ -123,7 +176,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
         {
             try
             {
-                if(int.TryParse(_currentUser.UserId, out int userId))
+                if (int.TryParse(_currentUser.UserId, out int userId))
                 {
                     action.ResponsibleUserId = userId;
                 }

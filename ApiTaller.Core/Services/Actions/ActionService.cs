@@ -1,6 +1,7 @@
 ﻿using ApiTaller.Domain.Dtos.Action;
 using ApiTaller.Domain.Interfaces.Repositories.Actions;
 using ApiTaller.Domain.Interfaces.Services.Actions;
+using ApiTaller.Domain.Models;
 using Microsoft.Extensions.Logging;
 
 namespace ApiTaller.Core.Services.Actions
@@ -43,9 +44,51 @@ namespace ApiTaller.Core.Services.Actions
             return null;
         }
 
-        public Task<GetActions> SaveOrEditActions(GetActions action, CancellationToken cancellation = default)
+        public async Task<GetActions> SaveOrEditActions(GetActions action, CancellationToken cancellation = default)
         {
-            throw new NotImplementedException();
+            GetActions data = new();
+            try
+            {
+                Domain.Models.Action saveData = new()
+                {
+                    ModuleId = action.Module.Id,
+                    OperationId = action.Operation.Id,
+                    Name = action.Name,
+                    Slug = action.Name.Replace(" ", "_").ToLower(),
+                    CreatedAt = DateTime.Now,
+                    IsActive = action.IsActive
+                };
+                bool isExist = await ActionValidation(action, cancellation);
+                if(saveData.Id == 0 && !isExist)
+                {
+                    await _actionRepository.SaveActions(saveData, cancellation);
+                }
+                else if(saveData.Id != 0)
+                {
+                    await _actionRepository.UpdateActions(saveData, cancellation);
+                }
+                data  = await _actionRepository.GetActionByName(saveData.Name, saveData.ModuleId, saveData.OperationId, cancellation) ?? new();
+
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, "Error guardando o editando la accion");
+            }
+            return data;
+        }
+
+        private async Task<bool> ActionValidation(GetActions action, CancellationToken cancellation = default)
+        {
+            try
+            {
+                return await _actionRepository.GetActionByExist(action.Name, action.Module.Id, action.Operation.Id, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validando la accion");
+            }
+            return false;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Actions
         Task<GetActions?> GetActionsById(int id, CancellationToken cancellation = default);
         Task<bool> SaveActions(Models.Action action, CancellationToken cancellation = default);
         Task<bool> UpdateActions(Models.Action action, CancellationToken cancellation = default);
-        
+        Task<bool> GetActionByExist(string name, int idModule, int idOperation, CancellationToken cancellation = default);
+        Task<GetActions> GetActionByName(string name, int idModule, int idOperation, CancellationToken cancellation = default);
+
     }
 }
