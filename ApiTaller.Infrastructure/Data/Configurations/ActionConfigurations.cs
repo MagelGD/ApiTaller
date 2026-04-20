@@ -64,7 +64,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                     .HasConstraintName("FK_ACTION_OPERATION");
 
             entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
-                .HasForeignKey(d => d.UserResponsibleId)
+                .HasForeignKey(d => d.ResponsibleUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ACTION_USER");
         }

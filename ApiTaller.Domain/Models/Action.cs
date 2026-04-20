@@ -9,7 +9,6 @@ public class Action : GeneralEntity
     public int OperationId { get; set; }
     public string Name { get; set; }
     public string Slug { get; set; }
-    public int UserResponsibleId { get; set; }
     public virtual Module ModuleIdNavigation { get; set; }
     public virtual Operation OperationIdNavigation { get; set; }
 }

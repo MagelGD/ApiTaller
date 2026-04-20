@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260420195016_version11")]
+    partial class version11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -447,50 +450,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.ToTable("product_type", (string)null);
                 });
 
-            modelBuilder.Entity("ApiTaller.Domain.Models.RoleAction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActionId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("action_id");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("created_at");
-
-                    b.Property<ulong>("IsActive")
-                        .HasColumnType("bit(1)")
-                        .HasColumnName("is_active");
-
-                    b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("role_id");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex(new[] { "ActionId" }, "FK_ROLEACTION_ACTION");
-
-                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_ROLEACTION_USER");
-
-                    b.HasIndex(new[] { "RoleId" }, "FK_ROLEACTION_USERROLE");
-
-                    b.ToTable("roleaction", (string)null);
-                });
-
             modelBuilder.Entity("ApiTaller.Domain.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -806,32 +765,6 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasConstraintName("FK_TYPE_PRODUCT_USER");
 
                     b.Navigation("ResponsibleUserIdNavigation");
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.RoleAction", b =>
-                {
-                    b.HasOne("ApiTaller.Domain.Models.Action", "ActionIdNavigation")
-                        .WithMany()
-                        .HasForeignKey("ActionId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ROLEACTION_ACTION");
-
-                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleUserId")
-                        .HasConstraintName("FK_ROLEACTION_USER");
-
-                    b.HasOne("ApiTaller.Domain.Models.UserRole", "RoleIdNavigation")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .IsRequired()
-                        .HasConstraintName("FK_ROLEACTION_USERROLE");
-
-                    b.Navigation("ActionIdNavigation");
-
-                    b.Navigation("ResponsibleUserIdNavigation");
-
-                    b.Navigation("RoleIdNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.User", b =>
