@@ -3,9 +3,6 @@ using ApiTaller.Domain.Interfaces.Repositories.UserRoles;
 using ApiTaller.Domain.Interfaces.Services.UserRoles;
 using ApiTaller.Domain.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ApiTaller.Core.Services.UserRoles
 {
@@ -27,7 +24,7 @@ namespace ApiTaller.Core.Services.UserRoles
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"");
+                _logger.LogError(ex, "");
             }
             return null;
         }
@@ -43,7 +40,7 @@ namespace ApiTaller.Core.Services.UserRoles
             {
                 _logger.LogError(ex, "");
             }
-            return userRoles?? [];
+            return userRoles ?? [];
         }
 
         public async Task<GetUserRole> SaveOrEditUserRole(GetUserRole userRole, CancellationToken cancellation = default)
@@ -59,15 +56,15 @@ namespace ApiTaller.Core.Services.UserRoles
                     CreatedAt = userRole.CreatedAt ?? new DateTime()
                 };
                 bool exist = await RolValidation(userRole.RoleName, cancellation);
-                if(data.Id == 0 && !exist)
+                if (data.Id == 0 && !exist)
                 {
                     data.CreatedAt = DateTime.Now;
-                    await _userRoleRepository.SaveUserRole(data, cancellation);
+                    _ = await _userRoleRepository.SaveUserRole(data, cancellation);
                 }
                 else
                 {
                     data.UpdatedAt = DateTime.Now;
-                    await _userRoleRepository.UpdateUserRole(data, cancellation);
+                    _ = await _userRoleRepository.UpdateUserRole(data, cancellation);
                 }
                 savedUserRole = await _userRoleRepository.GetUserRoleName(data.Role, cancellation) ?? new();
             }

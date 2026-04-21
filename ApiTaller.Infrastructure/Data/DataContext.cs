@@ -26,6 +26,7 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<UserRole> UserRole {  get; set; }
         public DbSet<UserRoleModule> UserRoleModule {  get; set; }
         public DbSet<Module> Module {  get; set; }
+        public DbSet<RoleAction> RoleAction {  get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -51,11 +51,11 @@ namespace ApiTaller.api.Controllers
 
         // POST api/<UserRoleModuleController>
         [HttpPost("SaveOrEditUserRoleModule")]
-        public async Task<IActionResult> SaveOrEditUserRoleModule(GetUserRoleModule getUserRoleModule, CancellationToken cancellation)
+        public async Task<IActionResult> SaveOrEditUserRoleModule(SaveUserRoleModule saveUserRoleModule, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _userRoleModuleService.SaveOrEditUserRoleModule(getUserRoleModule, cancellation));
+                return Ok(await _userRoleModuleService.SaveOrEditUserRoleModule(saveUserRoleModule, cancellation));
             }
             catch (Exception ex)
             {

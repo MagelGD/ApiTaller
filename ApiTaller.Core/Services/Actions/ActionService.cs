@@ -51,6 +51,7 @@ namespace ApiTaller.Core.Services.Actions
             {
                 Domain.Models.Action saveData = new()
                 {
+                    Id = action.Id,
                     ModuleId = action.Module.Id,
                     OperationId = action.Operation.Id,
                     Name = action.Name,

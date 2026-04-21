@@ -2,8 +2,8 @@
 {
     public class Income
     {
-        public required string Fullname { get; set; }
-        public required string Token { get; set; }
+        public string Fullname { get; set; }
+        public string Token { get; set; }
         public bool Success { get; set; }
         public int IdUser { get; set; }
     }
