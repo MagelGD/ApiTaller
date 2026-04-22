@@ -1,6 +1,7 @@
 ﻿using ApiTaller.Domain.Dtos.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Repositories.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Services.IdentificationTypes;
+using ApiTaller.Domain.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,18 @@ namespace ApiTaller.Core.Services.IdentificationTypes
         {
             try
             {
-
+                IdentificationType saveData = new IdentificationType
+                {
+                    Id = createDto.Id,
+                    Identification = createDto.Name,
+                    IsActive = createDto.IsActive,
+                    CreatedAt = createDto.CreatedAt ?? DateTime.Now,
+                };
+                bool isExist = await ValidateExist(createDto.Name, cancellation);
+                if (saveData.Id == 0 &&)
+                {
+                    
+                }
             }
             catch (Exception ex)
             {

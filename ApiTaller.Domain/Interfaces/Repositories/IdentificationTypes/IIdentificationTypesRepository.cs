@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ApiTaller.Domain.Interfaces.Repositories.IdentificationTypes
 {
-    public interface IdentificationTypesRepository
+    public interface IIdentificationTypesRepository
     {
         Task<IEnumerable<GetIdentificationType>> GetAllAsync(CancellationToken cancellation);
         Task<GetIdentificationType> GetByIdAsync(int id, CancellationToken cancellation);
