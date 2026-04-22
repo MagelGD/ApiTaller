@@ -26,7 +26,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RoleActions
         {
             try
             {
-                if(int.TryParse(_currentUser?.UserId, out int userId))
+                if (int.TryParse(_currentUser?.UserId, out int userId))
                 {
                     roleAction.ResponsibleUserId = userId;
                 }
@@ -46,7 +46,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RoleActions
             List<ActionsRole> actions = [];
             try
             {
-                actions = await _Context.RoleAction.Include(x=> x.ActionIdNavigation).Where(ra => ra.RoleId == roleId)
+                actions = await _Context.RoleAction.Include(x => x.ActionIdNavigation).Where(ra => ra.RoleId == roleId)
                     .Select(ra => new ActionsRole
                     {
                         ActionId = ra.ActionId,
@@ -83,7 +83,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RoleActions
         {
             try
             {
-                if(int.TryParse(_currentUser?.UserId, out int userId))
+                if (int.TryParse(_currentUser?.UserId, out int userId))
                 {
                     roleAction.ResponsibleUserId = userId;
                 }
@@ -94,6 +94,19 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RoleActions
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in SaveRoleAction");
+            }
+            return false;
+        }
+
+        public async Task<bool> ValidateActionActive(int actionId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _Context.RoleAction.AnyAsync(ra => ra.ActionId == actionId && ra.IsActive, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ValidateActionActive");
             }
             return false;
         }

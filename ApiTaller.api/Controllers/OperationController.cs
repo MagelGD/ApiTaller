@@ -1,6 +1,7 @@
 ﻿using ApiTaller.Domain.Dtos.Action;
 using ApiTaller.Domain.Dtos.Operation;
 using ApiTaller.Domain.Interfaces.Services.Operations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class OperationController : ControllerBase
     {

@@ -13,5 +13,6 @@ namespace ApiTaller.Domain.Interfaces.Repositories.RoleActions
         Task<List<ActionsRole>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken);
         Task<bool> SaveRoleAction(RoleAction roleAction, CancellationToken cancellationToken);
         Task<bool> ActiveOrInactiveRoleAction(RoleAction roleAction, CancellationToken cancellationToken);
+        Task<bool> ValidateActionActive(int actionId, CancellationToken cancellationToken);
     }
 }

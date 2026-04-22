@@ -1,5 +1,6 @@
 ﻿using ApiTaller.Domain.Dtos.Action;
 using ApiTaller.Domain.Interfaces.Repositories.Actions;
+using ApiTaller.Domain.Interfaces.Repositories.RoleActions;
 using ApiTaller.Domain.Interfaces.Services.Actions;
 using ApiTaller.Domain.Models;
 using Microsoft.Extensions.Logging;
@@ -10,11 +11,13 @@ namespace ApiTaller.Core.Services.Actions
     {
         private readonly IActionRepository _actionRepository;
         private readonly ILogger<ActionService> _logger;
+        private readonly IRoleActionsRepository _roleActionsRepository;
 
-        public ActionService(IActionRepository actionRepository, ILogger<ActionService> logger)
+        public ActionService(IActionRepository actionRepository, ILogger<ActionService> logger, IRoleActionsRepository roleActionsRepository)
         {
             _actionRepository = actionRepository;
             _logger = logger;
+            _roleActionsRepository = roleActionsRepository;
         }
         public async Task<IEnumerable<GetActions>> GetActions(CancellationToken cancellation = default)
         {
@@ -22,6 +25,20 @@ namespace ApiTaller.Core.Services.Actions
             try
             {
                 actions = await _actionRepository.GetActions(cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener las acciones");
+            }
+            return actions;
+        }
+
+        public async Task<IEnumerable<GetActions>> GetActionsActive(CancellationToken cancellation = default)
+        {
+            IEnumerable<GetActions> actions = [];
+            try
+            {
+                actions = await _actionRepository.GetActionsActive(cancellation);
             }
             catch (Exception ex)
             {
@@ -60,15 +77,23 @@ namespace ApiTaller.Core.Services.Actions
                     IsActive = action.IsActive
                 };
                 bool isExist = await ActionValidation(action, cancellation);
-                if(saveData.Id == 0 && !isExist)
+                if (saveData.Id == 0 && !isExist)
                 {
                     await _actionRepository.SaveActions(saveData, cancellation);
                 }
-                else if(saveData.Id != 0)
+                else if (saveData.Id != 0) 
                 {
-                    await _actionRepository.UpdateActions(saveData, cancellation);
+                    bool isActive = await ActionActiveValidation(saveData.Id, cancellation);
+                    if (saveData.IsActive)
+                    {
+                        await _actionRepository.UpdateActions(saveData, cancellation);
+                    }
+                    else if(!saveData.IsActive && !isActive)
+                    {
+                        await _actionRepository.UpdateActions(saveData, cancellation);
+                    }
                 }
-                data  = await _actionRepository.GetActionByName(saveData.Name, saveData.ModuleId, saveData.OperationId, cancellation) ?? new();
+                data = await _actionRepository.GetActionByName(saveData.Name, saveData.ModuleId, saveData.OperationId, cancellation) ?? new();
 
             }
             catch (Exception ex)
@@ -88,6 +113,19 @@ namespace ApiTaller.Core.Services.Actions
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validando la accion");
+            }
+            return false;
+        }
+
+        private async Task<bool> ActionActiveValidation(int actionId, CancellationToken cancellation = default)
+        {
+            try
+            {
+                return await _roleActionsRepository.ValidateActionActive(actionId, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validando si la accion esta activa en algun rol");
             }
             return false;
         }

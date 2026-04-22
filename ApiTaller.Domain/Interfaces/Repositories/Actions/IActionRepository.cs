@@ -9,6 +9,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Actions
     public interface IActionRepository
     {
         Task<IEnumerable<GetActions>> GetActions(CancellationToken cancellation = default);
+        Task<IEnumerable<GetActions>> GetActionsActive(CancellationToken cancellation = default);
         Task<GetActions?> GetActionsById(int id, CancellationToken cancellation = default);
         Task<bool> SaveActions(Models.Action action, CancellationToken cancellation = default);
         Task<bool> UpdateActions(Models.Action action, CancellationToken cancellation = default);

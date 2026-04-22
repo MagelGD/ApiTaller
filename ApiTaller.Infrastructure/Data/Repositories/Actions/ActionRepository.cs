@@ -114,6 +114,45 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
             return actions;
         }
 
+        public async Task<IEnumerable<GetActions>> GetActionsActive(CancellationToken cancellation = default)
+        {
+            IEnumerable<GetActions> actions = [];
+            try
+            {
+                actions = await _context.Action.Where(x => x.IsActive).Select(x => new GetActions
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Slug = x.Slug,
+                    Module = new GetModule
+                    {
+                        Id = x.ModuleIdNavigation.Id,
+                        Name = x.ModuleIdNavigation.Name,
+                        IsActive = x.ModuleIdNavigation.IsActive,
+                        CreatedAt = x.ModuleIdNavigation.CreatedAt,
+                        UpdatedAt = x.ModuleIdNavigation.UpdatedAt
+                    },
+                    Operation = new GetOperation
+                    {
+                        Id = x.OperationIdNavigation.Id,
+                        Name = x.OperationIdNavigation.Name,
+                        IsActive = x.OperationIdNavigation.IsActive,
+                        CreatedAt = x.OperationIdNavigation.CreatedAt,
+                        UpdatedAt = x.OperationIdNavigation.UpdatedAt
+                    },
+                    IsActive = x.IsActive,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = x.UpdatedAt,
+                    ResponsibleUser = x.ResponsibleUserIdNavigation.Username
+                }).ToListAsync(cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener las acciones");
+            }
+            return actions;
+        }
+
         public async Task<GetActions?> GetActionsById(int id, CancellationToken cancellation = default)
         {
             try

@@ -1,5 +1,6 @@
 ﻿using ApiTaller.Domain.Dtos.Action;
 using ApiTaller.Domain.Interfaces.Services.Actions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class ActionsController : ControllerBase
     {
@@ -25,6 +27,20 @@ namespace ApiTaller.api.Controllers
             try
             {
                 return Ok(await _actionService.GetActions(cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener las acciones");
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("GetActionsActive")]
+        public async Task<IActionResult> GetActionsActive(CancellationToken cancellation)
+        {
+            try
+            {
+                return Ok(await _actionService.GetActionsActive(cancellation));
             }
             catch (Exception ex)
             {
