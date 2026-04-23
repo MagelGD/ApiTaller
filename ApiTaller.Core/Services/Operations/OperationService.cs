@@ -16,9 +16,9 @@ namespace ApiTaller.Core.Services.Operations
             _operationRepository = operationRepository;
             _logger = logger;
         }
-        public async Task<IEnumerable<GetOperation>> GetOperations(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetOperationDto>> GetOperations(CancellationToken cancellation = default)
         {
-            IEnumerable<GetOperation> operations = [];
+            IEnumerable<GetOperationDto> operations = [];
             try
             {
                 operations = await _operationRepository.GetOperations(cancellation);
@@ -30,7 +30,7 @@ namespace ApiTaller.Core.Services.Operations
             return operations;
         }
 
-        public async Task<GetOperation?> GetOperationsById(int id, CancellationToken cancellation = default)
+        public async Task<GetOperationDto?> GetOperationsById(int id, CancellationToken cancellation = default)
         {
             try
             {
@@ -43,9 +43,9 @@ namespace ApiTaller.Core.Services.Operations
             return null;
         }
 
-        public async Task<GetOperation> SaveOrEditOperation(GetOperation operation, CancellationToken cancellation = default)
+        public async Task<GetOperationDto> SaveOrEditOperation(GetOperationDto operation, CancellationToken cancellation = default)
         {
-            GetOperation data = new();
+            GetOperationDto data = new();
             try
             {
                 Operation saveData = new()
@@ -77,7 +77,7 @@ namespace ApiTaller.Core.Services.Operations
         {
             try
             {
-                GetOperation? operation = await _operationRepository.GetOperationName(name, cancellation);
+                GetOperationDto? operation = await _operationRepository.GetOperationName(name, cancellation);
                 return operation != null;
             }
             catch (Exception ex)

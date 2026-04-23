@@ -3,11 +3,11 @@ using ApiTaller.Domain.Dtos.UserRole;
 
 namespace ApiTaller.Domain.Dtos.UserRoleModule
 {
-    public class GetUserRoleModule
+    public class GetUserRoleModuleDto
     {
         public int id { get; set; }
-        public GetUserRole Role { get; set; }
-        public GetModule Module { get; set; }
+        public GetUserRoleDto Role { get; set; }
+        public GetModuleDto Module { get; set; }
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

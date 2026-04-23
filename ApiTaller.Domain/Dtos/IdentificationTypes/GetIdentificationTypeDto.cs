@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ApiTaller.Domain.Dtos.IdentificationTypes
 {
-    public class GetIdentificationType
+    public class GetIdentificationTypeDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

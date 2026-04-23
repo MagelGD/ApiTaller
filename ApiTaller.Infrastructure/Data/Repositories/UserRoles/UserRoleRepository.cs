@@ -16,13 +16,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoles
             _context = dataContext;
             _logger = logger;
         }
-        public async Task<GetUserRole?> GetUserRoleById(int id, CancellationToken cancellation = default)
+        public async Task<GetUserRoleDto?> GetUserRoleById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetUserRole? Query = await (from ur in _context.UserRole
+                GetUserRoleDto? Query = await (from ur in _context.UserRole
                                             where ur.Id == id
-                                            select new GetUserRole
+                                            select new GetUserRoleDto
                                             {
                                                 IdUserRol = ur.Id,
                                                 RoleName = ur.Role,
@@ -37,13 +37,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoles
             return null;
         }
 
-        public async Task<GetUserRole?> GetUserRoleName(string NameRol, CancellationToken cancellation = default)
+        public async Task<GetUserRoleDto?> GetUserRoleName(string NameRol, CancellationToken cancellation = default)
         {
             try
             {
-                GetUserRole? Query = await (from ur in _context.UserRole
+                GetUserRoleDto? Query = await (from ur in _context.UserRole
                                             where ur.Role == NameRol
-                                            select new GetUserRole
+                                            select new GetUserRoleDto
                                             {
                                                 IdUserRol = ur.Id,
                                                 RoleName = ur.Role,
@@ -58,13 +58,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoles
             return null;
         }
 
-        public async Task<IEnumerable<GetUserRole>> GetUserRoles(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetUserRoleDto>> GetUserRoles(CancellationToken cancellation = default)
         {
-            IEnumerable<GetUserRole> Query = [];
+            IEnumerable<GetUserRoleDto> Query = [];
             try
             {
                 Query = await (from ur in _context.UserRole
-                               select new GetUserRole
+                               select new GetUserRoleDto
                                {
                                    IdUserRol = ur.Id,
                                    RoleName = ur.Role,

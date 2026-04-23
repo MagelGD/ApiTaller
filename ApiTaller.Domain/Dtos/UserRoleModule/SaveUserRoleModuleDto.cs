@@ -5,9 +5,9 @@ using System.Text;
 
 namespace ApiTaller.Domain.Dtos.UserRoleModule
 {
-    public class SaveUserRoleModule
+    public class SaveUserRoleModuleDto
     {
-        public List<ActionsRole> actions { get; set; } 
+        public List<ActionsRoleDto> actions { get; set; } 
         public bool isActive { get; set; }
         public int modulesRoleId { get; set; }
         public int userRoleId { get; set; }

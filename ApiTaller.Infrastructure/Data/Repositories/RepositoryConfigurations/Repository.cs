@@ -1,4 +1,5 @@
 ﻿using ApiTaller.Domain.Interfaces.Repositories.Actions;
+using ApiTaller.Domain.Interfaces.Repositories.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Repositories.Login;
 using ApiTaller.Domain.Interfaces.Repositories.Modules;
 using ApiTaller.Domain.Interfaces.Repositories.Operations;
@@ -7,6 +8,7 @@ using ApiTaller.Domain.Interfaces.Repositories.UserRoleModules;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoles;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
 using ApiTaller.Infrastructure.Data.Repositories.Actions;
+using ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes;
 using ApiTaller.Infrastructure.Data.Repositories.Login;
 using ApiTaller.Infrastructure.Data.Repositories.Modules;
 using ApiTaller.Infrastructure.Data.Repositories.Operations;
@@ -16,9 +18,6 @@ using ApiTaller.Infrastructure.Data.Repositories.UserRoles;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
 {
@@ -34,6 +33,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IUserRoleModuleRepository, UserRoleModuleRepository>();
             services.TryAddScoped<IOperationRepository, OperationRepository>();
             services.TryAddScoped<IRoleActionsRepository, RoleActionsRepository>();
+            services.TryAddScoped<IIdentificationTypesRepository, IdentificationTypesRepository>();
             return services;
         }
     }

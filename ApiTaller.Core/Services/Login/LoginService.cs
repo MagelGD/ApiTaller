@@ -15,7 +15,7 @@ namespace ApiTaller.Core.Services.Login
             _logger = logger;
             _loginRepository = loginRepository;
         }
-        public async Task<bool> AddUserLogin(GetUser user, CancellationToken cancellation = default)
+        public async Task<bool> AddUserLogin(LoginUserDto user, CancellationToken cancellation = default)
         {
             try
             {

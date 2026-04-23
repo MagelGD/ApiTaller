@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ApiTaller.Domain.Dtos.RoleActions
 {
-    public class ValidateRolAction
+    public class ValidateRolActionDto
     {
         public int Id { get; set; }
         public int ActionId { get; set; }

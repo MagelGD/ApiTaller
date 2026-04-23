@@ -18,11 +18,11 @@ namespace ApiTaller.Core.Services.Modules
             _logger = logger;
             _moduleRepository = moduleRepository;
         }
-        public async Task<GetModule?> GetModuleById(int id, CancellationToken cancellation = default)
+        public async Task<GetModuleDto?> GetModuleById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetModule? module = await _moduleRepository.GetModuleById(id, cancellation);
+                GetModuleDto? module = await _moduleRepository.GetModuleById(id, cancellation);
                 return module;
             }
             catch (Exception ex)
@@ -32,9 +32,9 @@ namespace ApiTaller.Core.Services.Modules
             return null;
         }
 
-        public async Task<IEnumerable<GetModule>> GetModules(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetModuleDto>> GetModules(CancellationToken cancellation = default)
         {
-            IEnumerable<GetModule> modules = [];
+            IEnumerable<GetModuleDto> modules = [];
             try
             {
                 modules = await _moduleRepository.GetModules(cancellation);
@@ -46,9 +46,9 @@ namespace ApiTaller.Core.Services.Modules
             return modules;
         }
 
-        public async Task<GetModule> SaveOrEditModule(GetModule module, CancellationToken cancellation = default)
+        public async Task<GetModuleDto> SaveOrEditModule(GetModuleDto module, CancellationToken cancellation = default)
         {
-            GetModule data = new();
+            GetModuleDto data = new();
             try
             {
                 Module saveData = new()
@@ -83,7 +83,7 @@ namespace ApiTaller.Core.Services.Modules
         {
             try
             {
-                GetModule? module = await _moduleRepository.GetModuleName(name, cancellation);
+                GetModuleDto? module = await _moduleRepository.GetModuleName(name, cancellation);
                 return module != null;
             }
             catch (Exception ex)

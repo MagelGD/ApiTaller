@@ -35,11 +35,11 @@ namespace ApiTaller.Core.Services.UserRoleModules
             _actionRepository = actionRepository;
         }
 
-        public async Task<GetUserRoleModule?> GetUserRoleModuleById(int id, CancellationToken cancellation = default)
+        public async Task<GetUserRoleModuleDto?> GetUserRoleModuleById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetUserRoleModule? userRoleModule = await _userRoleModuleRepository.GetUserRoleModuleById(id, cancellation);
+                GetUserRoleModuleDto? userRoleModule = await _userRoleModuleRepository.GetUserRoleModuleById(id, cancellation);
                 return userRoleModule;
             }
             catch (Exception ex)
@@ -49,9 +49,9 @@ namespace ApiTaller.Core.Services.UserRoleModules
             return null;
         }
 
-        public async Task<IEnumerable<GetUserRoleModule>> GetUserRoleModules(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetUserRoleModuleDto>> GetUserRoleModules(CancellationToken cancellation = default)
         {
-            IEnumerable<GetUserRoleModule> userRoleModules = [];
+            IEnumerable<GetUserRoleModuleDto> userRoleModules = [];
             try
             {
                 userRoleModules = await _userRoleModuleRepository.GetUserRoleModules(cancellation);
@@ -63,9 +63,9 @@ namespace ApiTaller.Core.Services.UserRoleModules
             return userRoleModules;
         }
 
-        public async Task<GetUserRoleModule> SaveOrEditUserRoleModule(SaveUserRoleModule saveUserRoleModule, CancellationToken cancellation = default)
+        public async Task<GetUserRoleModuleDto> SaveOrEditUserRoleModule(SaveUserRoleModuleDto saveUserRoleModule, CancellationToken cancellation = default)
         {
-            GetUserRoleModule userRoleModule = new();
+            GetUserRoleModuleDto userRoleModule = new();
             try
             {
                 userRoleModule.Role = await _userRoleRepository.GetUserRoleById(saveUserRoleModule.userRoleId, cancellation) ?? new();
@@ -98,11 +98,11 @@ namespace ApiTaller.Core.Services.UserRoleModules
             return userRoleModule;
         }
 
-        private async Task<bool> InsertActions(List<ActionsRole> actionsIds, int userRoleModuleId, CancellationToken cancellation)
+        private async Task<bool> InsertActions(List<ActionsRoleDto> actionsIds, int userRoleModuleId, CancellationToken cancellation)
         {
             try
             {
-                foreach (ActionsRole actionId in actionsIds)
+                foreach (ActionsRoleDto actionId in actionsIds)
                 {
                     int existingActionId = await ValidateExist(userRoleModuleId, actionId.ActionId, cancellation);
                     if (existingActionId != 0)
@@ -130,7 +130,7 @@ namespace ApiTaller.Core.Services.UserRoleModules
         {
             try
             {
-                List<ValidateRolAction> Query = await _roleActionsRepository.ValidateActionRoleAsync(id, cancellationToken);
+                List<ValidateRolActionDto> Query = await _roleActionsRepository.ValidateActionRoleAsync(id, cancellationToken);
                 return Query.Where(x=> x.ActionId == idaction).Select(x=> x.Id).FirstOrDefault();
             }
             catch (Exception ex)
@@ -140,7 +140,7 @@ namespace ApiTaller.Core.Services.UserRoleModules
             return 0;
         }
 
-        private async Task<bool> UpdateActions(int idRoleAction,ActionsRole actionsIds, int userRoleModuleId, CancellationToken cancellation)
+        private async Task<bool> UpdateActions(int idRoleAction,ActionsRoleDto actionsIds, int userRoleModuleId, CancellationToken cancellation)
         {
             try
             {

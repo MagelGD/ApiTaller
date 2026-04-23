@@ -52,7 +52,7 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("SaveOrEditOperation")]
-        public async Task<IActionResult> SaveOrEdit(GetOperation getOperation, CancellationToken cancellation)
+        public async Task<IActionResult> SaveOrEdit(GetOperationDto getOperation, CancellationToken cancellation)
         {
             try
             {

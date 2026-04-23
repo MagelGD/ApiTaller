@@ -24,14 +24,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
             _logger = logger;
             _currentUser = currentUser;
         }
-        public async Task<GetUserRoleModule?> GetUserRoleModuleById(int id, CancellationToken cancellation = default)
+        public async Task<GetUserRoleModuleDto?> GetUserRoleModuleById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                return await _context.UserRoleModule.Where(x => x.Id == id).Select(x => new GetUserRoleModule
+                return await _context.UserRoleModule.Where(x => x.Id == id).Select(x => new GetUserRoleModuleDto
                 {
                     id = x.Id,
-                    Role = new GetUserRole
+                    Role = new GetUserRoleDto
                     {
                         IdUserRol = x.UserRoleIdNavigation.Id,
                         RoleName = x.UserRoleIdNavigation.Role,
@@ -39,7 +39,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
                         CreatedAt = x.UserRoleIdNavigation.CreatedAt,
                         UpdatedAt = x.UserRoleIdNavigation.UpdatedAt
                     },
-                    Module = new GetModule
+                    Module = new GetModuleDto
                     {
                         Id = x.ModuleIdNavigation.Id,
                         Name = x.ModuleIdNavigation.Name,
@@ -60,15 +60,15 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
             return null;
         }
 
-        public async Task<IEnumerable<GetUserRoleModule>> GetUserRoleModules(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetUserRoleModuleDto>> GetUserRoleModules(CancellationToken cancellation = default)
         {
-            IEnumerable<GetUserRoleModule> userRoleModules = [];
+            IEnumerable<GetUserRoleModuleDto> userRoleModules = [];
             try
             {
-                userRoleModules = await _context.UserRoleModule.Select(x => new GetUserRoleModule
+                userRoleModules = await _context.UserRoleModule.Select(x => new GetUserRoleModuleDto
                 {
                     id = x.Id,
-                    Role = new GetUserRole
+                    Role = new GetUserRoleDto
                     {
                         IdUserRol = x.UserRoleIdNavigation.Id,
                         RoleName = x.UserRoleIdNavigation.Role,
@@ -76,7 +76,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
                         CreatedAt = x.UserRoleIdNavigation.CreatedAt,
                         UpdatedAt = x.UserRoleIdNavigation.UpdatedAt
                     },
-                    Module = new GetModule
+                    Module = new GetModuleDto
                     {
                         Id = x.ModuleIdNavigation.Id,
                         Name = x.ModuleIdNavigation.Name,
@@ -98,14 +98,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
             return userRoleModules;
         }
 
-        public async Task<GetUserRoleModule?> GetuserRoleModulesCreate(int userRoleId, int moduleId, CancellationToken cancellation = default)
+        public async Task<GetUserRoleModuleDto?> GetuserRoleModulesCreate(int userRoleId, int moduleId, CancellationToken cancellation = default)
         {
             try
             {
-                GetUserRoleModule? query = await _context.UserRoleModule.Where(x => x.UserRoleId == userRoleId && x.ModulesRoleId == moduleId).Select(x => new GetUserRoleModule
+                GetUserRoleModuleDto? query = await _context.UserRoleModule.Where(x => x.UserRoleId == userRoleId && x.ModulesRoleId == moduleId).Select(x => new GetUserRoleModuleDto
                 {
                     id = x.Id,
-                    Role = new GetUserRole
+                    Role = new GetUserRoleDto
                     {
                         IdUserRol = x.UserRoleIdNavigation.Id,
                         RoleName = x.UserRoleIdNavigation.Role,
@@ -113,7 +113,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
                         CreatedAt = x.UserRoleIdNavigation.CreatedAt,
                         UpdatedAt = x.UserRoleIdNavigation.UpdatedAt
                     },
-                    Module = new GetModule
+                    Module = new GetModuleDto
                     {
                         Id = x.ModuleIdNavigation.Id,
                         Name = x.ModuleIdNavigation.Name,

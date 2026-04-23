@@ -7,8 +7,8 @@ namespace ApiTaller.Domain.Interfaces.Services.Operations
 {
     public interface IOperationService
     {
-        Task<IEnumerable<GetOperation>> GetOperations(CancellationToken cancellation = default!);
-        Task<GetOperation?> GetOperationsById(int id, CancellationToken cancellation = default!);
-        Task<GetOperation> SaveOrEditOperation(GetOperation operation, CancellationToken cancellation = default!);
+        Task<IEnumerable<GetOperationDto>> GetOperations(CancellationToken cancellation = default!);
+        Task<GetOperationDto?> GetOperationsById(int id, CancellationToken cancellation = default!);
+        Task<GetOperationDto> SaveOrEditOperation(GetOperationDto operation, CancellationToken cancellation = default!);
     }
 }

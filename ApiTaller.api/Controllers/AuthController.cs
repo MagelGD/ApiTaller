@@ -17,7 +17,7 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Pots(Auth auth, CancellationToken cancellationToken)
+        public async Task<IActionResult> Pots(AuthDto auth, CancellationToken cancellationToken)
         {
             return Ok(await _authService.Login(auth, cancellationToken) );
         }

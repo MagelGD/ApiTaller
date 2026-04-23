@@ -42,7 +42,7 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpGet("RoleActions/{id}")]
+        [HttpGet("PermissionRole/{id}")]
         public async Task<IActionResult> RoleActions(int id, CancellationToken cancellationToken)
         {
             try

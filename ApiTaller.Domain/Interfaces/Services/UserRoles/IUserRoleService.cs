@@ -8,8 +8,8 @@ namespace ApiTaller.Domain.Interfaces.Services.UserRoles
 {
     public interface IUserRoleService
     {
-        Task<IEnumerable<GetUserRole>> GetUserRoles(CancellationToken cancellation = default!);
-        Task<GetUserRole?> GetUserRoleById(int id, CancellationToken cancellation = default!);
-        Task<GetUserRole> SaveOrEditUserRole(GetUserRole userRole, CancellationToken cancellation = default!);
+        Task<IEnumerable<GetUserRoleDto>> GetUserRoles(CancellationToken cancellation = default!);
+        Task<GetUserRoleDto?> GetUserRoleById(int id, CancellationToken cancellation = default!);
+        Task<GetUserRoleDto> SaveOrEditUserRole(GetUserRoleDto userRole, CancellationToken cancellation = default!);
     }
 }

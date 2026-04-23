@@ -26,26 +26,30 @@ namespace ApiTaller.Core.Services.Auth
             _loginService = loginService;
         }
 
-        public async Task<Income> Login(Domain.Dtos.Login.Auth auth, CancellationToken cancellation = default)
+        public async Task<IncomeDto> Login(AuthDto auth, CancellationToken cancellation = default)
         {
             try
             {
-                GetUser? user = await _userService.GetUser(auth.Username, cancellation);
-                if (user is null || user.Password != auth.Password)
+                LoginUserDto? user = await _userService.GetUser(auth.Username, cancellation);
+                if (user is null || BCrypt.Net.BCrypt.Verify(auth.Password, user.Password))
                     return default!;
+                //if (user is null || user.Password != auth.Password)
+                //    return default!;
                 user.Token = user.CreateJwt(_options);
+                user.ExpireToken = _options.AccessTokenMinutes;
                 if (string.IsNullOrEmpty(user.Token))
                     return default!;
                 if (!await _userService.UpdateUserToken(user, cancellation))
                     return default!;
                 if (!await _loginService.AddUserLogin(user, cancellation))
                     return default!;
-                Income income = new()
+                IncomeDto income = new()
                 {
                     Fullname = user.Fullname,
                     Token = user.Token,
                     Success = true,
-                    IdUser = user.Id
+                    IdUser = user.Id,
+                    IdRoleUser = user.IdUserRole ?? 0
                 };
                 return income;
             }

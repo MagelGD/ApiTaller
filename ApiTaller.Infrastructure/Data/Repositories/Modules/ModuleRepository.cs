@@ -23,11 +23,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Modules
             _logger = logger;
             _currentUser = currentUser;
         }
-        public async Task<GetModule?> GetModuleById(int id, CancellationToken cancellation = default)
+        public async Task<GetModuleDto?> GetModuleById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetModule? Query = await _context.Module.Where(x => x.Id == id).Select(x => new GetModule
+                GetModuleDto? Query = await _context.Module.Where(x => x.Id == id).Select(x => new GetModuleDto
                 {
                     Id = x.Id,
                     Name = x.Name,
@@ -44,11 +44,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Modules
             return default;
         }
 
-        public async Task<GetModule?> GetModuleName(string Module, CancellationToken cancellation = default)
+        public async Task<GetModuleDto?> GetModuleName(string Module, CancellationToken cancellation = default)
         {
             try
             {
-                GetModule? Query = await _context.Module.Where(x => x.Name == Module).Select(x => new GetModule
+                GetModuleDto? Query = await _context.Module.Where(x => x.Name == Module).Select(x => new GetModuleDto
                 {
                     Id = x.Id,
                     Name = x.Name,
@@ -65,12 +65,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Modules
             return null;
         }
 
-        public async Task<IEnumerable<GetModule>> GetModules(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetModuleDto>> GetModules(CancellationToken cancellation = default)
         {
-            IEnumerable<GetModule> Query = new List<GetModule>();
+            IEnumerable<GetModuleDto> Query = new List<GetModuleDto>();
             try
             {
-                Query = await _context.Module.Select(x => new GetModule
+                Query = await _context.Module.Select(x => new GetModuleDto
                 {
                     Id = x.Id,
                     Name = x.Name,

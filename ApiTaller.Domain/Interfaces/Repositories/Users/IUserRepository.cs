@@ -8,7 +8,12 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Users
 {
     public interface IUserRepository
     {
-        Task<GetUser?> GetUser(string username, CancellationToken cancellation = default!);
-        Task<bool> UpdateUserToken(GetUser user, CancellationToken cancellation = default!); 
+        Task<LoginUserDto?> GetUser(string username, CancellationToken cancellation = default!);
+        Task<bool> UpdateUserToken(LoginUserDto user, CancellationToken cancellation = default!); 
+        Task<IEnumerable<GetUsersDto>> GetUsers(CancellationToken cancellation = default!);
+        Task<GetUsersDto?> GetUserById(int id, CancellationToken cancellation = default!);
+        Task<bool> CreateUser(User user, CancellationToken cancellation = default!);
+        Task<bool> UpdateUser(User user, CancellationToken cancellation = default!);
+        Task<GetUsersDto?> ValidateExist(string username, string numberIdentification, CancellationToken cancellation = default!);
     }
 }

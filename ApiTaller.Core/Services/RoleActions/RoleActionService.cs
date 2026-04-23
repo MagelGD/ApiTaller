@@ -16,9 +16,9 @@ namespace ApiTaller.Core.Services.RoleActions
             _logger = logger;
         }
 
-        public async Task<List<ActionsRole>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken)
+        public async Task<List<ActionsRoleDto>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken)
         {
-            List<ActionsRole> actionsRoles = [];
+            List<ActionsRoleDto> actionsRoles = [];
             try
             {
                 actionsRoles = await _roleActionsRepository.GetActionsByRoleAsync(roleId, cancellationToken);

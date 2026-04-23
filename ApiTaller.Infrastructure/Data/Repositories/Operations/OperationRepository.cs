@@ -21,13 +21,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Operations
             _logger = logger;
             _currentUser = currentUser;
         }
-        public async Task<GetOperation?> GetOperationName(string Operation, CancellationToken cancellation = default)
+        public async Task<GetOperationDto?> GetOperationName(string Operation, CancellationToken cancellation = default)
         {
             try
             {
-                GetOperation? operation = await _context.Operation
+                GetOperationDto? operation = await _context.Operation
                     .Where(o => o.Name == Operation)
-                    .Select(o => new GetOperation
+                    .Select(o => new GetOperationDto
                     {
                         Id = o.Id,
                         Name = o.Name,
@@ -44,13 +44,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Operations
             return default;
         }
 
-        public async Task<IEnumerable<GetOperation>> GetOperations(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetOperationDto>> GetOperations(CancellationToken cancellation = default)
         {
-            IEnumerable<GetOperation> operations = [];
+            IEnumerable<GetOperationDto> operations = [];
             try
             {
                 operations = await _context.Operation
-                    .Select(o => new GetOperation
+                    .Select(o => new GetOperationDto
                     {
                         Id = o.Id,
                         Name = o.Name,
@@ -67,11 +67,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Operations
             return operations;
         }
 
-        public async Task<GetOperation?> GetOperationsById(int id, CancellationToken cancellation = default)
+        public async Task<GetOperationDto?> GetOperationsById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetOperation? Query = await _context.Operation.Where(x => x.Id == id).Select(x => new GetOperation
+                GetOperationDto? Query = await _context.Operation.Where(x => x.Id == id).Select(x => new GetOperationDto
                 {
                     Id= x.Id,
                     Name= x.Name,

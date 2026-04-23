@@ -7,9 +7,9 @@ namespace ApiTaller.Domain.Interfaces.Services.IdentificationTypes
 {
     public interface IIdentificationTypesService
     {
-        Task<IEnumerable<GetIdentificationType>> GetAllActiveAsync(CancellationToken cancellation);
-        Task<IEnumerable<GetIdentificationType>> GetAllAsync(CancellationToken cancellation);
-        Task<bool> CreateOrEditIdentificationType(GetIdentificationType createDto, CancellationToken cancellation);
-        Task<GetIdentificationType?> GetByIdAsync(int id, CancellationToken cancellation);
+        Task<IEnumerable<GetIdentificationTypeDto>> GetAllActiveAsync(CancellationToken cancellation);
+        Task<IEnumerable<GetIdentificationTypeDto>> GetAllAsync(CancellationToken cancellation);
+        Task<GetIdentificationTypeDto> CreateOrEditIdentificationType(GetIdentificationTypeDto createDto, CancellationToken cancellation);
+        Task<GetIdentificationTypeDto?> GetByIdAsync(int id, CancellationToken cancellation);
     }
 }

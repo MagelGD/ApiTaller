@@ -15,11 +15,11 @@ namespace ApiTaller.Core.Services.UserRoles
             _logger = logger;
             _userRoleRepository = userRoleRepository;
         }
-        public async Task<GetUserRole?> GetUserRoleById(int id, CancellationToken cancellation = default)
+        public async Task<GetUserRoleDto?> GetUserRoleById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetUserRole? userRole = await _userRoleRepository.GetUserRoleById(id, cancellation);
+                GetUserRoleDto? userRole = await _userRoleRepository.GetUserRoleById(id, cancellation);
                 return userRole;
             }
             catch (Exception ex)
@@ -29,9 +29,9 @@ namespace ApiTaller.Core.Services.UserRoles
             return null;
         }
 
-        public async Task<IEnumerable<GetUserRole>> GetUserRoles(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetUserRoleDto>> GetUserRoles(CancellationToken cancellation = default)
         {
-            IEnumerable<GetUserRole> userRoles = [];
+            IEnumerable<GetUserRoleDto> userRoles = [];
             try
             {
                 userRoles = await _userRoleRepository.GetUserRoles(cancellation);
@@ -43,9 +43,9 @@ namespace ApiTaller.Core.Services.UserRoles
             return userRoles ?? [];
         }
 
-        public async Task<GetUserRole> SaveOrEditUserRole(GetUserRole userRole, CancellationToken cancellation = default)
+        public async Task<GetUserRoleDto> SaveOrEditUserRole(GetUserRoleDto userRole, CancellationToken cancellation = default)
         {
-            GetUserRole savedUserRole = new();
+            GetUserRoleDto savedUserRole = new();
             try
             {
                 UserRole data = new()
@@ -79,7 +79,7 @@ namespace ApiTaller.Core.Services.UserRoles
         {
             try
             {
-                GetUserRole? userRole = await _userRoleRepository.GetUserRoleName(rolName, cancellation);
+                GetUserRoleDto? userRole = await _userRoleRepository.GetUserRoleName(rolName, cancellation);
                 return userRole != null;
             }
             catch (Exception ex)

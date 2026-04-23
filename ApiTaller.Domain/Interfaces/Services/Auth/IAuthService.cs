@@ -9,6 +9,6 @@ namespace ApiTaller.Domain.Interfaces.Services.Auth
 {
     public interface IAuthService
     {
-        Task<Income> Login(Domain.Dtos.Login.Auth auth, CancellationToken cancellation = default!);
+        Task<IncomeDto> Login(Domain.Dtos.Login.AuthDto auth, CancellationToken cancellation = default!);
     }
 }

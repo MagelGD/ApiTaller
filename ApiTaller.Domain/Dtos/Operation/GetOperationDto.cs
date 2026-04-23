@@ -1,6 +1,6 @@
-﻿namespace ApiTaller.Domain.Dtos.Module
+﻿namespace ApiTaller.Domain.Dtos.Operation
 {
-    public class GetModule
+    public class GetOperationDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

@@ -46,7 +46,7 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
         [HttpPost("SaveModule")]
-        public async Task<IActionResult> Post(GetModule value, CancellationToken cancellationToken)
+        public async Task<IActionResult> Post(GetModuleDto value, CancellationToken cancellationToken)
         {
             try
             {

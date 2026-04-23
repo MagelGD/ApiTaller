@@ -41,17 +41,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RoleActions
             return false;
         }
 
-        public async Task<List<ActionsRole>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken)
+        public async Task<List<ActionsRoleDto>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken)
         {
-            List<ActionsRole> actions = [];
+            List<ActionsRoleDto> actions = [];
             try
             {
                 actions = await _Context.RoleAction.Include(x => x.ActionIdNavigation).Where(ra => ra.RoleId == roleId)
-                    .Select(ra => new ActionsRole
+                    .Select(ra => new ActionsRoleDto
                     {
                         ActionId = ra.ActionId,
                         IsActive = ra.IsActive,
-                        ModuleId = ra.ActionIdNavigation.ModuleId
+                        ModuleId = ra.ActionIdNavigation.ModuleId,
+                        ActionName = ra.ActionIdNavigation.Slug
                     })
                     .ToListAsync(cancellationToken);
             }
@@ -111,14 +112,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RoleActions
             return false;
         }
 
-        public async Task<List<ValidateRolAction>> ValidateActionRoleAsync(int roleId, CancellationToken cancellationToken)
+        public async Task<List<ValidateRolActionDto>> ValidateActionRoleAsync(int roleId, CancellationToken cancellationToken)
         {
-            List<ValidateRolAction> actions = [];
+            List<ValidateRolActionDto> actions = [];
             try
             {
                 actions = await _Context.RoleAction
                     .Where(ra => ra.RoleId == roleId)
-                    .Select(ra => new ValidateRolAction
+                    .Select(ra => new ValidateRolActionDto
                     {
                         Id = ra.Id,
                         ActionId = ra.ActionId

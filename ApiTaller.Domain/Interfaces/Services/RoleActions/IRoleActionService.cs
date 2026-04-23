@@ -8,6 +8,6 @@ namespace ApiTaller.Domain.Interfaces.Services.RoleActions
     public interface IRoleActionService
     {
         Task<List<string>> GetActionsByRoleIdAsync(int roleId, CancellationToken cancellationToken);
-        Task<List<ActionsRole>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken);
+        Task<List<ActionsRoleDto>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken);
     }
 }

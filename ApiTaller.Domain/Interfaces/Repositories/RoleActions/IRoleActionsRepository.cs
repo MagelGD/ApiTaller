@@ -9,8 +9,8 @@ namespace ApiTaller.Domain.Interfaces.Repositories.RoleActions
     public interface IRoleActionsRepository
     {
         Task<List<string>> GetActionsByRoleIdAsync(int roleId, CancellationToken cancellationToken);
-        Task<List<ValidateRolAction>> ValidateActionRoleAsync(int roleId, CancellationToken cancellationToken);
-        Task<List<ActionsRole>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken);
+        Task<List<ValidateRolActionDto>> ValidateActionRoleAsync(int roleId, CancellationToken cancellationToken);
+        Task<List<ActionsRoleDto>> GetActionsByRoleAsync(int roleId, CancellationToken cancellationToken);
         Task<bool> SaveRoleAction(RoleAction roleAction, CancellationToken cancellationToken);
         Task<bool> ActiveOrInactiveRoleAction(RoleAction roleAction, CancellationToken cancellationToken);
         Task<bool> ValidateActionActive(int actionId, CancellationToken cancellationToken);

@@ -48,7 +48,7 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("SaveOrEditUserRole")]
-        public async Task<IActionResult> SaveOrEdit(GetUserRole userRole, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrEdit(GetUserRoleDto userRole, CancellationToken cancellationToken)
         {
             try
             {

@@ -36,16 +36,16 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
             return false;
         }
 
-        public async Task<GetActions> GetActionByName(string name, int idModule, int idOperation, CancellationToken cancellation = default)
+        public async Task<GetActionsDto> GetActionByName(string name, int idModule, int idOperation, CancellationToken cancellation = default)
         {
             try
             {
-                GetActions Query = await _context.Action.Where(x => x.ModuleId == idModule && x.OperationId == idOperation && x.Name == name).Select(x => new GetActions
+                GetActionsDto Query = await _context.Action.Where(x => x.ModuleId == idModule && x.OperationId == idOperation && x.Name == name).Select(x => new GetActionsDto
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Slug = x.Slug,
-                    Module = new GetModule
+                    Module = new GetModuleDto
                     {
                         Id = x.ModuleIdNavigation.Id,
                         Name = x.ModuleIdNavigation.Name,
@@ -53,7 +53,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
                         CreatedAt = x.ModuleIdNavigation.CreatedAt,
                         UpdatedAt = x.ModuleIdNavigation.UpdatedAt
                     },
-                    Operation = new GetOperation
+                    Operation = new GetOperationDto
                     {
                         Id = x.OperationIdNavigation.Id,
                         Name = x.OperationIdNavigation.Name,
@@ -75,17 +75,17 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
             return new();
         }
 
-        public async Task<IEnumerable<GetActions>> GetActions(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetActionsDto>> GetActions(CancellationToken cancellation = default)
         {
-            IEnumerable<GetActions> actions = [];
+            IEnumerable<GetActionsDto> actions = [];
             try
             {
-                actions = await _context.Action.Select(x => new GetActions
+                actions = await _context.Action.Select(x => new GetActionsDto
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Slug = x.Slug,
-                    Module = new GetModule
+                    Module = new GetModuleDto
                     {
                         Id = x.ModuleIdNavigation.Id,
                         Name = x.ModuleIdNavigation.Name,
@@ -93,7 +93,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
                         CreatedAt = x.ModuleIdNavigation.CreatedAt,
                         UpdatedAt = x.ModuleIdNavigation.UpdatedAt
                     },
-                    Operation = new GetOperation
+                    Operation = new GetOperationDto
                     {
                         Id = x.OperationIdNavigation.Id,
                         Name = x.OperationIdNavigation.Name,
@@ -114,17 +114,17 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
             return actions;
         }
 
-        public async Task<IEnumerable<GetActions>> GetActionsActive(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetActionsDto>> GetActionsActive(CancellationToken cancellation = default)
         {
-            IEnumerable<GetActions> actions = [];
+            IEnumerable<GetActionsDto> actions = [];
             try
             {
-                actions = await _context.Action.Where(x => x.IsActive).Select(x => new GetActions
+                actions = await _context.Action.Where(x => x.IsActive).Select(x => new GetActionsDto
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Slug = x.Slug,
-                    Module = new GetModule
+                    Module = new GetModuleDto
                     {
                         Id = x.ModuleIdNavigation.Id,
                         Name = x.ModuleIdNavigation.Name,
@@ -132,7 +132,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
                         CreatedAt = x.ModuleIdNavigation.CreatedAt,
                         UpdatedAt = x.ModuleIdNavigation.UpdatedAt
                     },
-                    Operation = new GetOperation
+                    Operation = new GetOperationDto
                     {
                         Id = x.OperationIdNavigation.Id,
                         Name = x.OperationIdNavigation.Name,
@@ -153,16 +153,16 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
             return actions;
         }
 
-        public async Task<GetActions?> GetActionsById(int id, CancellationToken cancellation = default)
+        public async Task<GetActionsDto?> GetActionsById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetActions? action = _context.Action.Where(x => x.Id == id).Select(x => new GetActions
+                GetActionsDto? action = _context.Action.Where(x => x.Id == id).Select(x => new GetActionsDto
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Slug = x.Slug,
-                    Module = new GetModule
+                    Module = new GetModuleDto
                     {
                         Id = x.ModuleIdNavigation.Id,
                         Name = x.ModuleIdNavigation.Name,
@@ -170,7 +170,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Actions
                         CreatedAt = x.ModuleIdNavigation.CreatedAt,
                         UpdatedAt = x.ModuleIdNavigation.UpdatedAt
                     },
-                    Operation = new GetOperation
+                    Operation = new GetOperationDto
                     {
                         Id = x.OperationIdNavigation.Id,
                         Name = x.OperationIdNavigation.Name,

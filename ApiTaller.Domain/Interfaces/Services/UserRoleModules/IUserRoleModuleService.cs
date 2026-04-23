@@ -7,8 +7,8 @@ namespace ApiTaller.Domain.Interfaces.Services.UserRoleModules
 {
     public interface IUserRoleModuleService
     {
-        Task<IEnumerable<GetUserRoleModule>> GetUserRoleModules(CancellationToken cancellation = default!);
-        Task<GetUserRoleModule?> GetUserRoleModuleById(int id, CancellationToken cancellation = default!);
-        Task<GetUserRoleModule> SaveOrEditUserRoleModule(SaveUserRoleModule saveUserRoleModule, CancellationToken cancellation = default!);
+        Task<IEnumerable<GetUserRoleModuleDto>> GetUserRoleModules(CancellationToken cancellation = default!);
+        Task<GetUserRoleModuleDto?> GetUserRoleModuleById(int id, CancellationToken cancellation = default!);
+        Task<GetUserRoleModuleDto> SaveOrEditUserRoleModule(SaveUserRoleModuleDto saveUserRoleModule, CancellationToken cancellation = default!);
     }
 }

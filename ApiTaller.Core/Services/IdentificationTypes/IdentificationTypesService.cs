@@ -18,11 +18,12 @@ namespace ApiTaller.Core.Services.IdentificationTypes
             _repository = repository;
             _logger = logger;
         }
-        public async Task<bool> CreateOrEditIdentificationType(GetIdentificationType createDto, CancellationToken cancellation)
+        public async Task<GetIdentificationTypeDto> CreateOrEditIdentificationType(GetIdentificationTypeDto createDto, CancellationToken cancellation)
         {
+            GetIdentificationTypeDto result = new();
             try
             {
-                IdentificationType saveData = new IdentificationType
+                IdentificationType saveData = new()
                 {
                     Id = createDto.Id,
                     Identification = createDto.Name,
@@ -30,20 +31,27 @@ namespace ApiTaller.Core.Services.IdentificationTypes
                     CreatedAt = createDto.CreatedAt ?? DateTime.Now,
                 };
                 bool isExist = await ValidateExist(createDto.Name, cancellation);
-                if (saveData.Id == 0 &&)
+                if (saveData.Id == 0 && !isExist)
                 {
-                    
+                    await _repository.CreateAsync(saveData, cancellation);
+                    result = await _repository.GetByNameAsync(createDto.Name, cancellation) ?? new();
+                }
+                else if (saveData.Id != 0)
+                {
+                    await _repository.UpdateAsync(saveData, cancellation);
+                    result = await _repository.GetByIdAsync(saveData.Id, cancellation);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating or editing identification type");
             }
+            return result;
         }
 
-        public async Task<IEnumerable<GetIdentificationType>> GetAllAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetIdentificationTypeDto>> GetAllAsync(CancellationToken cancellation)
         {
-            IEnumerable<GetIdentificationType> result = [];
+            IEnumerable<GetIdentificationTypeDto> result = [];
             try
             {
                 result = await _repository.GetAllAsync(cancellation);
@@ -55,9 +63,9 @@ namespace ApiTaller.Core.Services.IdentificationTypes
             return result;
         }
 
-        public async Task<IEnumerable<GetIdentificationType>> GetAllActiveAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetIdentificationTypeDto>> GetAllActiveAsync(CancellationToken cancellation)
         {
-            IEnumerable<GetIdentificationType> result = [];
+            IEnumerable<GetIdentificationTypeDto> result = [];
             try
             {
                 result = await _repository.GetAllActiveAsync(cancellation);
@@ -69,9 +77,9 @@ namespace ApiTaller.Core.Services.IdentificationTypes
             return result;
         }
 
-        public async Task<GetIdentificationType?> GetByIdAsync(int id, CancellationToken cancellation)
+        public async Task<GetIdentificationTypeDto?> GetByIdAsync(int id, CancellationToken cancellation)
         {
-            GetIdentificationType? result = null;
+            GetIdentificationTypeDto? result = null;
             try
             {
                 result = await _repository.GetByIdAsync(id, cancellation);
@@ -96,5 +104,6 @@ namespace ApiTaller.Core.Services.IdentificationTypes
             }
             return result;
         }
+    }
 }
 

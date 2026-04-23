@@ -40,14 +40,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes
             return false;
         }
 
-        public async Task<IEnumerable<GetIdentificationType>> GetAllActiveAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetIdentificationTypeDto>> GetAllActiveAsync(CancellationToken cancellation)
         {
-            IEnumerable<GetIdentificationType> result = [];
+            IEnumerable<GetIdentificationTypeDto> result = [];
             try
             {
                 result = await _Context.IdentificationType
                     .Where(it => it.IsActive)
-                    .Select(it => new GetIdentificationType
+                    .Select(it => new GetIdentificationTypeDto
                     {
                         Id = it.Id,
                         Name = it.Identification,
@@ -64,13 +64,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes
             return result;
         }
 
-        public async Task<IEnumerable<GetIdentificationType>> GetAllAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetIdentificationTypeDto>> GetAllAsync(CancellationToken cancellation)
         {
-            IEnumerable<GetIdentificationType> result = [];
+            IEnumerable<GetIdentificationTypeDto> result = [];
             try
             {
                 result = await _Context.IdentificationType
-                    .Select(it => new GetIdentificationType
+                    .Select(it => new GetIdentificationTypeDto
                     {
                         Id = it.Id,
                         Name = it.Identification,
@@ -87,14 +87,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes
             return result;
         }
 
-        public async Task<GetIdentificationType> GetByIdAsync(int id, CancellationToken cancellation)
+        public async Task<GetIdentificationTypeDto> GetByIdAsync(int id, CancellationToken cancellation)
         {
-            GetIdentificationType? result = null;
+            GetIdentificationTypeDto? result = null;
             try
             {
                 result = await _Context.IdentificationType
                     .Where(it => it.Id == id)
-                    .Select(it => new GetIdentificationType
+                    .Select(it => new GetIdentificationTypeDto
                     {
                         Id = it.Id,
                         Name = it.Identification,
@@ -106,6 +106,29 @@ namespace ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes
             catch (Exception ex)
             {
                 _Logger.LogError(ex, "Error getting identification type by id {Id}", id);
+            }
+            return result;
+        }
+
+        public async Task<GetIdentificationTypeDto?> GetByNameAsync(string name, CancellationToken cancellation)
+        {
+            GetIdentificationTypeDto? result = null;
+            try
+            {
+                return await _Context.IdentificationType
+                    .Where(it => it.Identification == name)
+                    .Select(it => new GetIdentificationTypeDto
+                    {
+                        Id = it.Id,
+                        Name = it.Identification,
+                        IsActive = it.IsActive,
+                        CreatedAt = it.CreatedAt,
+                        UpdatedAt = it.UpdatedAt
+                    }).FirstOrDefaultAsync(cancellation);
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex, "Error getting identification type by name {Name}", name);
             }
             return result;
         }

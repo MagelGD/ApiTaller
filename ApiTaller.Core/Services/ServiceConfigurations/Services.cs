@@ -1,5 +1,6 @@
 ﻿using ApiTaller.Core.Services.Actions;
 using ApiTaller.Core.Services.Auth;
+using ApiTaller.Core.Services.IdentificationTypes;
 using ApiTaller.Core.Services.Modules;
 using ApiTaller.Core.Services.Operations;
 using ApiTaller.Core.Services.RoleActions;
@@ -8,6 +9,7 @@ using ApiTaller.Core.Services.UserRoles;
 using ApiTaller.Core.Services.Users;
 using ApiTaller.Domain.Interfaces.Services.Actions;
 using ApiTaller.Domain.Interfaces.Services.Auth;
+using ApiTaller.Domain.Interfaces.Services.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Services.Login;
 using ApiTaller.Domain.Interfaces.Services.Module;
 using ApiTaller.Domain.Interfaces.Services.Operations;
@@ -36,6 +38,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IUserRoleModuleService, UserRoleModuleService>();
             services.TryAddScoped<IOperationService, OperationService>();
             services.TryAddScoped<IRoleActionService, RoleActionService>();
+            services.TryAddScoped<IIdentificationTypesService, IdentificationTypesService>();
             return services;
         }
     }

@@ -19,9 +19,9 @@ namespace ApiTaller.Core.Services.Actions
             _logger = logger;
             _roleActionsRepository = roleActionsRepository;
         }
-        public async Task<IEnumerable<GetActions>> GetActions(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetActionsDto>> GetActions(CancellationToken cancellation = default)
         {
-            IEnumerable<GetActions> actions = [];
+            IEnumerable<GetActionsDto> actions = [];
             try
             {
                 actions = await _actionRepository.GetActions(cancellation);
@@ -33,9 +33,9 @@ namespace ApiTaller.Core.Services.Actions
             return actions;
         }
 
-        public async Task<IEnumerable<GetActions>> GetActionsActive(CancellationToken cancellation = default)
+        public async Task<IEnumerable<GetActionsDto>> GetActionsActive(CancellationToken cancellation = default)
         {
-            IEnumerable<GetActions> actions = [];
+            IEnumerable<GetActionsDto> actions = [];
             try
             {
                 actions = await _actionRepository.GetActionsActive(cancellation);
@@ -47,11 +47,11 @@ namespace ApiTaller.Core.Services.Actions
             return actions;
         }
 
-        public async Task<GetActions?> GetActionsById(int id, CancellationToken cancellation = default)
+        public async Task<GetActionsDto?> GetActionsById(int id, CancellationToken cancellation = default)
         {
             try
             {
-                GetActions? actions = await _actionRepository.GetActionsById(id, cancellation);
+                GetActionsDto? actions = await _actionRepository.GetActionsById(id, cancellation);
                 return actions;
             }
             catch (Exception ex)
@@ -61,9 +61,9 @@ namespace ApiTaller.Core.Services.Actions
             return null;
         }
 
-        public async Task<GetActions> SaveOrEditActions(GetActions action, CancellationToken cancellation = default)
+        public async Task<GetActionsDto> SaveOrEditActions(GetActionsDto action, CancellationToken cancellation = default)
         {
-            GetActions data = new();
+            GetActionsDto data = new();
             try
             {
                 Domain.Models.Action saveData = new()
@@ -104,7 +104,7 @@ namespace ApiTaller.Core.Services.Actions
             return data;
         }
 
-        private async Task<bool> ActionValidation(GetActions action, CancellationToken cancellation = default)
+        private async Task<bool> ActionValidation(GetActionsDto action, CancellationToken cancellation = default)
         {
             try
             {

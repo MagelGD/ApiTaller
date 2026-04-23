@@ -10,7 +10,7 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
 {
     public static class TokenHelper
     {
-        public static string CreateJwt(this GetUser user, JwtOptions options)
+        public static string CreateJwt(this LoginUserDto user, JwtOptions options)
         {
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(options.JwtSigningKey));
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);

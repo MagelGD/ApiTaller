@@ -7,6 +7,6 @@ namespace ApiTaller.Domain.Interfaces.Services.Login
 {
     public interface ILoginService 
     {
-        Task<bool> AddUserLogin(GetUser user, CancellationToken cancellation = default!);
+        Task<bool> AddUserLogin(LoginUserDto user, CancellationToken cancellation = default!);
     }
 }

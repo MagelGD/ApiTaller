@@ -66,7 +66,7 @@ namespace ApiTaller.api.Controllers
 
         // POST api/<ActionsController>
         [HttpPost("SaveOrEditAction")]
-        public async Task<IActionResult> SaveOrEditAction(GetActions getAction, CancellationToken cancellation)
+        public async Task<IActionResult> SaveOrEditAction(GetActionsDto getAction, CancellationToken cancellation)
         {
             try
             {

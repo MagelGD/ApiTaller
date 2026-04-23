@@ -1,6 +1,6 @@
 ﻿namespace ApiTaller.Domain.Dtos.UserRole
 {
-    public class GetUserRole
+    public class GetUserRoleDto
     {
         public int IdUserRol { get; set; }
         public string RoleName { get; set; }

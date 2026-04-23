@@ -5,9 +5,9 @@ namespace ApiTaller.Domain.Interfaces.Repositories.UserRoles
 {
     public interface IUserRoleRepository
     {
-        Task<IEnumerable<GetUserRole>> GetUserRoles(CancellationToken cancellation = default!);
-        Task<GetUserRole?> GetUserRoleById(int id, CancellationToken cancellation = default!);
-        Task<GetUserRole?> GetUserRoleName(string NameRol, CancellationToken cancellation = default!);
+        Task<IEnumerable<GetUserRoleDto>> GetUserRoles(CancellationToken cancellation = default!);
+        Task<GetUserRoleDto?> GetUserRoleById(int id, CancellationToken cancellation = default!);
+        Task<GetUserRoleDto?> GetUserRoleName(string NameRol, CancellationToken cancellation = default!);
         Task<bool> SaveUserRole(UserRole userRole, CancellationToken cancellation = default!);
         Task<bool> UpdateUserRole(UserRole userRole, CancellationToken cancellation = default!);
     }
