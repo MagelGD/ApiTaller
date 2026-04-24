@@ -25,4 +25,8 @@
     <ProjectReference Include="..\ApiTaller.Domain\ApiTaller.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Repositories\Products\" />
+  </ItemGroup>
+
 </Project>

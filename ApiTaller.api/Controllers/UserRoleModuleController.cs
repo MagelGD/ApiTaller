@@ -1,7 +1,9 @@
-﻿using ApiTaller.Domain.Dtos.UserRoleModule;
+﻿using ApiTaller.api.Hubs;
+using ApiTaller.Domain.Dtos.UserRoleModule;
 using ApiTaller.Domain.Interfaces.Services.UserRoleModules;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,10 +17,12 @@ namespace ApiTaller.api.Controllers
 
         private readonly ILogger<UserRoleModuleController> _logger;
         private readonly IUserRoleModuleService _userRoleModuleService;
-        public UserRoleModuleController(ILogger<UserRoleModuleController> logger, IUserRoleModuleService userRoleModuleService)
+        private readonly IHubContext<PermissionsHub> _hubContext;
+        public UserRoleModuleController(ILogger<UserRoleModuleController> logger, IUserRoleModuleService userRoleModuleService, IHubContext<PermissionsHub> hubContext)
         {
             _logger = logger;
             _userRoleModuleService = userRoleModuleService;
+            _hubContext = hubContext;
         }
 
         
@@ -57,7 +61,9 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _userRoleModuleService.SaveOrEditUserRoleModule(saveUserRoleModule, cancellation));
+                GetUserRoleModuleDto result = await _userRoleModuleService.SaveOrEditUserRoleModule(saveUserRoleModule, cancellation);
+                await _hubContext.Clients.All.SendAsync("PermissionsChanged", result.Role.IdUserRol);
+                return Ok(result);
             }
             catch (Exception ex)
             {

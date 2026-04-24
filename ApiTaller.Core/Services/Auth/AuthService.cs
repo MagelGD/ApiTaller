@@ -31,7 +31,7 @@ namespace ApiTaller.Core.Services.Auth
             try
             {
                 LoginUserDto? user = await _userService.GetUser(auth.Username, cancellation);
-                if (user is null || BCrypt.Net.BCrypt.Verify(auth.Password, user.Password))
+                if (user is null || !BCrypt.Net.BCrypt.Verify(auth.Password, user.Password))
                     return default!;
                 //if (user is null || user.Password != auth.Password)
                 //    return default!;

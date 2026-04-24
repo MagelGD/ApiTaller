@@ -14,22 +14,25 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ApiTaller.api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddOpenApi();
 #region Cors
 builder.Services.AddCors(options =>
 {
-       options.AddPolicy("AllowAll", policy =>
+        options.AddPolicy("AllowAll", policy =>
     {
         policy
                .WithOrigins("http://localhost:4200")
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials();
     });
 
 });
@@ -95,5 +98,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<PermissionsHub>("/hubs/permissions");
 app.Run();

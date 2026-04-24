@@ -9,6 +9,6 @@ namespace ApiTaller.Domain.Dtos.RoleActions
         public int ActionId { get; set; }
         public int ModuleId { get; set; }
         public bool IsActive { get; set; }
-        public string ActionName { get; set; }
+        public string? ActionName { get; set; }
     }
 }

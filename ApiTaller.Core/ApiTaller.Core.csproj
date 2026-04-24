@@ -15,4 +15,8 @@
     <ProjectReference Include="..\ApiTaller.Infrastructure\ApiTaller.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Products\" />
+  </ItemGroup>
+
 </Project>

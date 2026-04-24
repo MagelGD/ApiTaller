@@ -56,22 +56,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(255)
                 .HasColumnName("reference");
-            entity.Property(e => e.ImagePath)
-                .IsRequired()
-                .HasMaxLength(255)
-                .HasColumnName("image_path");
-            entity.Property(e => e.ImagePath2)
-                .IsRequired()
-                .HasMaxLength(255)
-                .HasColumnName("image_path2");
-            entity.Property(e => e.ImagePath3)
-                .IsRequired()
-                .HasMaxLength(255)
-                .HasColumnName("image_path3");
-            entity.Property(e => e.ImagePath4)
-                .IsRequired()
-                .HasMaxLength(255)
-                .HasColumnName("image_path4");
+            
 
             entity.HasOne(d => d.ProductTypeIdNavigation).WithMany()
                 .HasForeignKey(d => d.ProducTypeId)

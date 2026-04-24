@@ -11,11 +11,7 @@ public partial class Product : GeneralEntity
     public string Code { get; set; }
     public string Reference { get; set; }
     public string Description { get; set; }
-    public string ImagePath { get; set; }
-    public string ImagePath2 { get; set; }
-    public string ImagePath3 { get; set; }
-    public string ImagePath4 { get; set; }
-
+   
     public virtual ProductType ProductTypeIdNavigation { get; set; }
 
 
