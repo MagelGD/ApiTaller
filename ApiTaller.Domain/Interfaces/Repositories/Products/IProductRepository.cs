@@ -13,6 +13,6 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Products
         Task<GetProductDto?> GetByIdAsync(int id, CancellationToken cancellation);
         Task<bool> CreateAsync(Product create, CancellationToken cancellation);
         Task<bool> UpdateAsync(Product update, CancellationToken cancellation);
-        Task<GetProductDto?> ValidateExist(string name, int idProductType CancellationToken cancellation);
+        Task<GetProductDto?> ValidateExist(string name, int idProductType, CancellationToken cancellation);
     }
 }
