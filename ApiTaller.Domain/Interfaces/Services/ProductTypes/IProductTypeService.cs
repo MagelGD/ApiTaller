@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ApiTaller.Domain.Interfaces.Services.ProductTypes
 {
-    public interface IProductTypeService
+    public interface IProductService
     {
         Task<IEnumerable<GetProductTypeDto>> GetAllAsync(CancellationToken cancellation);
         Task<IEnumerable<GetProductTypeDto>> GetAllActiveAsync(CancellationToken cancellation);

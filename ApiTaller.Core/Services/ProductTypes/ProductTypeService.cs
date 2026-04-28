@@ -3,13 +3,10 @@ using ApiTaller.Domain.Interfaces.Repositories.ProductTypes;
 using ApiTaller.Domain.Interfaces.Services.ProductTypes;
 using ApiTaller.Domain.Models;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ApiTaller.Core.Services.ProductTypes
 {
-    public class ProductTypeService : IProductTypeService
+    public class ProductTypeService : IProductService
     {
         private readonly IProductTypeRepository _repository;
         private readonly ILogger<ProductTypeService> _logger;
@@ -74,14 +71,14 @@ namespace ApiTaller.Core.Services.ProductTypes
                     UpdatedAt = DateTime.UtcNow
                 };
                 bool exists = await ValidateExist(productType.Type, cancellationToken);
-                if(saveData.Id == 0 && !exists)
+                if (saveData.Id == 0 && !exists)
                 {
-                    await _repository.CreateAsync(saveData, cancellationToken);
+                    _ = await _repository.CreateAsync(saveData, cancellationToken);
                     result = await _repository.ValidateExist(productType.Type, cancellationToken) ?? new GetProductTypeDto();
                 }
                 else if (saveData.Id != 0 && !exists)
                 {
-                    await _repository.UpdateAsync(saveData, cancellationToken);
+                    _ = await _repository.UpdateAsync(saveData, cancellationToken);
                     result = await _repository.GetByIdAsync(saveData.Id, cancellationToken) ?? new GetProductTypeDto();
                 }
             }

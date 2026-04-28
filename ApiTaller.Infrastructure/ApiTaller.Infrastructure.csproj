@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Repositories\Products\" />
+    <Folder Include="Data\Repositories\BrandModelVersion\" />
   </ItemGroup>
 
 </Project>

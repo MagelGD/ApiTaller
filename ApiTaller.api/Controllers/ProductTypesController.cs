@@ -11,9 +11,9 @@ namespace ApiTaller.api.Controllers
     public class ProductTypesController : ControllerBase
     {
         private readonly ILogger<ProductTypesController> _logger;
-        private readonly IProductTypeService _service;
+        private readonly IProductService _service;
 
-        public ProductTypesController(IProductTypeService service, ILogger<ProductTypesController> logger)
+        public ProductTypesController(IProductService service, ILogger<ProductTypesController> logger)
         {
             _service = service;
             _logger = logger;
