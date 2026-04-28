@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ApiTaller.Core.Services.ProductTypes
 {
-    public class ProductTypeService : IProductService
+    public class ProductTypeService : IProductTypeService
     {
         private readonly IProductTypeRepository _repository;
         private readonly ILogger<ProductTypeService> _logger;

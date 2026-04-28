@@ -1,18 +1,28 @@
 ﻿using ApiTaller.Core.Services.Actions;
 using ApiTaller.Core.Services.Auth;
+using ApiTaller.Core.Services.BrandModels;
+using ApiTaller.Core.Services.BrandModelVersions;
+using ApiTaller.Core.Services.Brands;
 using ApiTaller.Core.Services.IdentificationTypes;
 using ApiTaller.Core.Services.Modules;
 using ApiTaller.Core.Services.Operations;
+using ApiTaller.Core.Services.Products;
+using ApiTaller.Core.Services.ProductTypes;
 using ApiTaller.Core.Services.RoleActions;
 using ApiTaller.Core.Services.UserRoleModules;
 using ApiTaller.Core.Services.UserRoles;
 using ApiTaller.Core.Services.Users;
 using ApiTaller.Domain.Interfaces.Services.Actions;
 using ApiTaller.Domain.Interfaces.Services.Auth;
+using ApiTaller.Domain.Interfaces.Services.BrandModels;
+using ApiTaller.Domain.Interfaces.Services.BrandModelVersion;
+using ApiTaller.Domain.Interfaces.Services.Brands;
 using ApiTaller.Domain.Interfaces.Services.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Services.Login;
 using ApiTaller.Domain.Interfaces.Services.Module;
 using ApiTaller.Domain.Interfaces.Services.Operations;
+using ApiTaller.Domain.Interfaces.Services.Products;
+using ApiTaller.Domain.Interfaces.Services.ProductTypes;
 using ApiTaller.Domain.Interfaces.Services.RoleActions;
 using ApiTaller.Domain.Interfaces.Services.UserRoleModules;
 using ApiTaller.Domain.Interfaces.Services.UserRoles;
@@ -39,6 +49,11 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IOperationService, OperationService>();
             services.TryAddScoped<IRoleActionService, RoleActionService>();
             services.TryAddScoped<IIdentificationTypesService, IdentificationTypesService>();
+            services.TryAddScoped<IProductService, ProductService>();
+            services.TryAddScoped<IProductTypeService, ProductTypeService>();
+            services.TryAddScoped<IBrandService, BrandService>();
+            services.TryAddScoped<IBrandModelsService, BrandModelService>();
+            services.TryAddScoped<IBrandModelVersionService, BrandModelVersionService>();
             return services;
         }
     }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ApiTaller.Domain.Interfaces.Services.BrandModelVersion
 {
-    public interface IBrandModelVersion
+    public interface IBrandModelVersionService
     {
         Task<IEnumerable<GetBrandModelVersionDto>> GetBrandModelVersionAsync(CancellationToken cancellationToken);
         Task<IEnumerable<GetBrandModelVersionDto>> GetBrandModelVersionActiveAsync(CancellationToken cancellationToken);

@@ -25,8 +25,4 @@
     <ProjectReference Include="..\ApiTaller.Domain\ApiTaller.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\Repositories\BrandModelVersion\" />
-  </ItemGroup>
-
 </Project>

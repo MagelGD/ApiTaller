@@ -1,17 +1,27 @@
 ﻿using ApiTaller.Domain.Interfaces.Repositories.Actions;
+using ApiTaller.Domain.Interfaces.Repositories.BrandModels;
+using ApiTaller.Domain.Interfaces.Repositories.BrandModelVersion;
+using ApiTaller.Domain.Interfaces.Repositories.Brands;
 using ApiTaller.Domain.Interfaces.Repositories.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Repositories.Login;
 using ApiTaller.Domain.Interfaces.Repositories.Modules;
 using ApiTaller.Domain.Interfaces.Repositories.Operations;
+using ApiTaller.Domain.Interfaces.Repositories.Products;
+using ApiTaller.Domain.Interfaces.Repositories.ProductTypes;
 using ApiTaller.Domain.Interfaces.Repositories.RoleActions;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoleModules;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoles;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
 using ApiTaller.Infrastructure.Data.Repositories.Actions;
+using ApiTaller.Infrastructure.Data.Repositories.BrandModels;
+using ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions;
+using ApiTaller.Infrastructure.Data.Repositories.Brands;
 using ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes;
 using ApiTaller.Infrastructure.Data.Repositories.Login;
 using ApiTaller.Infrastructure.Data.Repositories.Modules;
 using ApiTaller.Infrastructure.Data.Repositories.Operations;
+using ApiTaller.Infrastructure.Data.Repositories.Products;
+using ApiTaller.Infrastructure.Data.Repositories.ProductTypes;
 using ApiTaller.Infrastructure.Data.Repositories.RoleActions;
 using ApiTaller.Infrastructure.Data.Repositories.UserRoleModules;
 using ApiTaller.Infrastructure.Data.Repositories.UserRoles;
@@ -34,6 +44,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IOperationRepository, OperationRepository>();
             services.TryAddScoped<IRoleActionsRepository, RoleActionsRepository>();
             services.TryAddScoped<IIdentificationTypesRepository, IdentificationTypesRepository>();
+            services.TryAddScoped<IProductRepository, ProductRepository>();
+            services.TryAddScoped<IProductTypeRepository, ProductTypeRepository>();
+            services.TryAddScoped<IBrandRepository, BrandRepository>();
+            services.TryAddScoped<IBrandModelsRepository, BrandModelsRepository>();
+            services.TryAddScoped<IBrandModelVersionRepository, BrandModelVersionRepository>();
             return services;
         }
     }
