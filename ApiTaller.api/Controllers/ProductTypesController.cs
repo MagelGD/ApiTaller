@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.ProductType;
+using ApiTaller.Domain.Dtos.ProductType;
 using ApiTaller.Domain.Interfaces.Services.ProductTypes;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,9 +11,9 @@ namespace ApiTaller.api.Controllers
     public class ProductTypesController : ControllerBase
     {
         private readonly ILogger<ProductTypesController> _logger;
-        private readonly IProductService _service;
+        private readonly IProductTypeService _service;
 
-        public ProductTypesController(IProductService service, ILogger<ProductTypesController> logger)
+        public ProductTypesController(IProductTypeService service, ILogger<ProductTypesController> logger)
         {
             _service = service;
             _logger = logger;
@@ -30,6 +30,20 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving product types");
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("GetProductTypeActive")]
+        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        {
+            try
+            {
+                return Ok(await _service.GetAllActiveAsync(cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving active product types");
             }
             return BadRequest();
         }

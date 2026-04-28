@@ -13,7 +13,7 @@ namespace ApiTaller.Domain.Dtos.BrandModelVersion
         public GetBrandDto brandDto { get; set; }
         public GetBrandModelsDto BrandModelsDto { get; set; }
         public bool IsActive { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
     }

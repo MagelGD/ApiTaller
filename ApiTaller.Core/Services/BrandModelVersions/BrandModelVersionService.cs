@@ -74,7 +74,7 @@ namespace ApiTaller.Core.Services.BrandModelVersions
                     BrandId = getBrandModelVersionDto.brandDto.Id,
                     ModelId = getBrandModelVersionDto.BrandModelsDto.Id,
                     IsActive = getBrandModelVersionDto.IsActive,
-                    CreatedAt = getBrandModelVersionDto.CreatedAt
+                    CreatedAt = getBrandModelVersionDto.CreatedAt ?? DateTime.Now
                 };
                 bool isExit = await ValidateExist(getBrandModelVersionDto, cancellationToken);
                 if (saveData.Id == 0 && !isExit)

@@ -15,8 +15,4 @@
     <ProjectReference Include="..\ApiTaller.Infrastructure\ApiTaller.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\BrandModelVersion\" />
-  </ItemGroup>
-
 </Project>

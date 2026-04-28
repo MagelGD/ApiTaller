@@ -52,6 +52,9 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.Property(e => e.Price)
                 .HasColumnType("int(11)")
                 .HasColumnName("price");
+            entity.Property(e => e.SalePrice)
+                .HasColumnType("int(11)")
+                .HasColumnName("sale_price");
             entity.Property(e => e.Reference)
                 .IsRequired()
                 .HasMaxLength(255)

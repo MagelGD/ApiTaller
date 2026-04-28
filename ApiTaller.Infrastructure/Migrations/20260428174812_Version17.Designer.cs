@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260428174812_Version17")]
+    partial class Version17
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -494,10 +497,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int?>("ResponsibleUserId")
                         .HasColumnType("int(11)")
                         .HasColumnName("responsible_user_id");
-
-                    b.Property<int>("SalePrice")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("sale_price");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")

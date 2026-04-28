@@ -11,7 +11,7 @@ namespace ApiTaller.Domain.Dtos.ProductType
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public string ResponsibleUser { get; set; }
+        public string? ResponsibleUser { get; set; }
 
     }
 }

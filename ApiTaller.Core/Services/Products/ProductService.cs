@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Product;
+using ApiTaller.Domain.Dtos.Product;
 using ApiTaller.Domain.Interfaces.Repositories.Products;
 using ApiTaller.Domain.Interfaces.Services.Products;
 using Microsoft.Extensions.Logging;
@@ -21,7 +21,40 @@ namespace ApiTaller.Core.Services.Products
 
         public async Task<GetProductDto> CreateOrEditProductType(GetProductDto product, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            GetProductDto result = new();
+            try
+            {
+                ApiTaller.Domain.Models.Product saveData = new()
+                {
+                    Id = product.Id,
+                    ProductName = product.ProductName,
+                    Price = product.Price,
+                    SalePrice = product.SalePrice,
+                    Code = product.Code,
+                    Reference = product.Reference,
+                    Description = product.Description,
+                    ProducTypeId = product.ProductType?.Id ?? 0,
+                    IsActive = product.IsActive,
+                    CreatedAt = product.Id == 0 ? DateTime.Now : product.CreatedAt,
+                    UpdatedAt = DateTime.Now
+                };
+
+                if (saveData.Id == 0)
+                {
+                     await _repository.CreateAsync(saveData, cancellationToken);
+                    result = await _repository.GetByIdAsync(saveData.Id, cancellationToken) ?? new GetProductDto();
+                }
+                else
+                {
+                    await _repository.UpdateAsync(saveData, cancellationToken);
+                    result = await _repository.GetByIdAsync(saveData.Id, cancellationToken) ?? new GetProductDto();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear o editar el producto");
+            }
+            return result;
         }
 
         public async Task<IEnumerable<GetProductDto>> GetAllActiveAsync(CancellationToken cancellation)

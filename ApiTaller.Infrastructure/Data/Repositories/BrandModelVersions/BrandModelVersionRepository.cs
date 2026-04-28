@@ -33,12 +33,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                 }
                 brandModelVersion.CreatedAt = DateTime.Now;
                 await _Context.AddAsync(brandModelVersion, cancellationToken);
+                return await _Context.SaveChangesAsync(cancellationToken) > 0;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "");
             }
-            return await _Context.SaveChangesAsync(cancellationToken) > 0;
+            return false;
         }
 
         public async Task<IEnumerable<GetBrandModelVersionDto>> GetBrandModelVersionActiveAsync(CancellationToken cancellationToken)
