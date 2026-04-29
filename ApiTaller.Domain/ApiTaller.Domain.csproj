@@ -6,13 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Dtos\Supplier\" />
-    <Folder Include="Dtos\PaymentMethod\" />
-    <Folder Include="Interfaces\Repositories\PaymentMethod\" />
-    <Folder Include="Interfaces\Repositories\Supplier\" />
-    <Folder Include="Interfaces\Services\PaymentMethod\" />
-    <Folder Include="Interfaces\Services\Supplier\" />
-  </ItemGroup>
-
 </Project>

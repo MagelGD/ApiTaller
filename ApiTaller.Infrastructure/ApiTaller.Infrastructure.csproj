@@ -25,9 +25,4 @@
     <ProjectReference Include="..\ApiTaller.Domain\ApiTaller.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Data\Repositories\PaymentMethod\" />
-    <Folder Include="Data\Repositories\Supplier\" />
-  </ItemGroup>
-
 </Project>

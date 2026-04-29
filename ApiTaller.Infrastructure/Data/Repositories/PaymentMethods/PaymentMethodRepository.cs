@@ -50,6 +50,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.PaymentMethods
                         Id = pm.Id,
                         Name = pm.Name,
                         Icon = pm.Icon,
+                        IsActive = pm.IsActive,
                         CreatedAt = pm.CreatedAt,
                         UpdatedAt = pm.UpdatedAt
                     })
@@ -73,6 +74,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.PaymentMethods
                         Id = pm.Id,
                         Name = pm.Name,
                         Icon = pm.Icon,
+                        IsActive = pm.IsActive,
                         CreatedAt = pm.CreatedAt,
                         UpdatedAt = pm.UpdatedAt
                     })
@@ -97,6 +99,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.PaymentMethods
                         Id = pm.Id,
                         Name = pm.Name,
                         Icon = pm.Icon,
+                        IsActive = pm.IsActive,
                         CreatedAt = pm.CreatedAt,
                         UpdatedAt = pm.UpdatedAt
                     })
@@ -139,6 +142,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.PaymentMethods
                         Id = pm.Id,
                         Name = pm.Name,
                         Icon = pm.Icon,
+                        IsActive = pm.IsActive,
                         CreatedAt = pm.CreatedAt,
                         UpdatedAt = pm.UpdatedAt
                     })

@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.PaymentMethod;
+using ApiTaller.Domain.Dtos.PaymentMethod;
 using ApiTaller.Domain.Interfaces.Repositories.PaymentMethods;
 using ApiTaller.Domain.Interfaces.Services.PaymentMethods;
 using ApiTaller.Domain.Models;
@@ -28,7 +28,9 @@ namespace ApiTaller.Core.Services.PaymentMethods
                 {
                     Id = paymentMethod.Id,
                     Name = paymentMethod.Name,
-                    Icon = paymentMethod.Icon
+                    Icon = paymentMethod.Icon,
+                    IsActive = paymentMethod.IsActive,
+                    CreatedAt = paymentMethod.CreatedAt ?? DateTime.Now
                 };
                 bool isExist = await ValidateExist(paymentMethod.Name, cancellationToken);
                 if (saveData.Id == 0 && !isExist)

@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Supplier;
+using ApiTaller.Domain.Dtos.Supplier;
 using ApiTaller.Domain.Interfaces.Repositories.Suppliers;
 using ApiTaller.Domain.Interfaces.Services.Suppliers;
 using ApiTaller.Domain.Models;
@@ -31,7 +31,9 @@ namespace ApiTaller.Core.Services.Suppliers
                     BusinessName = supplier.BusinessName,
                     ContactName = supplier.ContactName,
                     PhoneNumber = supplier.PhoneNumber,
-                    Email = supplier.Email
+                    Email = supplier.Email,
+                    IsActive = supplier.IsActive,
+                    CreatedAt = supplier.CreatedAt ?? DateTime.Now
                 };
                 bool isExit = await ValidateExist(supplier, cancellationToken);
                 if (saveData.Id == 0 && !isExit)

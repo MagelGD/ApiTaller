@@ -39,6 +39,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Suppliers
                         ContactName = s.ContactName,
                         PhoneNumber = s.PhoneNumber,
                         Email = s.Email,
+                        IsActive = s.IsActive,
                         CreatedAt = s.CreatedAt,
                         UpdatedAt = s.UpdatedAt
                     })
@@ -65,6 +66,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Suppliers
                         ContactName = s.ContactName,
                         PhoneNumber = s.PhoneNumber,
                         Email = s.Email,
+                        IsActive = s.IsActive,
                         CreatedAt = s.CreatedAt,
                         UpdatedAt = s.UpdatedAt
                     })
@@ -92,6 +94,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Suppliers
                         ContactName = s.ContactName,
                         PhoneNumber = s.PhoneNumber,
                         Email = s.Email,
+                        IsActive = s.IsActive,
                         CreatedAt = s.CreatedAt,
                         UpdatedAt = s.UpdatedAt
                     }).FirstOrDefaultAsync(cancellation);
@@ -107,7 +110,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Suppliers
         {
             try
             {
-                if(int.TryParse(_currentUserService.UserId, out int userId))
+                if (int.TryParse(_currentUserService.UserId, out int userId))
                 {
                     update.ResponsibleUserId = userId;
                 }
@@ -136,6 +139,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Suppliers
                         ContactName = s.ContactName,
                         PhoneNumber = s.PhoneNumber,
                         Email = s.Email,
+                        IsActive = s.IsActive,
                         CreatedAt = s.CreatedAt,
                         UpdatedAt = s.UpdatedAt
                     }).FirstOrDefaultAsync(cancellation);
