@@ -6,9 +6,11 @@ using ApiTaller.Domain.Interfaces.Repositories.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Repositories.Login;
 using ApiTaller.Domain.Interfaces.Repositories.Modules;
 using ApiTaller.Domain.Interfaces.Repositories.Operations;
+using ApiTaller.Domain.Interfaces.Repositories.PaymentMethods;
 using ApiTaller.Domain.Interfaces.Repositories.Products;
 using ApiTaller.Domain.Interfaces.Repositories.ProductTypes;
 using ApiTaller.Domain.Interfaces.Repositories.RoleActions;
+using ApiTaller.Domain.Interfaces.Repositories.Suppliers;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoleModules;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoles;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
@@ -20,9 +22,11 @@ using ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes;
 using ApiTaller.Infrastructure.Data.Repositories.Login;
 using ApiTaller.Infrastructure.Data.Repositories.Modules;
 using ApiTaller.Infrastructure.Data.Repositories.Operations;
+using ApiTaller.Infrastructure.Data.Repositories.PaymentMethods;
 using ApiTaller.Infrastructure.Data.Repositories.Products;
 using ApiTaller.Infrastructure.Data.Repositories.ProductTypes;
 using ApiTaller.Infrastructure.Data.Repositories.RoleActions;
+using ApiTaller.Infrastructure.Data.Repositories.Suppliers;
 using ApiTaller.Infrastructure.Data.Repositories.UserRoleModules;
 using ApiTaller.Infrastructure.Data.Repositories.UserRoles;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
@@ -49,6 +53,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IBrandRepository, BrandRepository>();
             services.TryAddScoped<IBrandModelsRepository, BrandModelsRepository>();
             services.TryAddScoped<IBrandModelVersionRepository, BrandModelVersionRepository>();
+            services.TryAddScoped<IPaymentMethosRepository, PaymentMethodRepository>();
+            services.TryAddScoped<ISupplierRepository, SupplierRepository>();
             return services;
         }
     }

@@ -13,8 +13,8 @@ namespace ApiTaller.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<Domain.Models.Action> entity)
         {
 
-                entity.HasKey(e => e.Id);
-
+                entity.HasKey(e => e.Id);   
+                
                 entity.ToTable("action");
 
                 entity.HasIndex(e => e.ModuleId, "FK_ACTION_APLICATIONMODULE");

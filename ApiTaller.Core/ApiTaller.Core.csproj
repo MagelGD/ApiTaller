@@ -15,4 +15,9 @@
     <ProjectReference Include="..\ApiTaller.Infrastructure\ApiTaller.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\PaymentMethod\" />
+    <Folder Include="Services\Supplier\" />
+  </ItemGroup>
+
 </Project>

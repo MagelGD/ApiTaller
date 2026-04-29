@@ -6,9 +6,11 @@ using ApiTaller.Core.Services.Brands;
 using ApiTaller.Core.Services.IdentificationTypes;
 using ApiTaller.Core.Services.Modules;
 using ApiTaller.Core.Services.Operations;
+using ApiTaller.Core.Services.PaymentMethods;
 using ApiTaller.Core.Services.Products;
 using ApiTaller.Core.Services.ProductTypes;
 using ApiTaller.Core.Services.RoleActions;
+using ApiTaller.Core.Services.Suppliers;
 using ApiTaller.Core.Services.UserRoleModules;
 using ApiTaller.Core.Services.UserRoles;
 using ApiTaller.Core.Services.Users;
@@ -21,9 +23,11 @@ using ApiTaller.Domain.Interfaces.Services.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Services.Login;
 using ApiTaller.Domain.Interfaces.Services.Module;
 using ApiTaller.Domain.Interfaces.Services.Operations;
+using ApiTaller.Domain.Interfaces.Services.PaymentMethods;
 using ApiTaller.Domain.Interfaces.Services.Products;
 using ApiTaller.Domain.Interfaces.Services.ProductTypes;
 using ApiTaller.Domain.Interfaces.Services.RoleActions;
+using ApiTaller.Domain.Interfaces.Services.Suppliers;
 using ApiTaller.Domain.Interfaces.Services.UserRoleModules;
 using ApiTaller.Domain.Interfaces.Services.UserRoles;
 using ApiTaller.Domain.Interfaces.Services.Users;
@@ -54,6 +58,8 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IBrandService, BrandService>();
             services.TryAddScoped<IBrandModelsService, BrandModelService>();
             services.TryAddScoped<IBrandModelVersionService, BrandModelVersionService>();
+            services.TryAddScoped<IPaymentMethodService, PaymentMethodService>();
+            services.TryAddScoped<ISupplierService, SupplierService>();
             return services;
         }
     }

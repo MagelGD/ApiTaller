@@ -30,6 +30,8 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<Brand> Brand {  get; set; }
         public DbSet<BrandModels> BrandModels {  get; set; }
         public DbSet<BrandModelVersion> BrandModelVersion {  get; set; }
+        public DbSet<PaymentMethod> PaymentMethod {  get; set; }
+        public DbSet<Supplier> Supplier {  get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
