@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Models;
+using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -32,6 +32,8 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<BrandModelVersion> BrandModelVersion {  get; set; }
         public DbSet<PaymentMethod> PaymentMethod {  get; set; }
         public DbSet<Supplier> Supplier {  get; set; }
+        public DbSet<Customer> Customer { get; set; }
+        public DbSet<Vehicle> Vehicle { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
