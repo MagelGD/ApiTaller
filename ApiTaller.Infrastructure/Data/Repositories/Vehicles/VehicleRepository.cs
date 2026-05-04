@@ -1,3 +1,6 @@
+using ApiTaller.Domain.Dtos.Brand;
+using ApiTaller.Domain.Dtos.BrandModels;
+using ApiTaller.Domain.Dtos.BrandModelVersion;
 using ApiTaller.Domain.Dtos.Vehicle;
 using ApiTaller.Domain.Interfaces.Repositories.Vehicles;
 using ApiTaller.Domain.Interfaces.Services;
@@ -78,7 +81,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
             IEnumerable<GetVehicleDto> result = new List<GetVehicleDto>();
             try
             {
-                result = await _context.Vehicle
+                result = await _context.Vehicle.Include(x=> x.BrandNavigation).Include(x=> x.ModelNavigation).Include(x=> x.VersionNavigation)
                     .Select(v => new GetVehicleDto
                     {
                         Id = v.Id,
@@ -91,6 +94,21 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
                         CylinderCapacity = v.CylinderCapacity,
                         IsActive = v.IsActive,
                         CreatedAt = v.CreatedAt,
+                        Brand = new GetBrandDto
+                        {
+                            Id = v.BrandNavigation.Id,
+                            Name = v.BrandNavigation.Name
+                        },
+                        Model = new GetBrandModelsDto
+                        {
+                            Id = v.ModelNavigation.Id,
+                            Models = v.ModelNavigation.Models
+                        },
+                        Reference = new GetBrandModelVersionDto
+                        {
+                            Id = v.VersionNavigation.Id,
+                            Version = v.VersionNavigation.Version
+                        },
                         UpdatedAt = v.UpdatedAt
                     })
                     .ToListAsync(cancellation);

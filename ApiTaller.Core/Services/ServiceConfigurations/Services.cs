@@ -32,6 +32,8 @@ using ApiTaller.Domain.Interfaces.Services.RoleActions;
 using ApiTaller.Domain.Interfaces.Services.Suppliers;
 using ApiTaller.Domain.Interfaces.Services.Customers;
 using ApiTaller.Domain.Interfaces.Services.Vehicles;
+using ApiTaller.Domain.Interfaces.Services.WorkOrders;
+using ApiTaller.Core.Services.WorkOrders;
 using ApiTaller.Domain.Interfaces.Services.UserRoleModules;
 using ApiTaller.Domain.Interfaces.Services.UserRoles;
 using ApiTaller.Domain.Interfaces.Services.Users;
@@ -66,6 +68,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<ISupplierService, SupplierService>();
             services.TryAddScoped<ICustomerService, CustomerService>();
             services.TryAddScoped<IVehicleService, VehicleService>();
+            services.TryAddScoped<IWorkOrderService, WorkOrderService>();
             return services;
         }
     }

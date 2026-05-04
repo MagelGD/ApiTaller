@@ -1,3 +1,6 @@
+using ApiTaller.Domain.Dtos.Brand;
+using ApiTaller.Domain.Dtos.BrandModels;
+using ApiTaller.Domain.Dtos.BrandModelVersion;
 using System;
 
 namespace ApiTaller.Domain.Dtos.Vehicle
@@ -15,5 +18,8 @@ namespace ApiTaller.Domain.Dtos.Vehicle
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public GetBrandDto? Brand { get; set; }
+        public GetBrandModelsDto? Model { get; set; }
+        public GetBrandModelVersionDto? Reference { get; set; }
     }
 }

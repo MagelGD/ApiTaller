@@ -4,11 +4,7 @@ using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Linq;
+
 
 namespace ApiTaller.Infrastructure.Data.Repositories.Modules
 {
@@ -77,7 +73,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Modules
                     IsActive = x.IsActive,
                     CreatedAt = x.CreatedAt,
                     UpdatedAt = x.UpdatedAt
-                }).ToListAsync(cancellation);
+                }).OrderBy(x=> x.Name).ToListAsync(cancellation);
             }
             catch (Exception ex)
             {

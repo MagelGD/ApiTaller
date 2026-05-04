@@ -71,7 +71,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoles
                                    IsActive = ur.IsActive,
                                    CreatedAt = ur.CreatedAt,
                                    UpdatedAt = ur.UpdatedAt,
-                               }).ToListAsync(cancellation);
+                               }).OrderBy(x=> x.RoleName).ToListAsync(cancellation);
             }
             catch (Exception ex)
             {

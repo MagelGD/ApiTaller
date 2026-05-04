@@ -13,6 +13,7 @@ using ApiTaller.Domain.Interfaces.Repositories.RoleActions;
 using ApiTaller.Domain.Interfaces.Repositories.Suppliers;
 using ApiTaller.Domain.Interfaces.Repositories.Customers;
 using ApiTaller.Domain.Interfaces.Repositories.Vehicles;
+using ApiTaller.Domain.Interfaces.Repositories.WorkOrders;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoleModules;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoles;
 using ApiTaller.Domain.Interfaces.Repositories.Users;
@@ -31,6 +32,7 @@ using ApiTaller.Infrastructure.Data.Repositories.RoleActions;
 using ApiTaller.Infrastructure.Data.Repositories.Suppliers;
 using ApiTaller.Infrastructure.Data.Repositories.Customers;
 using ApiTaller.Infrastructure.Data.Repositories.Vehicles;
+using ApiTaller.Infrastructure.Data.Repositories.WorkOrders;
 using ApiTaller.Infrastructure.Data.Repositories.UserRoleModules;
 using ApiTaller.Infrastructure.Data.Repositories.UserRoles;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
@@ -61,6 +63,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<ISupplierRepository, SupplierRepository>();
             services.TryAddScoped<ICustomerRepository, CustomerRepository>();
             services.TryAddScoped<IVehicleRepository, VehicleRepository>();
+            services.TryAddScoped<IWorkOrderRepository, WorkOrderRepository>();
             return services;
         }
     }
