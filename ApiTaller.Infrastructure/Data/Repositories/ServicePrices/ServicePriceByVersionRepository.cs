@@ -1,3 +1,7 @@
+using ApiTaller.Domain.Dtos.Brand;
+using ApiTaller.Domain.Dtos.BrandModels;
+using ApiTaller.Domain.Dtos.BrandModelVersion;
+using ApiTaller.Domain.Dtos.ServiceCatalogs;
 using ApiTaller.Domain.Dtos.ServicePrices;
 using ApiTaller.Domain.Interfaces.Repositories.ServicePrices;
 using ApiTaller.Domain.Interfaces.Services;
@@ -50,6 +54,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
             {
                 return await _context.ServicePriceByVersion
                     .Where(sp => sp.IsActive)
+                    .Include(sp=> sp.ServiceCatalogIdNavigation)
+                    .Include(sp => sp.BrandModelVersionIdNavigation).ThenInclude(x=> x.Brand)
+                    .Include(sp => sp.BrandModelVersionIdNavigation).ThenInclude(x=> x.Model)
                     .Select(sp => new GetServicePriceByVersionDto
                     {
                         Id = sp.Id,
@@ -59,7 +66,28 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
                         EstimatedMinutes = sp.EstimatedMinutes,
                         IsActive = sp.IsActive,
                         CreatedAt = sp.CreatedAt,
-                        UpdatedAt = sp.UpdatedAt
+                        UpdatedAt = sp.UpdatedAt,
+                        ServiceCatalog = new GetServiceCatalogDto   
+                        {
+                            Id = sp.ServiceCatalogIdNavigation.Id,
+                            Name = sp.ServiceCatalogIdNavigation.Name
+                        },
+                        BrandModelVersion = new GetBrandModelVersionDto
+                        {
+                            Id = sp.BrandModelVersionIdNavigation.Id,
+                            Version = sp.BrandModelVersionIdNavigation.Version,
+                            brandDto = new GetBrandDto
+                            {
+                                Id = sp.BrandModelVersionIdNavigation.Brand.Id,
+                                Name = sp.BrandModelVersionIdNavigation.Brand.Name
+                            },
+                            BrandModelsDto = new GetBrandModelsDto
+                            {
+                                Id = sp.BrandModelVersionIdNavigation.Model.Id,
+                                Models = sp.BrandModelVersionIdNavigation.Model.Models
+                            }
+                        }
+
                     }).ToListAsync(cancellation);
             }
             catch (Exception ex)
@@ -74,6 +102,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
             try
             {
                 return await _context.ServicePriceByVersion
+                    .Include(sp => sp.ServiceCatalogIdNavigation)
+                    .Include(sp => sp.BrandModelVersionIdNavigation).ThenInclude(x => x.Brand)
+                    .Include(sp => sp.BrandModelVersionIdNavigation).ThenInclude(x => x.Model)
                     .Select(sp => new GetServicePriceByVersionDto
                     {
                         Id = sp.Id,
@@ -83,7 +114,28 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
                         EstimatedMinutes = sp.EstimatedMinutes,
                         IsActive = sp.IsActive,
                         CreatedAt = sp.CreatedAt,
-                        UpdatedAt = sp.UpdatedAt
+                        UpdatedAt = sp.UpdatedAt,
+                        ServiceCatalog = new GetServiceCatalogDto
+                        {
+                            Id = sp.ServiceCatalogIdNavigation.Id,
+                            Name = sp.ServiceCatalogIdNavigation.Name
+                        },
+                        BrandModelVersion = new GetBrandModelVersionDto
+                        {
+                            Id = sp.BrandModelVersionIdNavigation.Id,
+                            Version = sp.BrandModelVersionIdNavigation.Version,
+                            brandDto = new GetBrandDto
+                            {
+                                Id = sp.BrandModelVersionIdNavigation.Brand.Id,
+                                Name = sp.BrandModelVersionIdNavigation.Brand.Name
+                            },
+                            BrandModelsDto = new GetBrandModelsDto
+                            {
+                                Id = sp.BrandModelVersionIdNavigation.Model.Id,
+                                Models = sp.BrandModelVersionIdNavigation.Model.Models
+                            }
+                        }
+
                     }).ToListAsync(cancellation);
             }
             catch (Exception ex)
@@ -160,6 +212,37 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
                 _logger.LogError(ex, $"Error validating existence of service price");
             }
             return null;
+        }
+        public async Task<IEnumerable<GetServicePriceByVersionDto>> GetByVersionAsync(int versionId, CancellationToken cancellation)
+        {
+            try
+            {
+                return await _context.ServicePriceByVersion
+                    .Where(sp => sp.IsActive && sp.BrandModelVersionId == versionId)
+                    .Include(sp => sp.ServiceCatalogIdNavigation)
+                    .Select(sp => new GetServicePriceByVersionDto
+                    {
+                        Id = sp.Id,
+                        ServiceCatalogId = sp.ServiceCatalogId,
+                        BrandModelVersionId = sp.BrandModelVersionId,
+                        Price = sp.Price,
+                        EstimatedMinutes = sp.EstimatedMinutes,
+                        IsActive = sp.IsActive,
+                        CreatedAt = sp.CreatedAt,
+                        UpdatedAt = sp.UpdatedAt,
+                        ServiceCatalog = new GetServiceCatalogDto
+                        {
+                            Id = sp.ServiceCatalogIdNavigation.Id,
+                            Name = sp.ServiceCatalogIdNavigation.Name,
+                            ServiceTypeId = sp.ServiceCatalogIdNavigation.ServiceTypeId
+                        }
+                    }).ToListAsync(cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving service prices for version {versionId}");
+            }
+            return new List<GetServicePriceByVersionDto>();
         }
     }
 }

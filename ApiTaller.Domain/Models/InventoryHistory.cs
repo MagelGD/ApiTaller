@@ -1,11 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 
-namespace ApiTaller.Domain.Models;
-
-public partial class InventoryHistory : GeneralEntity
+namespace ApiTaller.Domain.Models
 {
-    public int InventoryId { get; set; }
-    public int Amount { get; set; }
-    public virtual Inventory InventoryIdNavigation { get; set; }
+    public class InventoryHistory : GeneralEntity
+    {
+        public int ProductId { get; set; }
+        public string MovementType { get; set; } // Entrada, Salida, Ajuste
+        public int Quantity { get; set; }
+        public int? ReferenceId { get; set; } // ID de Compra o Orden de Trabajo
+        public string Observations { get; set; }
+
+        public virtual Product ProductNavigation { get; set; }
+    }
 }

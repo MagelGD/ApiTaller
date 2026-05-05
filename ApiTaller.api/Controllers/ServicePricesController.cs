@@ -63,6 +63,20 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
+        [HttpGet("GetServicePriceByVersion/{versionId}")]
+        public async Task<IActionResult> GetByVersion(int versionId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return Ok(await _service.GetByVersionAsync(versionId, cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error retrieving service prices for version {versionId}");
+            }
+            return BadRequest();
+        }
+
         [HttpPost("SaveOrUpdate")]
         public async Task<IActionResult> Post(GetServicePriceByVersionDto value, CancellationToken cancellationToken)
         {

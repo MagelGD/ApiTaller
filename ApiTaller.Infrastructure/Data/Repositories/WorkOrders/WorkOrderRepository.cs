@@ -35,6 +35,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 }
                 create.CreatedAt = DateTime.Now;
                 create.IsActive = true;
+
+                if (userId != 0)
+                {
+                    foreach (var p in create.Parts) p.ResponsibleUserId = userId;
+                    foreach (var s in create.Services) s.ResponsibleUserId = userId;
+                }
                 
                 await _context.WorkOrder.AddAsync(create, cancellation);
                 return await _context.SaveChangesAsync(cancellation) > 0;
@@ -68,7 +74,40 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         Status = w.Status,
                         IsActive = w.IsActive,
                         CreatedAt = w.CreatedAt,
-                        UpdatedAt = w.UpdatedAt
+                        UpdatedAt = w.UpdatedAt,
+                        Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
+                        {
+                            Id = e.Id,
+                            WorkOrderId = e.WorkOrderId,
+                            PhotoUrl = e.PhotoUrl,
+                            EvidenceType = e.EvidenceType,
+                            Description = e.Description,
+                            IsActive = e.IsActive
+                        }).ToList(),
+                        Parts = w.Parts.Select(p => new WorkOrderPartDto
+                        {
+                            Id = p.Id,
+                            WorkOrderId = p.WorkOrderId,
+                            ProductId = p.ProductId,
+                            ProductName = p.ProductNavigation != null ? p.ProductNavigation.ProductName : p.PartName,
+                            PartName = p.PartName,
+                            Quantity = p.Quantity,
+                            UnitPrice = p.UnitPrice,
+                            IsProvidedByCustomer = p.IsProvidedByCustomer,
+                            WarrantyEndDate = p.WarrantyEndDate,
+                            IsActive = p.IsActive
+                        }).ToList(),
+                        Services = w.Services.Select(s => new WorkOrderServiceDto
+                        {
+                            Id = s.Id,
+                            WorkOrderId = s.WorkOrderId,
+                            Description = s.Description,
+                            MechanicId = s.MechanicId,
+                            MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
+                            Price = s.Price,
+                            WarrantyEndDate = s.WarrantyEndDate,
+                            IsActive = s.IsActive
+                        }).ToList()
                     })
                     .OrderByDescending(w => w.CreatedAt)
                     .ToListAsync(cancellation);
@@ -121,7 +160,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             Id = p.Id,
                             WorkOrderId = p.WorkOrderId,
                             ProductId = p.ProductId,
-                            ProductName = p.ProductNavigation.ProductName,
+                            ProductName = p.ProductNavigation != null ? p.ProductNavigation.ProductName : p.PartName,
                             PartName = p.PartName,
                             Quantity = p.Quantity,
                             UnitPrice = p.UnitPrice,
@@ -135,7 +174,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             WorkOrderId = s.WorkOrderId,
                             Description = s.Description,
                             MechanicId = s.MechanicId,
-                            MechanicName = s.MechanicNavigation.FullName,
+                            MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
                             Price = s.Price,
                             WarrantyEndDate = s.WarrantyEndDate,
                             IsActive = s.IsActive
@@ -154,18 +193,80 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
+                var existingOrder = await _context.WorkOrder
+                    .Include(w => w.Parts)
+                    .Include(w => w.Services)
+                    .FirstOrDefaultAsync(w => w.Id == update.Id, cancellation);
+
+                if (existingOrder == null) return false;
+
+                // Actualizar cabecera
+                _context.Entry(existingOrder).CurrentValues.SetValues(update);
+                existingOrder.UpdatedAt = DateTime.Now;
                 if (int.TryParse(_currentUserService.UserId, out int userId))
                 {
-                    update.ResponsibleUserId = userId;
+                    existingOrder.ResponsibleUserId = userId;
                 }
-                update.UpdatedAt = DateTime.Now;
-                
-                _context.WorkOrder.Update(update);
+
+                // Sincronizar Repuestos (Parts)
+                // 1. Eliminar los que ya no están
+                foreach (var existingPart in existingOrder.Parts.ToList())
+                {
+                    if (!update.Parts.Any(p => p.Id == existingPart.Id))
+                    {
+                        _context.WorkOrderPart.Remove(existingPart);
+                    }
+                }
+                // 2. Agregar o actualizar
+                foreach (var part in update.Parts)
+                {
+                    var existingPart = existingOrder.Parts.FirstOrDefault(p => p.Id == part.Id && p.Id != 0);
+                    if (existingPart != null)
+                    {
+                        _context.Entry(existingPart).CurrentValues.SetValues(part);
+                        existingPart.UpdatedAt = DateTime.Now;
+                    }
+                    else
+                    {
+                        part.WorkOrderId = existingOrder.Id;
+                        part.CreatedAt = DateTime.Now;
+                        if (userId != 0) part.ResponsibleUserId = userId;
+                        existingOrder.Parts.Add(part);
+                    }
+                }
+
+                // Sincronizar Servicios (Services)
+                // 1. Eliminar los que ya no están
+                foreach (var existingService in existingOrder.Services.ToList())
+                {
+                    if (!update.Services.Any(s => s.Id == existingService.Id))
+                    {
+                        _context.WorkOrderService.Remove(existingService);
+                    }
+                }
+                // 2. Agregar o actualizar
+                foreach (var service in update.Services)
+                {
+                    var existingService = existingOrder.Services.FirstOrDefault(s => s.Id == service.Id && s.Id != 0);
+                    if (existingService != null)
+                    {
+                        _context.Entry(existingService).CurrentValues.SetValues(service);
+                        existingService.UpdatedAt = DateTime.Now;
+                    }
+                    else
+                    {
+                        service.WorkOrderId = existingOrder.Id;
+                        service.CreatedAt = DateTime.Now;
+                        if (userId != 0) service.ResponsibleUserId = userId;
+                        existingOrder.Services.Add(service);
+                    }
+                }
+
                 return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating work order");
+                _logger.LogError(ex, "Error updating work order with children");
                 return false;
             }
         }

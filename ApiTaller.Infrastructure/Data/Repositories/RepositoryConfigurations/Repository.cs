@@ -73,6 +73,8 @@ using ApiTaller.Infrastructure.Data.Repositories.Users;
 using ApiTaller.Infrastructure.Data.Repositories.ServiceTypes;
 using ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs;
 using ApiTaller.Infrastructure.Data.Repositories.ServicePrices;
+using ApiTaller.Domain.Interfaces.Repositories.Inventory;
+using ApiTaller.Infrastructure.Data.Repositories.Inventory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -104,6 +106,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IServiceTypeRepository, ServiceTypeRepository>();
             services.TryAddScoped<IServiceCatalogRepository, ServiceCatalogRepository>();
             services.TryAddScoped<IServicePriceByVersionRepository, ServicePriceByVersionRepository>();
+            services.TryAddScoped<IInventoryRepository, InventoryRepository>();
             return services;
         }
     }

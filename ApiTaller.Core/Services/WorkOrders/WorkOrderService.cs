@@ -67,6 +67,46 @@ namespace ApiTaller.Core.Services.WorkOrders
                     UpdatedAt = DateTime.Now
                 };
 
+                if (dto.Parts != null)
+                {
+                    foreach (var part in dto.Parts)
+                    {
+                        model.Parts.Add(new WorkOrderPart
+                        {
+                            Id = part.Id,
+                            WorkOrderId = dto.Id,
+                            ProductId = part.ProductId,
+                            PartName = part.PartName,
+                            Quantity = part.Quantity,
+                            UnitPrice = part.UnitPrice,
+                            IsProvidedByCustomer = part.IsProvidedByCustomer,
+                            WarrantyEndDate = part.WarrantyEndDate,
+                            IsActive = part.IsActive,
+                            CreatedAt = part.Id == 0 ? DateTime.Now : dto.CreatedAt, // Si es nuevo usamos ahora, si no, conservamos (aprox)
+                            UpdatedAt = DateTime.Now
+                        });
+                    }
+                }
+
+                if (dto.Services != null)
+                {
+                    foreach (var service in dto.Services)
+                    {
+                        model.Services.Add(new Domain.Models.WorkOrderService
+                        {
+                            Id = service.Id,
+                            WorkOrderId = dto.Id,
+                            Description = service.Description,
+                            MechanicId = service.MechanicId,
+                            Price = service.Price,
+                            WarrantyEndDate = service.WarrantyEndDate,
+                            IsActive = service.IsActive,
+                            CreatedAt = service.Id == 0 ? DateTime.Now : dto.CreatedAt,
+                            UpdatedAt = DateTime.Now
+                        });
+                    }
+                }
+
                 if (model.Id == 0)
                 {
                     return await _workOrderRepository.CreateAsync(model, cancellation);

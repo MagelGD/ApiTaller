@@ -36,6 +36,11 @@ namespace ApiTaller.Core.Services.ServicePrices
             return await _repository.GetByIdAsync(id, cancellation);
         }
 
+        public async Task<IEnumerable<GetServicePriceByVersionDto>> GetByVersionAsync(int versionId, CancellationToken cancellation)
+        {
+            return await _repository.GetByVersionAsync(versionId, cancellation);
+        }
+
         public async Task<GetServicePriceByVersionDto> CreateOrEditServicePrice(GetServicePriceByVersionDto servicePrice, CancellationToken cancellationToken)
         {
             GetServicePriceByVersionDto result = new();

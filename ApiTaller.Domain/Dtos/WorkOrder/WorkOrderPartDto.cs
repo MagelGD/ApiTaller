@@ -13,7 +13,6 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
         public bool IsProvidedByCustomer { get; set; }
         public DateTime? WarrantyEndDate { get; set; }
         public bool IsActive { get; set; }
-        
-        public string ProductName { get; set; } // Para mostrar el nombre del producto del taller
+        public string? ProductName { get; set; } 
     }
 }

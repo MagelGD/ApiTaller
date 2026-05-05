@@ -1,3 +1,5 @@
+using ApiTaller.Domain.Dtos.BrandModelVersion;
+using ApiTaller.Domain.Dtos.ServiceCatalogs;
 using System;
 
 namespace ApiTaller.Domain.Dtos.ServicePrices
@@ -12,5 +14,8 @@ namespace ApiTaller.Domain.Dtos.ServicePrices
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public GetServiceCatalogDto? ServiceCatalog { get; set; }
+        public GetBrandModelVersionDto? BrandModelVersion { get; set; }
+
     }
 }

@@ -14,5 +14,6 @@ namespace ApiTaller.Domain.Interfaces.Repositories.ServicePrices
         Task<bool> CreateAsync(ServicePriceByVersion create, CancellationToken cancellation);
         Task<bool> UpdateAsync(ServicePriceByVersion update, CancellationToken cancellation);
         Task<GetServicePriceByVersionDto?> ValidateExist(int serviceCatalogId, int brandModelVersionId, CancellationToken cancellation);
+        Task<IEnumerable<GetServicePriceByVersionDto>> GetByVersionAsync(int versionId, CancellationToken cancellation);
     }
 }

@@ -1,4 +1,5 @@
 using ApiTaller.Domain.Dtos.ServiceCatalogs;
+using ApiTaller.Domain.Dtos.ServiceTypes;
 using ApiTaller.Domain.Interfaces.Repositories.ServiceCatalogs;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Models;
@@ -50,6 +51,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
             {
                 return await _context.ServiceCatalog
                     .Where(sc => sc.IsActive)
+                    .Include(sc => sc.ServiceTypeIdNavigation)
                     .Select(sc => new GetServiceCatalogDto
                     {
                         Id = sc.Id,
@@ -58,7 +60,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
                         Description = sc.Description,
                         IsActive = sc.IsActive,
                         CreatedAt = sc.CreatedAt,
-                        UpdatedAt = sc.UpdatedAt
+                        UpdatedAt = sc.UpdatedAt,
+                        GetServiceType = new GetServiceTypeDto
+                        {
+                            Id = sc.ServiceTypeIdNavigation.Id,
+                            Name = sc.ServiceTypeIdNavigation.Name
+                        }
                     }).ToListAsync(cancellation);
             }
             catch (Exception ex)
@@ -73,6 +80,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
             try
             {
                 return await _context.ServiceCatalog
+                    .Include(sc => sc.ServiceTypeIdNavigation)
                     .Select(sc => new GetServiceCatalogDto
                     {
                         Id = sc.Id,
@@ -81,7 +89,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
                         Description = sc.Description,
                         IsActive = sc.IsActive,
                         CreatedAt = sc.CreatedAt,
-                        UpdatedAt = sc.UpdatedAt
+                        UpdatedAt = sc.UpdatedAt,
+                        GetServiceType = new GetServiceTypeDto
+                        {
+                            Id = sc.ServiceTypeIdNavigation.Id,
+                            Name = sc.ServiceTypeIdNavigation.Name
+                        }
                     }).ToListAsync(cancellation);
             }
             catch (Exception ex)

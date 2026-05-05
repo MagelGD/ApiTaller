@@ -10,6 +10,7 @@ namespace ApiTaller.Domain.Interfaces.Services.ServicePrices
         Task<IEnumerable<GetServicePriceByVersionDto>> GetAllAsync(CancellationToken cancellation);
         Task<IEnumerable<GetServicePriceByVersionDto>> GetAllActiveAsync(CancellationToken cancellation);
         Task<GetServicePriceByVersionDto?> GetByIdAsync(int id, CancellationToken cancellation);
+        Task<IEnumerable<GetServicePriceByVersionDto>> GetByVersionAsync(int versionId, CancellationToken cancellation);
         Task<GetServicePriceByVersionDto> CreateOrEditServicePrice(GetServicePriceByVersionDto servicePrice, CancellationToken cancellationToken);
     }
 }

@@ -30,6 +30,8 @@ using ApiTaller.Core.Services.Users;
 using ApiTaller.Core.Services.ServiceTypes;
 using ApiTaller.Core.Services.ServiceCatalogs;
 using ApiTaller.Core.Services.ServicePrices;
+using ApiTaller.Domain.Interfaces.Services.Inventory;
+using ApiTaller.Core.Services.Inventory;
 using ApiTaller.Domain.Interfaces.Services.Actions;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.BrandModels;
@@ -89,6 +91,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IServiceTypeService, ServiceTypeService>();
             services.TryAddScoped<IServiceCatalogService, ServiceCatalogService>();
             services.TryAddScoped<IServicePriceByVersionService, ServicePriceByVersionService>();
+            services.TryAddScoped<IInventoryService, InventoryService>();
             return services;
         }
     }

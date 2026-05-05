@@ -1,11 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ApiTaller.Domain.Models;
-
-public partial class Inventory : GeneralEntity
+namespace ApiTaller.Domain.Models
 {
-    public int ProductId { get; set; }
-    public int Amount { get; set; }
-    public virtual Product ProductIdNavigation { get; set; }
+    public class Inventory : GeneralEntity
+    {
+        public int ProductId { get; set; }
+        public int StockQuantity { get; set; }
+        public int MinStock { get; set; }
+        public DateTime LastUpdate { get; set; }
+
+        public virtual Product ProductNavigation { get; set; }
+
+        public Inventory()
+        {
+            LastUpdate = DateTime.Now;
+        }
+    }
 }

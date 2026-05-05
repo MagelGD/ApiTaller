@@ -11,6 +11,6 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
         public decimal Price { get; set; }
         public DateTime? WarrantyEndDate { get; set; }
         public bool IsActive { get; set; }
-        public string MechanicName { get; set; } 
+        public string? MechanicName { get; set; } 
     }
 }
