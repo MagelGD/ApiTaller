@@ -13,16 +13,16 @@ namespace ApiTaller.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // --- BLOQUE 1: OPERACIONES DE LIMPIEZA (YA EJECUTADAS) ---
-            /*
+
             migrationBuilder.DropForeignKey(name: "FK_Module_user_ResponsibleUserIdNavigationId", table: "Module");
             migrationBuilder.DropPrimaryKey(name: "PK_Module", table: "Module");
             migrationBuilder.DropIndex(name: "IX_Module_ResponsibleUserIdNavigationId", table: "Module");
             migrationBuilder.DropColumn(name: "ResponsibleUserIdNavigationId", table: "Module");
-            */
+
 
             // --- BLOQUE 2: RENOMBRES (YA EJECUTADOS) ---
-            // Comentamos estos porque MySQL ya cambió los nombres de la tabla y columnas
-            /*
+            //Comentamos estos porque MySQL ya cambió los nombres de la tabla y columnas
+
             migrationBuilder.RenameTable(name: "Module", newName: "module");
             migrationBuilder.RenameColumn(name: "Name", table: "module", newName: "name");
             migrationBuilder.RenameColumn(name: "Id", table: "module", newName: "id");
@@ -30,7 +30,7 @@ namespace ApiTaller.Infrastructure.Migrations
             migrationBuilder.RenameColumn(name: "ResponsibleUserId", table: "module", newName: "responsible_user_id");
             migrationBuilder.RenameColumn(name: "IsActive", table: "module", newName: "is_active");
             migrationBuilder.RenameColumn(name: "CreatedAt", table: "module", newName: "created_at");
-            */
+
 
             // --- BLOQUE 3: REESTABLECER LLAVE PRIMARIA ---
             // Si esto falla diciendo que la PK ya existe, comenta estas 4 líneas también.
