@@ -13,11 +13,23 @@ TRUNCATE TABLE action;
 TRUNCATE TABLE module;
 TRUNCATE TABLE operation;
 
--- 2. Agregamos restricciones UNIQUE para que NUNCA MÁS se duplique un registro.
--- Con esto, el INSERT IGNORE funcionará perfectamente de ahora en adelante.
+-- 2. Agregamos restricciones UNIQUE (Manejo de error 1061)
+-- Primero eliminamos el índice si ya existe para evitar el error 1061 y luego lo creamos de nuevo.
+
+-- Para 'operation'
+ALTER TABLE operation DROP INDEX idx_unique_operation; -- Ignora si falla la primera vez
 ALTER TABLE operation ADD UNIQUE INDEX idx_unique_operation (name);
+
+-- Para 'module'
+ALTER TABLE module DROP INDEX idx_unique_module;
 ALTER TABLE module ADD UNIQUE INDEX idx_unique_module (name);
+
+-- Para 'action'
+ALTER TABLE action DROP INDEX idx_unique_slug;
 ALTER TABLE action ADD UNIQUE INDEX idx_unique_slug (slug);
+
+-- Para 'userrole'
+ALTER TABLE userrole DROP INDEX idx_unique_role;
 ALTER TABLE userrole ADD UNIQUE INDEX idx_unique_role (role);
 
 -- ==============================================================================
@@ -79,7 +91,8 @@ INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_u
 ('Ordenes Trabajo', 1, NOW(), NOW(), 1),
 ('Tipos Servicio', 1, NOW(), NOW(), 1),
 ('Catalogos Servicio', 1, NOW(), NOW(), 1),
-('Precios Servicio', 1, NOW(), NOW(), 1);
+('Precios Servicio', 1, NOW(), NOW(), 1),
+('Inventario', 1, NOW(), NOW(), 1);
 
 -- 6. Crear Acciones
 INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
@@ -212,7 +225,14 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 ((SELECT id FROM module WHERE name = 'Precios Servicio'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Precios Servicio', 'Ver_Precios_Servicio', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Precios Servicio'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Precios Servicio', 'Guardar_Precios_Servicio', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Precios Servicio'), (SELECT id FROM operation WHERE name = 'Editar'), 'Editar Precios Servicio', 'Editar_Precios_Servicio', 1, NOW(), NOW(), 1),
-((SELECT id FROM module WHERE name = 'Precios Servicio'), (SELECT id FROM operation WHERE name = 'Inactivar'), 'Inactivar Precios Servicio', 'Inactivar_Precios_Servicio', 1, NOW(), NOW(), 1);
+((SELECT id FROM module WHERE name = 'Precios Servicio'), (SELECT id FROM operation WHERE name = 'Inactivar'), 'Inactivar Precios Servicio', 'Inactivar_Precios_Servicio', 1, NOW(), NOW(), 1),
+
+-- MÓDULO: INVENTARIO
+((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Inventario', 'Ver_Inventario', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Editar'), 'Ajustar Inventario', 'Ajustar_Inventario', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Historial Inventario', 'Ver_Historial_Inventario', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Recepcion Masiva Inventario', 'Recepcion_Masiva_Inventario', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Facturas Inventario', 'Ver_Facturas_Inventario', 1, NOW(), NOW(), 1);
 
 -- 7. ASIGNAR MÓDULOS AL ROL SUPERADMIN
 INSERT INTO user_role_module (user_role_id, module_role_id, is_active, created_at, updated_at, responsible_user_id)
@@ -235,6 +255,34 @@ WHERE ur.role = 'SuperAdmin'
       SELECT 1 FROM roleaction ra 
       WHERE ra.role_id = ur.id AND ra.action_id = a.id
   );
+
+/* Recepción Masiva de Inventario */
+CREATE TABLE IF NOT EXISTS `inventory_reception` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `supplier_id` int(11) DEFAULT NULL,
+  `reception_date` datetime NOT NULL,
+  `invoice_image_base64` LONGTEXT DEFAULT NULL,
+  `observations` varchar(1000) DEFAULT NULL,
+  `is_active` bit(1) NOT NULL DEFAULT b'1',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `responsible_user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_inventory_reception_supplier` (`supplier_id`),
+  CONSTRAINT `FK_inventory_reception_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE IF NOT EXISTS `inventory_reception_detail` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `reception_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_reception_detail_reception` (`reception_id`),
+  KEY `FK_reception_detail_product` (`product_id`),
+  CONSTRAINT `FK_reception_detail_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
+  CONSTRAINT `FK_reception_detail_reception` FOREIGN KEY (`reception_id`) REFERENCES `inventory_reception` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Reactivar validación de llaves foráneas
 SET FOREIGN_KEY_CHECKS = 1;

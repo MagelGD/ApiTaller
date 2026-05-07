@@ -1,3 +1,4 @@
+using ApiTaller.Domain.Dtos;
 using ApiTaller.Domain.Dtos.WorkOrder;
 using ApiTaller.Domain.Interfaces.Repositories.WorkOrders;
 using ApiTaller.Domain.Interfaces.Services.WorkOrders;
@@ -133,6 +134,19 @@ namespace ApiTaller.Core.Services.WorkOrders
             {
                 _logger.LogError(ex, $"Error changing status for work order {id}");
                 return false;
+            }
+        }
+
+        public async Task<IEnumerable<WorkOrderHistoryDto>> GetHistoryAsync(int workOrderId, CancellationToken cancellation)
+        {
+            try
+            {
+                return await _workOrderRepository.GetHistoryAsync(workOrderId, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting history for work order {workOrderId}");
+                return new List<WorkOrderHistoryDto>();
             }
         }
     }

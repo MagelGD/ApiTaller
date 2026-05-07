@@ -8,8 +8,12 @@ namespace ApiTaller.Domain.Models
         public string MovementType { get; set; } // Entrada, Salida, Ajuste
         public int Quantity { get; set; }
         public int? ReferenceId { get; set; } // ID de Compra o Orden de Trabajo
+        public int? SupplierId { get; set; }
         public string Observations { get; set; }
+        public decimal? UnitCost { get; set; }
+        public decimal? SalePrice { get; set; }
 
         public virtual Product ProductNavigation { get; set; }
+        public virtual Supplier SupplierNavigation { get; set; }
     }
 }

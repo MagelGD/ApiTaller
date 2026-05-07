@@ -20,37 +20,37 @@ namespace ApiTaller.api.Controllers
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            return Ok(await _service.GetAllAsync(cancellationTokenToken));
+            return Ok(await _service.GetAllAsync(cancellationToken));
         }
 
         [HttpGet("GetByProduct/{productId}")]
         public async Task<IActionResult> GetByProduct(int productId, CancellationToken cancellationToken)
         {
-            return Ok(await _service.GetByProductIdAsync(productId, cancellationTokenToken));
+            return Ok(await _service.GetByProductIdAsync(productId, cancellationToken));
         }
 
         [HttpPost("AddStock")]
         public async Task<IActionResult> AddStock(InventoryHistoryDto movement, CancellationToken cancellationToken)
         {
-            return Ok(await _service.AddStockAsync(movement, cancellationTokenToken));
+            return Ok(await _service.AddStockAsync(movement, cancellationToken));
         }
 
         [HttpPost("RemoveStock")]
         public async Task<IActionResult> RemoveStock(InventoryHistoryDto movement, CancellationToken cancellationToken)
         {
-            return Ok(await _service.RemoveStockAsync(movement, cancellationTokenToken));
+            return Ok(await _service.RemoveStockAsync(movement, cancellationToken));
         }
 
         [HttpPost("AdjustStock")]
         public async Task<IActionResult> AdjustStock(InventoryHistoryDto movement, CancellationToken cancellationToken)
         {
-            return Ok(await _service.AdjustStockAsync(movement, cancellationTokenToken));
+            return Ok(await _service.AdjustStockAsync(movement, cancellationToken));
         }
 
         [HttpGet("GetHistory/{productId}")]
         public async Task<IActionResult> GetHistory(int productId, CancellationToken cancellationToken)
         {
-            return Ok(await _service.GetHistoryAsync(productId, cancellationTokenToken));
+            return Ok(await _service.GetHistoryAsync(productId, cancellationToken));
         }
     }
 }

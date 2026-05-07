@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260507185617_Version23")]
+    partial class Version23
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -395,14 +398,8 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int?>("ResponsibleUserId")
                         .HasColumnType("int(11)");
 
-                    b.Property<decimal?>("SalePrice")
-                        .HasColumnType("decimal(65,30)");
-
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int(11)");
-
-                    b.Property<decimal?>("UnitCost")
-                        .HasColumnType("decimal(65,30)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime");
@@ -453,9 +450,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int(11)");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(65,30)");
-
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -484,12 +478,6 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.Property<int>("ReceptionId")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(65,30)");
-
-                    b.Property<decimal>("UnitCost")
-                        .HasColumnType("decimal(65,30)");
 
                     b.HasKey("Id");
 

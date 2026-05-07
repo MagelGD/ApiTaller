@@ -24,39 +24,44 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
 
         public async Task<IEnumerable<InventoryDto>> GetAllAsync(CancellationToken cancellation)
         {
-            return await _context.Inventory
-                .Include(i => i.ProductNavigation)
-                .Select(i => new InventoryDto
-                {
-                    Id = i.Id,
-                    ProductId = i.ProductId,
-                    ProductName = i.ProductNavigation.ProductName,
-                    StockQuantity = i.StockQuantity,
-                    MinStock = i.MinStock,
-                    LastUpdate = i.LastUpdate,
-                    IsActive = i.IsActive,
-                    CreatedAt = i.CreatedAt,
-                    UpdatedAt = i.UpdatedAt
-                }).ToListAsync(cancellation);
+            var query = from p in _context.Product
+                        join i in _context.Inventory on p.Id equals i.ProductId into inv
+                        from subInv in inv.DefaultIfEmpty()
+                        where p.IsActive
+                        select new InventoryDto
+                        {
+                            Id = subInv != null ? subInv.Id : 0,
+                            ProductId = p.Id,
+                            ProductName = p.ProductName,
+                            StockQuantity = subInv != null ? subInv.StockQuantity : 0,
+                            MinStock = subInv != null ? subInv.MinStock : 0,
+                            LastUpdate = subInv != null ? subInv.LastUpdate : p.CreatedAt,
+                            IsActive = p.IsActive,
+                            CreatedAt = p.CreatedAt,
+                            UpdatedAt = p.UpdatedAt
+                        };
+            return await query.ToListAsync(cancellation);
         }
 
         public async Task<InventoryDto> GetByProductIdAsync(int productId, CancellationToken cancellation)
         {
-            return await _context.Inventory
-                .Include(i => i.ProductNavigation)
-                .Where(i => i.ProductId == productId)
-                .Select(i => new InventoryDto
-                {
-                    Id = i.Id,
-                    ProductId = i.ProductId,
-                    ProductName = i.ProductNavigation.ProductName,
-                    StockQuantity = i.StockQuantity,
-                    MinStock = i.MinStock,
-                    LastUpdate = i.LastUpdate,
-                    IsActive = i.IsActive,
-                    CreatedAt = i.CreatedAt,
-                    UpdatedAt = i.UpdatedAt
-                }).FirstOrDefaultAsync(cancellation);
+            var query = from p in _context.Product
+                        join i in _context.Inventory on p.Id equals i.ProductId into inv
+                        from subInv in inv.DefaultIfEmpty()
+                        where p.Id == productId
+                        select new InventoryDto
+                        {
+                            Id = subInv != null ? subInv.Id : 0,
+                            ProductId = p.Id,
+                            ProductName = p.ProductName,
+                            StockQuantity = subInv != null ? subInv.StockQuantity : 0,
+                            MinStock = subInv != null ? subInv.MinStock : 0,
+                            LastUpdate = subInv != null ? subInv.LastUpdate : p.CreatedAt,
+                            IsActive = p.IsActive,
+                            CreatedAt = p.CreatedAt,
+                            UpdatedAt = p.UpdatedAt
+                        };
+            return await query.FirstOrDefaultAsync(cancellation);
         }
 
         public async Task<bool> UpdateStockAsync(InventoryHistory movement, CancellationToken cancellation)
@@ -114,6 +119,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
             return await _context.InventoryHistory
                 .Include(h => h.ProductNavigation)
                 .Include(h => h.ResponsibleUserIdNavigation)
+                .Include(h => h.SupplierNavigation)
                 .Where(h => h.ProductId == productId)
                 .OrderByDescending(h => h.CreatedAt)
                 .Select(h => new InventoryHistoryDto
@@ -124,6 +130,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                     MovementType = h.MovementType,
                     Quantity = h.Quantity,
                     ReferenceId = h.ReferenceId,
+                    SupplierId = h.SupplierId,
+                    SupplierName = h.SupplierNavigation != null ? h.SupplierNavigation.BusinessName : null,
                     Observations = h.Observations,
                     CreatedAt = h.CreatedAt,
                     ResponsibleUserName = h.ResponsibleUserIdNavigation.FullName

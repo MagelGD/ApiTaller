@@ -107,6 +107,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IServiceCatalogRepository, ServiceCatalogRepository>();
             services.TryAddScoped<IServicePriceByVersionRepository, ServicePriceByVersionRepository>();
             services.TryAddScoped<IInventoryRepository, InventoryRepository>();
+            services.TryAddScoped<IInventoryReceptionRepository, InventoryReceptionRepository>();
             return services;
         }
     }

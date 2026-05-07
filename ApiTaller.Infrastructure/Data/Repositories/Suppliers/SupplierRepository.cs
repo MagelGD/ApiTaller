@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Supplier;
+using ApiTaller.Domain.Dtos.Supplier;
 using ApiTaller.Domain.Interfaces.Repositories.Suppliers;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Models;
@@ -19,9 +19,22 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Suppliers
             _logger = logger;
             _currentUserService = currentUserService;
         }
-        public Task<bool> CreateAsync(Supplier create, CancellationToken cancellation)
+        public async Task<bool> CreateAsync(Supplier create, CancellationToken cancellation)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (int.TryParse(_currentUserService.UserId, out int userId))
+                {
+                    create.ResponsibleUserId = userId;
+                }
+                create.CreatedAt = DateTime.Now;
+                await _Context.Supplier.AddAsync(create, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear el proveedor");
+            }
+            return await _Context.SaveChangesAsync(cancellation) > 0;
         }
 
         public async Task<IEnumerable<GetSupplierDto>> GetAllActiveAsync(CancellationToken cancellation)

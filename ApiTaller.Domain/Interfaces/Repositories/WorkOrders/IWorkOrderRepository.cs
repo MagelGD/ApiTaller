@@ -1,3 +1,4 @@
+using ApiTaller.Domain.Dtos;
 using ApiTaller.Domain.Dtos.WorkOrder;
 using ApiTaller.Domain.Models;
 using System.Collections.Generic;
@@ -13,5 +14,6 @@ namespace ApiTaller.Domain.Interfaces.Repositories.WorkOrders
         Task<bool> CreateAsync(WorkOrder create, CancellationToken cancellation);
         Task<bool> UpdateAsync(WorkOrder update, CancellationToken cancellation);
         Task<bool> ChangeStatusAsync(int id, string status, CancellationToken cancellation);
+        Task<IEnumerable<WorkOrderHistoryDto>> GetHistoryAsync(int workOrderId, CancellationToken cancellation);
     }
 }

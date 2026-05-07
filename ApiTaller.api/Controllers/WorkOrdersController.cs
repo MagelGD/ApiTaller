@@ -76,5 +76,19 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
+
+        [HttpGet("GetHistory/{workOrderId}")]
+        public async Task<IActionResult> GetHistory(int workOrderId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return Ok(await _workOrderService.GetHistoryAsync(workOrderId, cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener el historial de la orden {workOrderId}");
+            }
+            return BadRequest();
+        }
     }
 }

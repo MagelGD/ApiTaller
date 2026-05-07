@@ -38,9 +38,12 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<WorkOrderEvidence> WorkOrderEvidence { get; set; }
         public DbSet<WorkOrderPart> WorkOrderPart { get; set; }
         public DbSet<WorkOrderService> WorkOrderService { get; set; }
+        public DbSet<WorkOrderHistory> WorkOrderHistory { get; set; }
         public DbSet<ServiceType> ServiceType { get; set; }
         public DbSet<ServiceCatalog> ServiceCatalog { get; set; }
         public DbSet<ServicePriceByVersion> ServicePriceByVersion { get; set; }
+        public DbSet<InventoryReception> InventoryReception { get; set; }
+        public DbSet<InventoryReceptionDetail> InventoryReceptionDetail { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

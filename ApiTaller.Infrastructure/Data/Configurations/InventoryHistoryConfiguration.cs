@@ -27,6 +27,12 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId)
                 .HasConstraintName("FK_inventory_history_responsible_user");
+
+            builder.HasOne(d => d.SupplierNavigation)
+                .WithMany()
+                .HasForeignKey(d => d.SupplierId)
+                .IsRequired(false)
+                .HasConstraintName("FK_inventory_history_supplier");
         }
     }
 }
