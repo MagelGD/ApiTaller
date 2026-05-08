@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260505025142_Version22")]
-    partial class Version22
+    [Migration("20260508015910_Version1")]
+    partial class Version1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -326,40 +326,39 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("amount");
-
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("created_at");
+                        .HasColumnType("datetime");
 
-                    b.Property<ulong>("IsActive")
-                        .HasColumnType("bit(1)")
-                        .HasColumnName("is_active");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("MinStock")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("product_id");
+                        .HasColumnType("int(11)");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
+                        .HasColumnType("int(11)");
+
+                    b.Property<int>("StockQuantity")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("datetime");
 
                     b.HasKey("Id");
 
-                    b.HasIndex(new[] { "ProductId" }, "FK_INVENTORY_PRODUCT");
+                    b.HasIndex("ProductId");
 
-                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_INVENTORY_USER");
+                    b.HasIndex("ResponsibleUserId");
 
                     b.ToTable("inventory", (string)null);
                 });
@@ -368,42 +367,137 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int(11)")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("amount");
-
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("created_at");
+                        .HasColumnType("datetime");
 
-                    b.Property<int>("InventoryId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("inventory_id");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<ulong>("IsActive")
-                        .HasColumnType("bit(1)")
-                        .HasColumnName("is_active");
+                    b.Property<string>("MovementType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Observations")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReferenceId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
+                        .HasColumnType("int(11)");
+
+                    b.Property<decimal?>("SalePrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<decimal?>("UnitCost")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("datetime");
 
                     b.HasKey("Id");
 
-                    b.HasIndex(new[] { "InventoryId" }, "FK_HISTORY_INVENTORY_INVENTORY");
+                    b.HasIndex("ProductId");
 
-                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_HISTORY_INVENTORY_USER");
+                    b.HasIndex("ResponsibleUserId");
 
-                    b.ToTable("history_inventory", (string)null);
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("inventory_history", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReception", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("InvoiceImageBase64")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)");
+
+                    b.Property<string>("Observations")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<DateTime>("ReceptionDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int?>("SupplierId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponsibleUserId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("inventory_reception", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReceptionDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReceptionId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ReceptionId");
+
+                    b.ToTable("inventory_reception_detail", (string)null);
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Login", b =>
@@ -1312,6 +1406,72 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.ToTable("work_order_evidence", (string)null);
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.WorkOrderHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ActionBy")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("action_by");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Observations")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("observations");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("WorkOrderId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("work_order_id");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("ResponsibleUserIdNavigationId");
+
+                    b.HasIndex("WorkOrderId");
+
+                    b.ToTable("work_order_history", (string)null);
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.WorkOrderPart", b =>
                 {
                     b.Property<int>("Id")
@@ -1546,38 +1706,82 @@ namespace ApiTaller.Infrastructure.Migrations
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Inventory", b =>
                 {
-                    b.HasOne("ApiTaller.Domain.Models.Product", "ProductIdNavigation")
+                    b.HasOne("ApiTaller.Domain.Models.Product", "ProductNavigation")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .IsRequired()
-                        .HasConstraintName("FK_INVENTORY_PRODUCT");
+                        .HasConstraintName("FK_inventory_product");
 
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId")
-                        .HasConstraintName("FK_INVENTORY_USER");
+                        .HasConstraintName("FK_inventory_responsible_user");
 
-                    b.Navigation("ProductIdNavigation");
+                    b.Navigation("ProductNavigation");
 
                     b.Navigation("ResponsibleUserIdNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.InventoryHistory", b =>
                 {
-                    b.HasOne("ApiTaller.Domain.Models.Inventory", "InventoryIdNavigation")
+                    b.HasOne("ApiTaller.Domain.Models.Product", "ProductNavigation")
                         .WithMany()
-                        .HasForeignKey("InventoryId")
+                        .HasForeignKey("ProductId")
                         .IsRequired()
-                        .HasConstraintName("FK_HISTORY_INVENTORY_INVENTORY");
+                        .HasConstraintName("FK_inventory_history_product");
 
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId")
-                        .HasConstraintName("FK_HISTORY_INVENTORY_USER");
+                        .HasConstraintName("FK_inventory_history_responsible_user");
 
-                    b.Navigation("InventoryIdNavigation");
+                    b.HasOne("ApiTaller.Domain.Models.Supplier", "SupplierNavigation")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .HasConstraintName("FK_inventory_history_supplier");
+
+                    b.Navigation("ProductNavigation");
 
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("SupplierNavigation");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReception", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_inventory_reception_responsible_user");
+
+                    b.HasOne("ApiTaller.Domain.Models.Supplier", "SupplierNavigation")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .HasConstraintName("FK_inventory_reception_supplier");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("SupplierNavigation");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReceptionDetail", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.Product", "ProductNavigation")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .IsRequired()
+                        .HasConstraintName("FK_reception_detail_product");
+
+                    b.HasOne("ApiTaller.Domain.Models.InventoryReception", "ReceptionNavigation")
+                        .WithMany("Details")
+                        .HasForeignKey("ReceptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_reception_detail_reception");
+
+                    b.Navigation("ProductNavigation");
+
+                    b.Navigation("ReceptionNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Login", b =>
@@ -1882,6 +2086,26 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("WorkOrderNavigation");
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.WorkOrderHistory", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApiTaller.Domain.Models.WorkOrder", "WorkOrderNavigation")
+                        .WithMany()
+                        .HasForeignKey("WorkOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_work_order_history_order");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkOrderNavigation");
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.WorkOrderPart", b =>
                 {
                     b.HasOne("ApiTaller.Domain.Models.Product", "ProductNavigation")
@@ -1938,6 +2162,11 @@ namespace ApiTaller.Infrastructure.Migrations
             modelBuilder.Entity("ApiTaller.Domain.Models.Customer", b =>
                 {
                     b.Navigation("Vehicles");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReception", b =>
+                {
+                    b.Navigation("Details");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.WorkOrder", b =>

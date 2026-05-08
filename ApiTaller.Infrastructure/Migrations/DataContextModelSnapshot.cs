@@ -427,14 +427,14 @@ namespace ApiTaller.Infrastructure.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.Property<string>("InvoiceImageBase64")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)");
 
                     b.Property<string>("Observations")
                         .IsRequired()
@@ -445,23 +445,20 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ResponsibleUserIdNavigationId")
                         .HasColumnType("int(11)");
 
                     b.Property<int?>("SupplierId")
                         .HasColumnType("int(11)");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResponsibleUserIdNavigationId");
+                    b.HasIndex("ResponsibleUserId");
 
                     b.HasIndex("SupplierId");
 
@@ -1751,9 +1748,8 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserIdNavigationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_inventory_reception_responsible_user");
 
                     b.HasOne("ApiTaller.Domain.Models.Supplier", "SupplierNavigation")
                         .WithMany()

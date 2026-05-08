@@ -16,21 +16,10 @@ TRUNCATE TABLE operation;
 -- 2. Agregamos restricciones UNIQUE (Manejo de error 1061)
 -- Primero eliminamos el índice si ya existe para evitar el error 1061 y luego lo creamos de nuevo.
 
--- Para 'operation'
-ALTER TABLE operation DROP INDEX idx_unique_operation; -- Ignora si falla la primera vez
-ALTER TABLE operation ADD UNIQUE INDEX idx_unique_operation (name);
-
--- Para 'module'
-ALTER TABLE module DROP INDEX idx_unique_module;
-ALTER TABLE module ADD UNIQUE INDEX idx_unique_module (name);
-
--- Para 'action'
-ALTER TABLE action DROP INDEX idx_unique_slug;
-ALTER TABLE action ADD UNIQUE INDEX idx_unique_slug (slug);
-
--- Para 'userrole'
-ALTER TABLE userrole DROP INDEX idx_unique_role;
-ALTER TABLE userrole ADD UNIQUE INDEX idx_unique_role (role);
+ALTER TABLE operation ADD UNIQUE INDEX IF NOT EXISTS idx_unique_operation (name);
+ALTER TABLE module ADD UNIQUE INDEX IF NOT EXISTS idx_unique_module (name);
+ALTER TABLE action ADD UNIQUE INDEX IF NOT EXISTS idx_unique_slug (slug);
+ALTER TABLE userrole ADD UNIQUE INDEX IF NOT EXISTS idx_unique_role (role);
 
 -- ==============================================================================
 -- PASO 2: INSERCIÓN DE DATOS (TU SCRIPT)
@@ -256,33 +245,6 @@ WHERE ur.role = 'SuperAdmin'
       WHERE ra.role_id = ur.id AND ra.action_id = a.id
   );
 
-/* Recepción Masiva de Inventario */
-CREATE TABLE IF NOT EXISTS `inventory_reception` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `supplier_id` int(11) DEFAULT NULL,
-  `reception_date` datetime NOT NULL,
-  `invoice_image_base64` LONGTEXT DEFAULT NULL,
-  `observations` varchar(1000) DEFAULT NULL,
-  `is_active` bit(1) NOT NULL DEFAULT b'1',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  `responsible_user_id` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_inventory_reception_supplier` (`supplier_id`),
-  CONSTRAINT `FK_inventory_reception_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE IF NOT EXISTS `inventory_reception_detail` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `reception_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `FK_reception_detail_reception` (`reception_id`),
-  KEY `FK_reception_detail_product` (`product_id`),
-  CONSTRAINT `FK_reception_detail_product` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`),
-  CONSTRAINT `FK_reception_detail_reception` FOREIGN KEY (`reception_id`) REFERENCES `inventory_reception` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Reactivar validación de llaves foráneas
 SET FOREIGN_KEY_CHECKS = 1;
