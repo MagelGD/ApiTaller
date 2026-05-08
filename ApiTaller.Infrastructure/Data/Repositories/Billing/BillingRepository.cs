@@ -99,22 +99,37 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
         {
             var sale = await _context.Sale
                 .Include(s => s.Customer)
+                .Include(s => s.Details)
                 .Include(s => s.WorkOrder)
                     .ThenInclude(wo => wo.VehicleNavigation)
+                        .ThenInclude(v => v.BrandNavigation)
+                .Include(s => s.WorkOrder)
+                    .ThenInclude(wo => wo.VehicleNavigation)
+                        .ThenInclude(v => v.ModelNavigation)
+                .Include(s => s.WorkOrder)
+                    .ThenInclude(wo => wo.VehicleNavigation)
+                        .ThenInclude(v => v.VersionNavigation)
                 .FirstOrDefaultAsync(s => s.WorkOrderId == workOrderId, cancellation);
 
             if (sale == null) return null;
+
+            var vehicle = sale.WorkOrder?.VehicleNavigation;
+            var vehicleDisplay = vehicle != null
+                ? $"{vehicle.BrandNavigation?.Name} {vehicle.ModelNavigation?.Models} {vehicle.VersionNavigation?.Version}".Trim()
+                : "";
 
             return new SaleDto
             {
                 Id = sale.Id,
                 WorkOrderId = sale.WorkOrderId,
                 CustomerId = sale.CustomerId,
-                CustomerName = sale.Customer != null ? $"{sale.Customer.FirstName} {sale.Customer.LastName}" : "Consumidor Final",
+                CustomerName = sale.Customer != null
+                    ? $"{sale.Customer.FirstName} {sale.Customer.LastName}".Trim()
+                    : "Consumidor Final",
                 CustomerPhone = sale.Customer?.PhoneNumber,
-                VehiclePlate = sale.WorkOrder?.VehicleNavigation?.Plate,
-                VehicleColor = sale.WorkOrder?.VehicleNavigation?.Color,
-                VehicleModel = sale.WorkOrder?.VehicleNavigation != null ? $"Referencia #{sale.WorkOrder.VehicleNavigation.Id}" : "", 
+                VehiclePlate = vehicle?.Plate,
+                VehicleColor = vehicle?.Color,
+                VehicleModel = vehicleDisplay,
                 SaleDate = sale.SaleDate,
                 Subtotal = sale.Subtotal,
                 DiscountPercent = sale.DiscountPercent,
