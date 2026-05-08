@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260508185928_Version6")]
+    partial class Version6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -860,8 +863,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("observations");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("responsible_user_id");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
 
                     b.Property<DateTime>("SaleDate")
                         .HasColumnType("datetime(6)")
@@ -889,7 +895,7 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex("ResponsibleUserIdNavigationId");
 
                     b.HasIndex("WorkOrderId");
 
@@ -928,8 +934,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("quantity");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("responsible_user_id");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
 
                     b.Property<int>("SaleId")
                         .HasColumnType("int")
@@ -957,7 +966,7 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex("ResponsibleUserIdNavigationId");
 
                     b.HasIndex("SaleId");
 
@@ -999,8 +1008,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("reference_code");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
+                        .HasColumnType("int")
                         .HasColumnName("responsible_user_id");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
 
                     b.Property<int>("SaleId")
                         .HasColumnType("int")
@@ -1014,7 +1026,7 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.HasIndex("PaymentMethodId");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex("ResponsibleUserIdNavigationId");
 
                     b.HasIndex("SaleId");
 
@@ -1499,10 +1511,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int(11)")
                         .HasColumnName("customer_id");
-
-                    b.Property<decimal>("DownPayment")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("down_payment");
 
                     b.Property<DateTime>("EntryDate")
                         .HasColumnType("datetime")
@@ -2108,7 +2116,9 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ApiTaller.Domain.Models.WorkOrder", "WorkOrder")
                         .WithMany()
@@ -2129,7 +2139,9 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ApiTaller.Domain.Models.Sale", "Sale")
                         .WithMany("Details")
@@ -2160,7 +2172,9 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ApiTaller.Domain.Models.Sale", "Sale")
                         .WithMany("Payments")

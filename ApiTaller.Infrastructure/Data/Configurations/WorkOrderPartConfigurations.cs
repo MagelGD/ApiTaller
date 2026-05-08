@@ -46,9 +46,17 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("datetime")
                 .HasColumnName("warranty_end_date");
 
+            entity.Property(e => e.QuotePhotoUrl)
+                .HasColumnType("longtext")
+                .HasColumnName("quote_photo_url");
+
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");
+
+            entity.Property(e => e.IsApproved)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_approved");
 
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")

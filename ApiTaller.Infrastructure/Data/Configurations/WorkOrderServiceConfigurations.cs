@@ -42,6 +42,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");
 
+            entity.Property(e => e.IsApproved)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_approved");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");

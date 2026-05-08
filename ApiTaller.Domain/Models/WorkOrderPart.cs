@@ -11,6 +11,8 @@ namespace ApiTaller.Domain.Models
         public decimal UnitPrice { get; set; }
         public bool IsProvidedByCustomer { get; set; }
         public DateTime? WarrantyEndDate { get; set; }
+        public string? QuotePhotoUrl { get; set; }
+        public bool IsApproved { get; set; } = true;
 
         public virtual WorkOrder WorkOrderNavigation { get; set; }
         public virtual Product ProductNavigation { get; set; }

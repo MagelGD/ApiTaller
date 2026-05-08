@@ -82,6 +82,8 @@ namespace ApiTaller.Core.Services.WorkOrders
                             UnitPrice = part.UnitPrice,
                             IsProvidedByCustomer = part.IsProvidedByCustomer,
                             WarrantyEndDate = part.WarrantyEndDate,
+                            QuotePhotoUrl = part.QuotePhotoUrl,
+                            IsApproved = part.IsApproved,
                             IsActive = part.IsActive,
                             CreatedAt = part.Id == 0 ? DateTime.Now : dto.CreatedAt, // Si es nuevo usamos ahora, si no, conservamos (aprox)
                             UpdatedAt = DateTime.Now
@@ -101,8 +103,27 @@ namespace ApiTaller.Core.Services.WorkOrders
                             MechanicId = service.MechanicId,
                             Price = service.Price,
                             WarrantyEndDate = service.WarrantyEndDate,
+                            IsApproved = service.IsApproved,
                             IsActive = service.IsActive,
                             CreatedAt = service.Id == 0 ? DateTime.Now : dto.CreatedAt,
+                            UpdatedAt = DateTime.Now
+                        });
+                    }
+                }
+
+                if (dto.Evidences != null)
+                {
+                    foreach (var evidence in dto.Evidences)
+                    {
+                        model.Evidences.Add(new WorkOrderEvidence
+                        {
+                            Id = evidence.Id,
+                            WorkOrderId = dto.Id,
+                            PhotoUrl = evidence.PhotoUrl,
+                            EvidenceType = evidence.EvidenceType,
+                            Description = evidence.Description,
+                            IsActive = evidence.IsActive,
+                            CreatedAt = evidence.Id == 0 ? DateTime.Now : dto.CreatedAt,
                             UpdatedAt = DateTime.Now
                         });
                     }

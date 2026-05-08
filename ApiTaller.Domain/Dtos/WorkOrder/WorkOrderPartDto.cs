@@ -14,5 +14,7 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
         public DateTime? WarrantyEndDate { get; set; }
         public bool IsActive { get; set; }
         public string? ProductName { get; set; } 
+        public string? QuotePhotoUrl { get; set; }
+        public bool IsApproved { get; set; }
     }
 }

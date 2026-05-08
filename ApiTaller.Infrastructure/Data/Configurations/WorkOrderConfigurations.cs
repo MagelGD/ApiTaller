@@ -46,6 +46,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("text")
                 .HasColumnName("observations");
 
+            entity.Property(e => e.DownPayment)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("down_payment");
+
             entity.Property(e => e.Status)
                 .HasMaxLength(100)
                 .HasColumnName("status");

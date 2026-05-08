@@ -13,6 +13,7 @@ namespace ApiTaller.Domain.Models
         public string FuelLevel { get; set; }
         public string Observations { get; set; }
         public string Status { get; set; }
+        public decimal DownPayment { get; set; }
 
         public virtual Vehicle VehicleNavigation { get; set; }
         public virtual Customer CustomerNavigation { get; set; }

@@ -12,5 +12,6 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
         public DateTime? WarrantyEndDate { get; set; }
         public bool IsActive { get; set; }
         public string? MechanicName { get; set; } 
+        public bool IsApproved { get; set; }
     }
 }

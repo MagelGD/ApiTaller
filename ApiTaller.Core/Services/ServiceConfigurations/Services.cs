@@ -21,6 +21,7 @@ using ApiTaller.Core.Services.UserRoles;
 using ApiTaller.Core.Services.Users;
 using ApiTaller.Core.Services.Vehicles;
 using ApiTaller.Core.Services.WorkOrders;
+using ApiTaller.Core.Services.Billing;
 using ApiTaller.Domain.Interfaces.Services.Actions;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.BrandModels;
@@ -45,6 +46,7 @@ using ApiTaller.Domain.Interfaces.Services.UserRoles;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Domain.Interfaces.Services.Vehicles;
 using ApiTaller.Domain.Interfaces.Services.WorkOrders;
+using ApiTaller.Domain.Interfaces.Services.Billing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -79,6 +81,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IInventoryReceptionService, InventoryReceptionService>();
             services.TryAddScoped<IServicePriceByVersionService, ServicePriceByVersionService>();
             services.TryAddScoped<IInventoryService, InventoryService>();
+            services.TryAddScoped<IBillingService, BillingService>();
             return services;
         }
     }

@@ -44,6 +44,9 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<ServicePriceByVersion> ServicePriceByVersion { get; set; }
         public DbSet<InventoryReception> InventoryReception { get; set; }
         public DbSet<InventoryReceptionDetail> InventoryReceptionDetail { get; set; }
+        public DbSet<Sale> Sale { get; set; }
+        public DbSet<SaleDetail> SaleDetail { get; set; }
+        public DbSet<SalePayment> SalePayment { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

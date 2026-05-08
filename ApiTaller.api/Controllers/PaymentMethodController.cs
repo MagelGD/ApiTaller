@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.PaymentMethod;
+using ApiTaller.Domain.Dtos.PaymentMethod;
 using ApiTaller.Domain.Interfaces.Services.PaymentMethods;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +18,6 @@ namespace ApiTaller.api.Controllers
             _paymentMethodService = paymentMethodService;
             _logger = logger;
         }
-        // GET: api/<PaymentMethodController>
         [HttpGet("GetPaymentMethods")]
         public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
@@ -29,6 +28,20 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener los métodos de pago");
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("GetPaymentMethodsActive")]
+        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        {
+            try
+            {
+                return Ok(await _paymentMethodService.GetAllActiveAsync(cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener los métodos de pago activos");
             }
             return BadRequest();
         }

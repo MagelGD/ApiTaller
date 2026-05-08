@@ -22,7 +22,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnName("work_order_id");
 
             entity.Property(e => e.PhotoUrl)
-                .HasMaxLength(500)
+                .HasColumnType("longtext")
                 .HasColumnName("photo_url");
 
             entity.Property(e => e.EvidenceType)

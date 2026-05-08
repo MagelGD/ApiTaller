@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260508144127_Version2")]
+    partial class Version2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -812,215 +815,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.ToTable("roleaction", (string)null);
                 });
 
-            modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Balance")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("balance");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("customer_id");
-
-                    b.Property<decimal>("DiscountAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_amount");
-
-                    b.Property<decimal>("DiscountPercent")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_percent");
-
-                    b.Property<decimal>("DownPayment")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("down_payment");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Observations")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)")
-                        .HasColumnName("observations");
-
-                    b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
-
-                    b.Property<DateTime>("SaleDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("sale_date");
-
-                    b.Property<decimal>("Subtotal")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("subtotal");
-
-                    b.Property<decimal>("Total")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("total");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int?>("WorkOrderId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("work_order_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("ResponsibleUserId");
-
-                    b.HasIndex("WorkOrderId");
-
-                    b.ToTable("sale", (string)null);
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.SaleDetail", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("description");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_active");
-
-                    b.Property<int?>("ProductId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("product_id");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int")
-                        .HasColumnName("quantity");
-
-                    b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
-
-                    b.Property<int>("SaleId")
-                        .HasColumnType("int")
-                        .HasColumnName("sale_id");
-
-                    b.Property<int?>("ServiceCatalogId")
-                        .HasColumnType("int")
-                        .HasColumnName("service_catalog_id");
-
-                    b.Property<decimal>("Total")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("total");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("unit_price");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("ResponsibleUserId");
-
-                    b.HasIndex("SaleId");
-
-                    b.HasIndex("ServiceCatalogId");
-
-                    b.ToTable("sale_detail", (string)null);
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.SalePayment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_active");
-
-                    b.Property<int>("PaymentMethodId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("payment_method_id");
-
-                    b.Property<string>("ReferenceCode")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("reference_code");
-
-                    b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
-
-                    b.Property<int>("SaleId")
-                        .HasColumnType("int")
-                        .HasColumnName("sale_id");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PaymentMethodId");
-
-                    b.HasIndex("ResponsibleUserId");
-
-                    b.HasIndex("SaleId");
-
-                    b.ToTable("sale_payment", (string)null);
-                });
-
             modelBuilder.Entity("ApiTaller.Domain.Models.ServiceCatalog", b =>
                 {
                     b.Property<int>("Id")
@@ -1500,10 +1294,6 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("int(11)")
                         .HasColumnName("customer_id");
 
-                    b.Property<decimal>("DownPayment")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("down_payment");
-
                     b.Property<DateTime>("EntryDate")
                         .HasColumnType("datetime")
                         .HasColumnName("entry_date");
@@ -1698,10 +1488,6 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
 
-                    b.Property<ulong>("IsApproved")
-                        .HasColumnType("bit(1)")
-                        .HasColumnName("is_approved");
-
                     b.Property<ulong>("IsProvidedByCustomer")
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_provided_by_customer");
@@ -1719,10 +1505,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int(11)")
                         .HasColumnName("quantity");
-
-                    b.Property<string>("QuotePhotoUrl")
-                        .HasColumnType("longtext")
-                        .HasColumnName("quote_photo_url");
 
                     b.Property<int?>("ResponsibleUserId")
                         .HasColumnType("int(11)")
@@ -1777,10 +1559,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<ulong>("IsActive")
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
-
-                    b.Property<ulong>("IsApproved")
-                        .HasColumnType("bit(1)")
-                        .HasColumnName("is_approved");
 
                     b.Property<int>("MechanicId")
                         .HasColumnType("int(11)")
@@ -2099,82 +1877,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("RoleIdNavigation");
                 });
 
-            modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>
-                {
-                    b.HasOne("ApiTaller.Domain.Models.Customer", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .IsRequired();
-
-                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
-
-                    b.HasOne("ApiTaller.Domain.Models.WorkOrder", "WorkOrder")
-                        .WithMany()
-                        .HasForeignKey("WorkOrderId");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("ResponsibleUserIdNavigation");
-
-                    b.Navigation("WorkOrder");
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.SaleDetail", b =>
-                {
-                    b.HasOne("ApiTaller.Domain.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId");
-
-                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
-
-                    b.HasOne("ApiTaller.Domain.Models.Sale", "Sale")
-                        .WithMany("Details")
-                        .HasForeignKey("SaleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ApiTaller.Domain.Models.ServiceCatalog", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceCatalogId");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("ResponsibleUserIdNavigation");
-
-                    b.Navigation("Sale");
-
-                    b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.SalePayment", b =>
-                {
-                    b.HasOne("ApiTaller.Domain.Models.PaymentMethod", "PaymentMethod")
-                        .WithMany()
-                        .HasForeignKey("PaymentMethodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
-
-                    b.HasOne("ApiTaller.Domain.Models.Sale", "Sale")
-                        .WithMany("Payments")
-                        .HasForeignKey("SaleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PaymentMethod");
-
-                    b.Navigation("ResponsibleUserIdNavigation");
-
-                    b.Navigation("Sale");
-                });
-
             modelBuilder.Entity("ApiTaller.Domain.Models.ServiceCatalog", b =>
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
@@ -2464,13 +2166,6 @@ namespace ApiTaller.Infrastructure.Migrations
             modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReception", b =>
                 {
                     b.Navigation("Details");
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>
-                {
-                    b.Navigation("Details");
-
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.WorkOrder", b =>

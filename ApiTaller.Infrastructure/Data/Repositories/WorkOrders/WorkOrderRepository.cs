@@ -41,6 +41,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 {
                     foreach (var p in create.Parts) p.ResponsibleUserId = userId;
                     foreach (var s in create.Services) s.ResponsibleUserId = userId;
+                    foreach (var e in create.Evidences) e.ResponsibleUserId = userId;
                 }
                 
                 await _context.WorkOrder.AddAsync(create, cancellation);
@@ -96,7 +97,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             UnitPrice = p.UnitPrice,
                             IsProvidedByCustomer = p.IsProvidedByCustomer,
                             WarrantyEndDate = p.WarrantyEndDate,
-                            IsActive = p.IsActive
+                            IsActive = p.IsActive,
+                            QuotePhotoUrl = p.QuotePhotoUrl,
+                            IsApproved = p.IsApproved
                         }).ToList(),
                         Services = w.Services.Select(s => new WorkOrderServiceDto
                         {
@@ -107,7 +110,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
                             Price = s.Price,
                             WarrantyEndDate = s.WarrantyEndDate,
-                            IsActive = s.IsActive
+                            IsActive = s.IsActive,
+                            IsApproved = s.IsApproved
                         }).ToList()
                     })
                     .OrderByDescending(w => w.CreatedAt)
@@ -167,7 +171,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             UnitPrice = p.UnitPrice,
                             IsProvidedByCustomer = p.IsProvidedByCustomer,
                             WarrantyEndDate = p.WarrantyEndDate,
-                            IsActive = p.IsActive
+                            IsActive = p.IsActive,
+                            QuotePhotoUrl = p.QuotePhotoUrl,
+                            IsApproved = p.IsApproved
                         }).ToList(),
                         Services = w.Services.Select(s => new WorkOrderServiceDto
                         {
@@ -178,7 +184,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
                             Price = s.Price,
                             WarrantyEndDate = s.WarrantyEndDate,
-                            IsActive = s.IsActive
+                            IsActive = s.IsActive,
+                            IsApproved = s.IsApproved
                         }).ToList()
                     })
                     .FirstOrDefaultAsync(cancellation);
@@ -197,6 +204,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 var existingOrder = await _context.WorkOrder
                     .Include(w => w.Parts)
                     .Include(w => w.Services)
+                    .Include(w => w.Evidences)
                     .FirstOrDefaultAsync(w => w.Id == update.Id, cancellation);
 
                 if (existingOrder == null) return false;
@@ -278,6 +286,31 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         service.CreatedAt = DateTime.Now;
                         if (userId != 0) service.ResponsibleUserId = userId;
                         existingOrder.Services.Add(service);
+                    }
+                }
+
+                // Sincronizar Evidencias
+                foreach (var existingEvidence in existingOrder.Evidences.ToList())
+                {
+                    if (!update.Evidences.Any(e => e.Id == existingEvidence.Id))
+                    {
+                        _context.WorkOrderEvidence.Remove(existingEvidence);
+                    }
+                }
+
+                foreach (var evidence in update.Evidences)
+                {
+                    var existingEvidence = existingOrder.Evidences.FirstOrDefault(e => e.Id == evidence.Id && e.Id != 0);
+                    if (existingEvidence != null)
+                    {
+                        _context.Entry(existingEvidence).CurrentValues.SetValues(evidence);
+                    }
+                    else
+                    {
+                        evidence.WorkOrderId = existingOrder.Id;
+                        evidence.CreatedAt = DateTime.Now;
+                        if (userId != 0) evidence.ResponsibleUserId = userId;
+                        existingOrder.Evidences.Add(evidence);
                     }
                 }
 
