@@ -47,6 +47,10 @@ using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Domain.Interfaces.Services.Vehicles;
 using ApiTaller.Domain.Interfaces.Services.WorkOrders;
 using ApiTaller.Domain.Interfaces.Services.Billing;
+using ApiTaller.Domain.Interfaces.Services.WorkshopSettings;
+using ApiTaller.Core.Services.WorkshopSettings;
+using ApiTaller.Domain.Interfaces.Services.CustomerPortal;
+using ApiTaller.Core.Services.CustomerPortal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -82,6 +86,8 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IServicePriceByVersionService, ServicePriceByVersionService>();
             services.TryAddScoped<IInventoryService, InventoryService>();
             services.TryAddScoped<IBillingService, BillingService>();
+            services.TryAddScoped<IWorkshopSettingsService, WorkshopSettingsService>();
+            services.TryAddScoped<ICustomerPortalService, CustomerPortalService>();
             return services;
         }
     }

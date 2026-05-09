@@ -4,22 +4,32 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ApiTaller.Infrastructure.Data.Configurations
 {
-    public class ServiceTypeConfigurations : IEntityTypeConfiguration<ServiceType>
+    public class WorkshopSettingsConfigurations : IEntityTypeConfiguration<WorkshopSettings>
     {
-        public void Configure(EntityTypeBuilder<ServiceType> entity)
+        public void Configure(EntityTypeBuilder<WorkshopSettings> entity)
         {
             entity.HasKey(e => e.Id);
-            entity.ToTable("service_type");
+            entity.ToTable("workshop_settings");
 
-            entity.HasIndex(e => e.ResponsibleUserId, "FK_SERVICE_TYPE_USER");
+            entity.HasIndex(e => e.SettingKey, "UQ_WORKSHOP_SETTINGS_KEY").IsUnique();
+            entity.HasIndex(e => e.ResponsibleUserId, "FK_WORKSHOP_SETTINGS_USER");
 
             entity.Property(e => e.Id)
                 .HasColumnType("int(11)")
                 .HasColumnName("id");
 
-            entity.Property(e => e.Name)
-                .HasMaxLength(50)
-                .HasColumnName("name");
+            entity.Property(e => e.SettingKey)
+                .HasMaxLength(100)
+                .HasColumnName("setting_key");
+
+            // ⚠️ CRÍTICO: LONGTEXT para soportar logos Base64 (~100-500 KB)
+            entity.Property(e => e.SettingValue)
+                .HasColumnType("longtext")
+                .HasColumnName("setting_value");
+
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .HasColumnName("description");
 
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
@@ -40,7 +50,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_SERVICE_TYPE_USER");
+                .HasConstraintName("FK_WORKSHOP_SETTINGS_USER");
         }
     }
 }

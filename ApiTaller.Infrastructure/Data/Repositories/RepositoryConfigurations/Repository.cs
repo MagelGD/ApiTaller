@@ -46,6 +46,10 @@ using ApiTaller.Domain.Interfaces.Repositories.ServicePrices;
 using ApiTaller.Domain.Interfaces.Repositories.Inventory;
 using ApiTaller.Infrastructure.Data.Repositories.Inventory;
 using ApiTaller.Infrastructure.Data.Repositories.Billing;
+using ApiTaller.Domain.Interfaces.Repositories.WorkshopSettings;
+using ApiTaller.Infrastructure.Data.Repositories.WorkshopSettings;
+using ApiTaller.Domain.Interfaces.Repositories.CustomerPortal;
+using ApiTaller.Infrastructure.Data.Repositories.CustomerPortal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -80,6 +84,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IInventoryRepository, InventoryRepository>();
             services.TryAddScoped<IInventoryReceptionRepository, InventoryReceptionRepository>();
             services.TryAddScoped<IBillingRepository, BillingRepository>();
+            services.TryAddScoped<IWorkshopSettingsRepository, WorkshopSettingsRepository>();
+            services.TryAddScoped<ICustomerPortalRepository, CustomerPortalRepository>();
             return services;
         }
     }

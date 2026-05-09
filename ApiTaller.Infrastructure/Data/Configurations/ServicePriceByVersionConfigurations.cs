@@ -6,35 +6,64 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 {
     public class ServicePriceByVersionConfigurations : IEntityTypeConfiguration<ServicePriceByVersion>
     {
-        public void Configure(EntityTypeBuilder<ServicePriceByVersion> builder)
+        public void Configure(EntityTypeBuilder<ServicePriceByVersion> entity)
         {
-            builder.ToTable("service_price_by_version");
+            entity.HasKey(e => e.Id);
+            entity.ToTable("service_price_by_version");
 
-            builder.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ServiceCatalogId, "FK_SERVICE_PRICE_CATALOG");
+            entity.HasIndex(e => e.BrandModelVersionId, "FK_SERVICE_PRICE_BRAND_MODEL_VERSION");
+            entity.HasIndex(e => e.ResponsibleUserId, "FK_SERVICE_PRICE_USER");
 
-            builder.Property(e => e.Id).HasColumnName("id");
-            builder.Property(e => e.ServiceCatalogId).HasColumnName("service_catalog_id");
-            builder.Property(e => e.BrandModelVersionId).HasColumnName("brand_model_version_id");
-            builder.Property(e => e.Price).HasColumnName("price").HasColumnType("decimal(18,2)");
-            builder.Property(e => e.EstimatedMinutes).HasColumnName("estimated_minutes");
-            builder.Property(e => e.IsActive).HasColumnName("is_active");
-            builder.Property(e => e.CreatedAt).HasColumnName("created_at");
-            builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            builder.Property(e => e.ResponsibleUserId).HasColumnName("responsible_user_id");
+            entity.Property(e => e.Id)
+                .HasColumnType("int(11)")
+                .HasColumnName("id");
 
-            builder.HasOne(d => d.ServiceCatalogIdNavigation)
-                .WithMany()
+            entity.Property(e => e.ServiceCatalogId)
+                .HasColumnType("int(11)")
+                .HasColumnName("service_catalog_id");
+
+            entity.Property(e => e.BrandModelVersionId)
+                .HasColumnType("int(11)")
+                .HasColumnName("brand_model_version_id");
+
+            entity.Property(e => e.Price)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("price");
+
+            entity.Property(e => e.EstimatedMinutes)
+                .HasColumnType("int(11)")
+                .HasColumnName("estimated_minutes");
+
+            entity.Property(e => e.IsActive)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_active");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.Property(e => e.ResponsibleUserId)
+                .HasColumnType("int(11)")
+                .HasColumnName("responsible_user_id");
+
+            entity.HasOne(d => d.ServiceCatalogIdNavigation).WithMany()
                 .HasForeignKey(d => d.ServiceCatalogId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SERVICE_PRICE_CATALOG");
 
-            builder.HasOne(d => d.BrandModelVersionIdNavigation)
-                .WithMany()
+            entity.HasOne(d => d.BrandModelVersionIdNavigation).WithMany()
                 .HasForeignKey(d => d.BrandModelVersionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SERVICE_PRICE_BRAND_MODEL_VERSION");
 
-            builder.HasOne(d => d.ResponsibleUserIdNavigation)
-                .WithMany()
+            entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SERVICE_PRICE_USER");
         }
     }

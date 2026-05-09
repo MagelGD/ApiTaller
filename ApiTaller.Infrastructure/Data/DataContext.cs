@@ -47,6 +47,7 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<Sale> Sale { get; set; }
         public DbSet<SaleDetail> SaleDetail { get; set; }
         public DbSet<SalePayment> SalePayment { get; set; }
+        public DbSet<WorkshopSettings> WorkshopSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

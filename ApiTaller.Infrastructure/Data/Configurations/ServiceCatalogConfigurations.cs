@@ -6,29 +6,54 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 {
     public class ServiceCatalogConfigurations : IEntityTypeConfiguration<ServiceCatalog>
     {
-        public void Configure(EntityTypeBuilder<ServiceCatalog> builder)
+        public void Configure(EntityTypeBuilder<ServiceCatalog> entity)
         {
-            builder.ToTable("service_catalog");
+            entity.HasKey(e => e.Id);
+            entity.ToTable("service_catalog");
 
-            builder.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ServiceTypeId, "FK_SERVICE_CATALOG_SERVICE_TYPE");
+            entity.HasIndex(e => e.ResponsibleUserId, "FK_SERVICE_CATALOG_USER");
 
-            builder.Property(e => e.Id).HasColumnName("id");
-            builder.Property(e => e.ServiceTypeId).HasColumnName("service_type_id");
-            builder.Property(e => e.Name).HasColumnName("name").IsRequired().HasMaxLength(150);
-            builder.Property(e => e.Description).HasColumnName("description").HasColumnType("text");
-            builder.Property(e => e.IsActive).HasColumnName("is_active");
-            builder.Property(e => e.CreatedAt).HasColumnName("created_at");
-            builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            builder.Property(e => e.ResponsibleUserId).HasColumnName("responsible_user_id");
+            entity.Property(e => e.Id)
+                .HasColumnType("int(11)")
+                .HasColumnName("id");
 
-            builder.HasOne(d => d.ServiceTypeIdNavigation)
-                .WithMany()
+            entity.Property(e => e.ServiceTypeId)
+                .HasColumnType("int(11)")
+                .HasColumnName("service_type_id");
+
+            entity.Property(e => e.Name)
+                .HasMaxLength(150)
+                .HasColumnName("name");
+
+            entity.Property(e => e.Description)
+                .HasColumnType("text")
+                .HasColumnName("description");
+
+            entity.Property(e => e.IsActive)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_active");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.Property(e => e.ResponsibleUserId)
+                .HasColumnType("int(11)")
+                .HasColumnName("responsible_user_id");
+
+            entity.HasOne(d => d.ServiceTypeIdNavigation).WithMany()
                 .HasForeignKey(d => d.ServiceTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SERVICE_CATALOG_SERVICE_TYPE");
 
-            builder.HasOne(d => d.ResponsibleUserIdNavigation)
-                .WithMany()
+            entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SERVICE_CATALOG_USER");
         }
     }

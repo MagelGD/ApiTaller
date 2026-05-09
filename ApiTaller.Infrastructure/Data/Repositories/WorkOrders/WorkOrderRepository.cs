@@ -30,9 +30,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                if (int.TryParse(_currentUserService.UserId, out int userId))
+                string userName = "Sistema";
+                int userId = 0;
+                if (int.TryParse(_currentUserService.UserId, out userId))
                 {
                     create.ResponsibleUserId = userId;
+                    var user = await _context.User.FindAsync(userId);
+                    if (user != null) userName = user.FullName;
                 }
                 create.CreatedAt = DateTime.Now;
                 create.IsActive = true;
@@ -43,9 +47,23 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     foreach (var s in create.Services) s.ResponsibleUserId = userId;
                     foreach (var e in create.Evidences) e.ResponsibleUserId = userId;
                 }
-                
+
                 await _context.WorkOrder.AddAsync(create, cancellation);
-                return await _context.SaveChangesAsync(cancellation) > 0;
+                // Primer SaveChanges: genera el Id de la orden
+                var saved = await _context.SaveChangesAsync(cancellation) > 0;
+                if (!saved) return false;
+
+                // Segundo paso: registrar historial con el Id ya generado
+                await RegisterHistoryEntryAsync(
+                    create.Id,
+                    create.Status,
+                    $"Orden de trabajo creada con estado inicial: {create.Status}",
+                    userId != 0 ? userId : null,
+                    userName,
+                    cancellation);
+                await _context.SaveChangesAsync(cancellation);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -217,11 +235,16 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     existingOrder.ResponsibleUserId = userId;
                 }
 
+                int partsAdded = 0, partsRemoved = 0, partsUpdated = 0;
+                int servicesAdded = 0, servicesRemoved = 0, servicesUpdated = 0;
+                int evidencesAdded = 0, evidencesRemoved = 0;
+
                 // Sincronizar Repuestos (Parts) con Inventario
                 foreach (var existingPart in existingOrder.Parts.ToList())
                 {
                     if (!update.Parts.Any(p => p.Id == existingPart.Id))
                     {
+                        partsRemoved++;
                         // Si era un repuesto del taller, devolver al inventario
                         if (!existingPart.IsProvidedByCustomer && existingPart.ProductId.HasValue)
                         {
@@ -236,6 +259,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     var existingPart = existingOrder.Parts.FirstOrDefault(p => p.Id == part.Id && p.Id != 0);
                     if (existingPart != null)
                     {
+                        partsUpdated++;
                         // Si cambió la cantidad y es del taller, ajustar inventario
                         if (!existingPart.IsProvidedByCustomer && existingPart.ProductId.HasValue && existingPart.Quantity != part.Quantity)
                         {
@@ -249,6 +273,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                     else
                     {
+                        partsAdded++;
                         part.WorkOrderId = existingOrder.Id;
                         part.CreatedAt = DateTime.Now;
                         if (userId != 0) part.ResponsibleUserId = userId;
@@ -263,25 +288,26 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 }
 
                 // Sincronizar Servicios (Services)
-                // 1. Eliminar los que ya no están
                 foreach (var existingService in existingOrder.Services.ToList())
                 {
                     if (!update.Services.Any(s => s.Id == existingService.Id))
                     {
+                        servicesRemoved++;
                         _context.WorkOrderService.Remove(existingService);
                     }
                 }
-                // 2. Agregar o actualizar
                 foreach (var service in update.Services)
                 {
                     var existingService = existingOrder.Services.FirstOrDefault(s => s.Id == service.Id && s.Id != 0);
                     if (existingService != null)
                     {
+                        servicesUpdated++;
                         _context.Entry(existingService).CurrentValues.SetValues(service);
                         existingService.UpdatedAt = DateTime.Now;
                     }
                     else
                     {
+                        servicesAdded++;
                         service.WorkOrderId = existingOrder.Id;
                         service.CreatedAt = DateTime.Now;
                         if (userId != 0) service.ResponsibleUserId = userId;
@@ -294,10 +320,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 {
                     if (!update.Evidences.Any(e => e.Id == existingEvidence.Id))
                     {
+                        evidencesRemoved++;
                         _context.WorkOrderEvidence.Remove(existingEvidence);
                     }
                 }
-
                 foreach (var evidence in update.Evidences)
                 {
                     var existingEvidence = existingOrder.Evidences.FirstOrDefault(e => e.Id == evidence.Id && e.Id != 0);
@@ -307,12 +333,44 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                     else
                     {
+                        evidencesAdded++;
                         evidence.WorkOrderId = existingOrder.Id;
                         evidence.CreatedAt = DateTime.Now;
                         if (userId != 0) evidence.ResponsibleUserId = userId;
                         existingOrder.Evidences.Add(evidence);
                     }
                 }
+
+                // Registrar historial de actualización
+                int histUserId = 0;
+                string histUserName = "Sistema";
+                if (int.TryParse(_currentUserService.UserId, out histUserId))
+                {
+                    var histUser = await _context.User.FindAsync(histUserId);
+                    if (histUser != null) histUserName = histUser.FullName;
+                }
+
+                var msgBuilder = new System.Text.StringBuilder("Actualización de la orden:");
+                if (partsAdded > 0) msgBuilder.Append($"\n- Se agregaron {partsAdded} repuestos.");
+                if (partsRemoved > 0) msgBuilder.Append($"\n- Se eliminaron {partsRemoved} repuestos.");
+                if (partsUpdated > 0) msgBuilder.Append($"\n- Se actualizaron {partsUpdated} repuestos.");
+                if (servicesAdded > 0) msgBuilder.Append($"\n- Se agregaron {servicesAdded} servicios.");
+                if (servicesRemoved > 0) msgBuilder.Append($"\n- Se eliminaron {servicesRemoved} servicios.");
+                if (servicesUpdated > 0) msgBuilder.Append($"\n- Se actualizaron {servicesUpdated} servicios.");
+                if (evidencesAdded > 0) msgBuilder.Append($"\n- Se agregaron {evidencesAdded} evidencias.");
+                if (evidencesRemoved > 0) msgBuilder.Append($"\n- Se eliminaron {evidencesRemoved} evidencias.");
+                if (partsAdded == 0 && partsRemoved == 0 && partsUpdated == 0 && servicesAdded == 0 && servicesRemoved == 0 && servicesUpdated == 0 && evidencesAdded == 0 && evidencesRemoved == 0)
+                {
+                    msgBuilder.Append("\n- Información general actualizada.");
+                }
+
+                await RegisterHistoryEntryAsync(
+                    existingOrder.Id,
+                    existingOrder.Status,
+                    msgBuilder.ToString(),
+                    histUserId != 0 ? histUserId : null,
+                    histUserName,
+                    cancellation);
 
                 return await _context.SaveChangesAsync(cancellation) > 0;
             }
@@ -338,28 +396,24 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 workOrder.UpdatedAt = DateTime.Now;
 
                 string userName = "Sistema";
-                if (int.TryParse(_currentUserService.UserId, out int userId))
+                int userId = 0;
+                if (int.TryParse(_currentUserService.UserId, out userId))
                 {
                     workOrder.ResponsibleUserId = userId;
                     var user = await _context.User.FindAsync(userId);
                     if (user != null) userName = user.FullName;
                 }
 
-                // Registrar Historial
-                var history = new WorkOrderHistory
-                {
-                    WorkOrderId = id,
-                    Status = status,
-                    Observations = $"Cambio de estado de {oldStatus} a {status}",
-                    ActionBy = userName,
-                    CreatedAt = DateTime.Now,
-                    ResponsibleUserId = userId != 0 ? userId : null,
-                    IsActive = true
-                };
+                // Registrar historial usando helper centralizado
+                await RegisterHistoryEntryAsync(
+                    id,
+                    status,
+                    $"Cambio de estado: {oldStatus} → {status}",
+                    userId != 0 ? userId : null,
+                    userName,
+                    cancellation);
 
-                await _context.WorkOrderHistory.AddAsync(history, cancellation);
                 var result = await _context.SaveChangesAsync(cancellation) > 0;
-
                 await transaction.CommitAsync(cancellation);
                 return result;
             }
@@ -386,6 +440,27 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     CreatedAt = h.CreatedAt
                 })
                 .ToListAsync(cancellation);
+        }
+
+        // ─── Helper centralizado: registra una entrada de historial ──────────────
+        private async Task RegisterHistoryEntryAsync(
+            int workOrderId,
+            string status,
+            string observations,
+            int? responsibleUserId,
+            string actionBy,
+            CancellationToken cancellation)
+        {
+            await _context.WorkOrderHistory.AddAsync(new WorkOrderHistory
+            {
+                WorkOrderId = workOrderId,
+                Status = status,
+                Observations = observations,
+                ActionBy = actionBy,
+                ResponsibleUserId = responsibleUserId,
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            }, cancellation);
         }
 
         private async Task RegisterInventoryMovement(int productId, int quantity, string type, string obs, int referenceId, CancellationToken cancellation)

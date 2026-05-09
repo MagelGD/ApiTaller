@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260508153743_Version3")]
-    partial class Version3
+    [Migration("20260509033439_FixVersion1")]
+    partial class FixVersion1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -326,39 +326,48 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
 
                     b.Property<DateTime>("LastUpdate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("last_update");
 
                     b.Property<int>("MinStock")
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("min_stock");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("product_id");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
 
                     b.Property<int>("StockQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("stock_quantity");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex(new[] { "ProductId" }, "FK_inventory_product");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_inventory_responsible_user");
 
                     b.ToTable("inventory", (string)null);
                 });
@@ -367,56 +376,67 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
 
                     b.Property<string>("MovementType")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("movement_type");
 
                     b.Property<string>("Observations")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("observations");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("product_id");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("quantity");
 
                     b.Property<int?>("ReferenceId")
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("reference_id");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
 
                     b.Property<decimal?>("SalePrice")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("supplier_id");
 
                     b.Property<decimal?>("UnitCost")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex(new[] { "ProductId" }, "FK_inventory_history_product");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_inventory_history_responsible_user");
 
-                    b.HasIndex("SupplierId");
+                    b.HasIndex(new[] { "SupplierId" }, "FK_inventory_history_supplier");
 
                     b.ToTable("inventory_history", (string)null);
                 });
@@ -425,45 +445,55 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
 
                     b.Property<string>("InvoiceImageBase64")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("invoice_image_base64");
 
                     b.Property<ulong>("IsActive")
-                        .HasColumnType("bit(1)");
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
 
                     b.Property<string>("Observations")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("observations");
 
                     b.Property<DateTime>("ReceptionDate")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("reception_date");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
 
                     b.Property<int?>("SupplierId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("supplier_id");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("total_amount");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime");
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_inventory_reception_responsible_user");
 
-                    b.HasIndex("SupplierId");
+                    b.HasIndex(new[] { "SupplierId" }, "FK_inventory_reception_supplier");
 
                     b.ToTable("inventory_reception", (string)null);
                 });
@@ -472,30 +502,35 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int(11)");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("product_id");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("quantity");
 
                     b.Property<int>("ReceptionId")
-                        .HasColumnType("int");
+                        .HasColumnType("int(11)")
+                        .HasColumnName("reception_id");
 
                     b.Property<decimal>("SalePrice")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal>("UnitCost")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("unit_cost");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex(new[] { "ProductId" }, "FK_reception_detail_product");
 
-                    b.HasIndex("ReceptionId");
+                    b.HasIndex(new[] { "ReceptionId" }, "FK_reception_detail_reception");
 
                     b.ToTable("inventory_reception_detail", (string)null);
                 });
@@ -815,17 +850,217 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.ToTable("roleaction", (string)null);
                 });
 
-            modelBuilder.Entity("ApiTaller.Domain.Models.ServiceCatalog", b =>
+            modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("customer_id");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("discount_amount");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("discount_percent");
+
+                    b.Property<decimal>("DownPayment")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("down_payment");
+
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Observations")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("observations");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<DateTime>("SaleDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("sale_date");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("subtotal");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("total");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int?>("WorkOrderId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("work_order_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "CustomerId" }, "FK_SALE_CUSTOMER");
+
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_SALE_USER");
+
+                    b.HasIndex(new[] { "WorkOrderId" }, "FK_SALE_WORK_ORDER");
+
+                    b.ToTable("sale", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.SaleDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
                         .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("description");
+
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("product_id");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("quantity");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("sale_id");
+
+                    b.Property<int?>("ServiceCatalogId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("service_catalog_id");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("total");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("unit_price");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "ProductId" }, "FK_SALE_DETAIL_PRODUCT");
+
+                    b.HasIndex(new[] { "SaleId" }, "FK_SALE_DETAIL_SALE");
+
+                    b.HasIndex(new[] { "ServiceCatalogId" }, "FK_SALE_DETAIL_SERVICE");
+
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_SALE_DETAIL_USER");
+
+                    b.ToTable("sale_detail", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.SalePayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("payment_method_id");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("reference_code");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<int>("SaleId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("sale_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "PaymentMethodId" }, "FK_SALE_PAYMENT_METHOD");
+
+                    b.HasIndex(new[] { "SaleId" }, "FK_SALE_PAYMENT_SALE");
+
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_SALE_PAYMENT_USER");
+
+                    b.ToTable("sale_payment", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.ServiceCatalog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
@@ -833,8 +1068,8 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
 
                     b.Property<string>("Name")
@@ -848,18 +1083,18 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("responsible_user_id");
 
                     b.Property<int>("ServiceTypeId")
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
                         .HasColumnName("service_type_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex(new[] { "ServiceTypeId" }, "FK_SERVICE_CATALOG_SERVICE_TYPE");
 
-                    b.HasIndex("ServiceTypeId");
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_SERVICE_CATALOG_USER");
 
                     b.ToTable("service_catalog", (string)null);
                 });
@@ -868,7 +1103,7 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
                         .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
@@ -878,15 +1113,15 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("brand_model_version_id");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
                     b.Property<int>("EstimatedMinutes")
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
                         .HasColumnName("estimated_minutes");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
 
                     b.Property<decimal>("Price")
@@ -898,20 +1133,20 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("responsible_user_id");
 
                     b.Property<int>("ServiceCatalogId")
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
                         .HasColumnName("service_catalog_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BrandModelVersionId");
+                    b.HasIndex(new[] { "BrandModelVersionId" }, "FK_SERVICE_PRICE_BRAND_MODEL_VERSION");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex(new[] { "ServiceCatalogId" }, "FK_SERVICE_PRICE_CATALOG");
 
-                    b.HasIndex("ServiceCatalogId");
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_SERVICE_PRICE_USER");
 
                     b.ToTable("service_price_by_version", (string)null);
                 });
@@ -920,17 +1155,17 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
                         .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("datetime")
                         .HasColumnName("created_at");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)")
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
 
                     b.Property<string>("Name")
@@ -944,12 +1179,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("responsible_user_id");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_SERVICE_TYPE_USER");
 
                     b.ToTable("service_type", (string)null);
                 });
@@ -1294,6 +1529,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("int(11)")
                         .HasColumnName("customer_id");
 
+                    b.Property<decimal>("DownPayment")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("down_payment");
+
                     b.Property<DateTime>("EntryDate")
                         .HasColumnType("datetime")
                         .HasColumnName("entry_date");
@@ -1409,7 +1648,7 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
                         .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
@@ -1421,15 +1660,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("action_by");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("created_at");
 
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
 
                     b.Property<string>("Observations")
@@ -1439,11 +1674,8 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("observations");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int")
+                        .HasColumnType("int(11)")
                         .HasColumnName("responsible_user_id");
-
-                    b.Property<int>("ResponsibleUserIdNavigationId")
-                        .HasColumnType("int(11)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -1452,21 +1684,18 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("status");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("updated_at");
 
                     b.Property<int>("WorkOrderId")
                         .HasColumnType("int(11)")
                         .HasColumnName("work_order_id");
 
-                    b.HasKey("Id")
-                        .HasName("PRIMARY");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ResponsibleUserIdNavigationId");
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_HISTORY_RESPONSIBLE_USER");
 
-                    b.HasIndex("WorkOrderId");
+                    b.HasIndex(new[] { "WorkOrderId" }, "FK_HISTORY_WORK_ORDER");
 
                     b.ToTable("work_order_history", (string)null);
                 });
@@ -1487,6 +1716,10 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<ulong>("IsActive")
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
+
+                    b.Property<ulong>("IsApproved")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_approved");
 
                     b.Property<ulong>("IsProvidedByCustomer")
                         .HasColumnType("bit(1)")
@@ -1564,6 +1797,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
 
+                    b.Property<ulong>("IsApproved")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_approved");
+
                     b.Property<int>("MechanicId")
                         .HasColumnType("int(11)")
                         .HasColumnName("mechanic_id");
@@ -1597,6 +1834,57 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.HasIndex(new[] { "WorkOrderId" }, "FK_SERVICE_WORK_ORDER");
 
                     b.ToTable("work_order_service", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.WorkshopSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("description");
+
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<string>("SettingKey")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("setting_key");
+
+                    b.Property<string>("SettingValue")
+                        .IsRequired()
+                        .HasColumnType("longtext")
+                        .HasColumnName("setting_value");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_WORKSHOP_SETTINGS_USER");
+
+                    b.HasIndex(new[] { "SettingKey" }, "UQ_WORKSHOP_SETTINGS_KEY")
+                        .IsUnique();
+
+                    b.ToTable("workshop_settings", (string)null);
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Action", b =>
@@ -1881,6 +2169,91 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("RoleIdNavigation");
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .IsRequired()
+                        .HasConstraintName("FK_SALE_CUSTOMER");
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_SALE_USER");
+
+                    b.HasOne("ApiTaller.Domain.Models.WorkOrder", "WorkOrder")
+                        .WithMany()
+                        .HasForeignKey("WorkOrderId")
+                        .HasConstraintName("FK_SALE_WORK_ORDER");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkOrder");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.SaleDetail", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .HasConstraintName("FK_SALE_DETAIL_PRODUCT");
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_SALE_DETAIL_USER");
+
+                    b.HasOne("ApiTaller.Domain.Models.Sale", "Sale")
+                        .WithMany("Details")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SALE_DETAIL_SALE");
+
+                    b.HasOne("ApiTaller.Domain.Models.ServiceCatalog", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceCatalogId")
+                        .HasConstraintName("FK_SALE_DETAIL_SERVICE");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("Sale");
+
+                    b.Navigation("Service");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.SalePayment", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.PaymentMethod", "PaymentMethod")
+                        .WithMany()
+                        .HasForeignKey("PaymentMethodId")
+                        .IsRequired()
+                        .HasConstraintName("FK_SALE_PAYMENT_METHOD");
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_SALE_PAYMENT_USER");
+
+                    b.HasOne("ApiTaller.Domain.Models.Sale", "Sale")
+                        .WithMany("Payments")
+                        .HasForeignKey("SaleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SALE_PAYMENT_SALE");
+
+                    b.Navigation("PaymentMethod");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("Sale");
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.ServiceCatalog", b =>
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
@@ -1891,7 +2264,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.HasOne("ApiTaller.Domain.Models.ServiceType", "ServiceTypeIdNavigation")
                         .WithMany()
                         .HasForeignKey("ServiceTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_SERVICE_CATALOG_SERVICE_TYPE");
 
@@ -1905,7 +2277,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.HasOne("ApiTaller.Domain.Models.BrandModelVersion", "BrandModelVersionIdNavigation")
                         .WithMany()
                         .HasForeignKey("BrandModelVersionId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_SERVICE_PRICE_BRAND_MODEL_VERSION");
 
@@ -1917,7 +2288,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.HasOne("ApiTaller.Domain.Models.ServiceCatalog", "ServiceCatalogIdNavigation")
                         .WithMany()
                         .HasForeignKey("ServiceCatalogId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_SERVICE_PRICE_CATALOG");
 
@@ -2093,16 +2463,15 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserIdNavigationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_HISTORY_RESPONSIBLE_USER");
 
                     b.HasOne("ApiTaller.Domain.Models.WorkOrder", "WorkOrderNavigation")
                         .WithMany()
                         .HasForeignKey("WorkOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_work_order_history_order");
+                        .HasConstraintName("FK_HISTORY_WORK_ORDER");
 
                     b.Navigation("ResponsibleUserIdNavigation");
 
@@ -2162,6 +2531,16 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("WorkOrderNavigation");
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.WorkshopSettings", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_WORKSHOP_SETTINGS_USER");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.Customer", b =>
                 {
                     b.Navigation("Vehicles");
@@ -2170,6 +2549,13 @@ namespace ApiTaller.Infrastructure.Migrations
             modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReception", b =>
                 {
                     b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>
+                {
+                    b.Navigation("Details");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.WorkOrder", b =>

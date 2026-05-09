@@ -6,40 +6,89 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 {
     public class SaleConfigurations : IEntityTypeConfiguration<Sale>
     {
-        public void Configure(EntityTypeBuilder<Sale> builder)
+        public void Configure(EntityTypeBuilder<Sale> entity)
         {
-            builder.ToTable("sale");
-            builder.HasKey(e => e.Id);
-            builder.Property(e => e.Id).HasColumnName("id");
-            builder.Property(e => e.WorkOrderId).HasColumnName("work_order_id");
-            builder.Property(e => e.CustomerId).HasColumnName("customer_id");
-            builder.Property(e => e.SaleDate).HasColumnName("sale_date");
-            builder.Property(e => e.Subtotal).HasColumnName("subtotal").HasPrecision(18, 2);
-            builder.Property(e => e.DiscountPercent).HasColumnName("discount_percent").HasPrecision(18, 2);
-            builder.Property(e => e.DiscountAmount).HasColumnName("discount_amount").HasPrecision(18, 2);
-            builder.Property(e => e.Total).HasColumnName("total").HasPrecision(18, 2);
-            builder.Property(e => e.DownPayment).HasColumnName("down_payment").HasPrecision(18, 2);
-            builder.Property(e => e.Balance).HasColumnName("balance").HasPrecision(18, 2);
-            builder.Property(e => e.Observations).HasColumnName("observations").HasMaxLength(1000);
-            builder.Property(e => e.IsActive).HasColumnName("is_active");
-            builder.Property(e => e.CreatedAt).HasColumnName("created_at");
-            builder.Property(e => e.UpdatedAt).HasColumnName("updated_at");
-            builder.Property(e => e.ResponsibleUserId).HasColumnName("responsible_user_id");
+            entity.HasKey(e => e.Id);
+            entity.ToTable("sale");
 
-            builder.HasOne(d => d.Customer)
-                .WithMany()
+            entity.HasIndex(e => e.WorkOrderId, "FK_SALE_WORK_ORDER");
+            entity.HasIndex(e => e.CustomerId, "FK_SALE_CUSTOMER");
+            entity.HasIndex(e => e.ResponsibleUserId, "FK_SALE_USER");
+
+            entity.Property(e => e.Id)
+                .HasColumnType("int(11)")
+                .HasColumnName("id");
+
+            entity.Property(e => e.WorkOrderId)
+                .HasColumnType("int(11)")
+                .HasColumnName("work_order_id");
+
+            entity.Property(e => e.CustomerId)
+                .HasColumnType("int(11)")
+                .HasColumnName("customer_id");
+
+            entity.Property(e => e.SaleDate)
+                .HasColumnType("datetime")
+                .HasColumnName("sale_date");
+
+            entity.Property(e => e.Subtotal)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("subtotal");
+
+            entity.Property(e => e.DiscountPercent)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("discount_percent");
+
+            entity.Property(e => e.DiscountAmount)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("discount_amount");
+
+            entity.Property(e => e.Total)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("total");
+
+            entity.Property(e => e.DownPayment)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("down_payment");
+
+            entity.Property(e => e.Balance)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("balance");
+
+            entity.Property(e => e.Observations)
+                .HasMaxLength(1000)
+                .HasColumnName("observations");
+
+            entity.Property(e => e.IsActive)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_active");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.Property(e => e.ResponsibleUserId)
+                .HasColumnType("int(11)")
+                .HasColumnName("responsible_user_id");
+
+            entity.HasOne(d => d.Customer).WithMany()
                 .HasForeignKey(d => d.CustomerId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SALE_CUSTOMER");
 
-            builder.HasOne(d => d.WorkOrder)
-                .WithMany()
+            entity.HasOne(d => d.WorkOrder).WithMany()
                 .HasForeignKey(d => d.WorkOrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SALE_WORK_ORDER");
 
-            builder.HasOne(d => d.ResponsibleUserIdNavigation)
-                .WithMany()
+            entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SALE_USER");
         }
     }
 }

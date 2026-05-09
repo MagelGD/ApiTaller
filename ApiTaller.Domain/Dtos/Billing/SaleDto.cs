@@ -15,14 +15,14 @@ namespace ApiTaller.Domain.Dtos.Billing
         public decimal Total { get; set; }
         public decimal DownPayment { get; set; }
         public decimal Balance { get; set; }
-        public string Observations { get; set; }
+        public string? Observations { get; set; }
         
         // Extended info for invoice
-        public string CustomerName { get; set; }
-        public string CustomerPhone { get; set; }
-        public string VehiclePlate { get; set; }
-        public string VehicleModel { get; set; }
-        public string VehicleColor { get; set; }
+        public string? CustomerName { get; set; }
+        public string? CustomerPhone { get; set; }
+        public string? VehiclePlate { get; set; }
+        public string? VehicleModel { get; set; }
+        public string? VehicleColor { get; set; }
 
         public List<SaleDetailDto> Details { get; set; }
         public List<SalePaymentDto> Payments { get; set; }

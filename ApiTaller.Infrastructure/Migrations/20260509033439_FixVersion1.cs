@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiTaller.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Version1 : Migration
+    public partial class FixVersion1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -161,20 +161,20 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "inventory",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ProductId = table.Column<int>(type: "int(11)", nullable: false),
-                    StockQuantity = table.Column<int>(type: "int", nullable: false),
-                    MinStock = table.Column<int>(type: "int", nullable: false),
-                    LastUpdate = table.Column<DateTime>(type: "datetime", nullable: false),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ResponsibleUserId = table.Column<int>(type: "int(11)", nullable: true)
+                    product_id = table.Column<int>(type: "int(11)", nullable: false),
+                    stock_quantity = table.Column<int>(type: "int(11)", nullable: false),
+                    min_stock = table.Column<int>(type: "int(11)", nullable: false),
+                    last_update = table.Column<DateTime>(type: "datetime", nullable: false),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_inventory", x => x.Id);
+                    table.PrimaryKey("PK_inventory", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -182,26 +182,26 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "inventory_history",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ProductId = table.Column<int>(type: "int(11)", nullable: false),
-                    MovementType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                    product_id = table.Column<int>(type: "int(11)", nullable: false),
+                    movement_type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    ReferenceId = table.Column<int>(type: "int", nullable: true),
-                    SupplierId = table.Column<int>(type: "int(11)", nullable: true),
-                    Observations = table.Column<string>(type: "longtext", nullable: false)
+                    quantity = table.Column<int>(type: "int(11)", nullable: false),
+                    reference_id = table.Column<int>(type: "int(11)", nullable: true),
+                    supplier_id = table.Column<int>(type: "int(11)", nullable: true),
+                    observations = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UnitCost = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
                     SalePrice = table.Column<decimal>(type: "decimal(65,30)", nullable: true),
-                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ResponsibleUserId = table.Column<int>(type: "int(11)", nullable: true)
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_inventory_history", x => x.Id);
+                    table.PrimaryKey("PK_inventory_history", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -209,23 +209,23 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "inventory_reception",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    SupplierId = table.Column<int>(type: "int(11)", nullable: true),
-                    ReceptionDate = table.Column<DateTime>(type: "datetime", nullable: false),
-                    InvoiceImageBase64 = table.Column<string>(type: "longtext", nullable: false)
+                    supplier_id = table.Column<int>(type: "int(11)", nullable: true),
+                    reception_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    invoice_image_base64 = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Observations = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
+                    observations = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    IsActive = table.Column<ulong>(type: "bit(1)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ResponsibleUserId = table.Column<int>(type: "int(11)", nullable: true)
+                    total_amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_inventory_reception", x => x.Id);
+                    table.PrimaryKey("PK_inventory_reception", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -233,22 +233,22 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "inventory_reception_detail",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    ReceptionId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int(11)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    UnitCost = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
+                    reception_id = table.Column<int>(type: "int(11)", nullable: false),
+                    product_id = table.Column<int>(type: "int(11)", nullable: false),
+                    quantity = table.Column<int>(type: "int(11)", nullable: false),
+                    unit_cost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SalePrice = table.Column<decimal>(type: "decimal(65,30)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_inventory_reception_detail", x => x.Id);
+                    table.PrimaryKey("PK_inventory_reception_detail", x => x.id);
                     table.ForeignKey(
                         name: "FK_reception_detail_reception",
-                        column: x => x.ReceptionId,
+                        column: x => x.reception_id,
                         principalTable: "inventory_reception",
-                        principalColumn: "Id",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -404,19 +404,121 @@ namespace ApiTaller.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "sale",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    work_order_id = table.Column<int>(type: "int(11)", nullable: true),
+                    customer_id = table.Column<int>(type: "int(11)", nullable: false),
+                    sale_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    subtotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    discount_percent = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    discount_amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    down_payment = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    observations = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sale", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_SALE_CUSTOMER",
+                        column: x => x.customer_id,
+                        principalTable: "customer",
+                        principalColumn: "id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "sale_detail",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    sale_id = table.Column<int>(type: "int(11)", nullable: false),
+                    product_id = table.Column<int>(type: "int(11)", nullable: true),
+                    service_catalog_id = table.Column<int>(type: "int(11)", nullable: true),
+                    description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    quantity = table.Column<int>(type: "int(11)", nullable: false),
+                    unit_price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sale_detail", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_SALE_DETAIL_PRODUCT",
+                        column: x => x.product_id,
+                        principalTable: "product",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_SALE_DETAIL_SALE",
+                        column: x => x.sale_id,
+                        principalTable: "sale",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "sale_payment",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    sale_id = table.Column<int>(type: "int(11)", nullable: false),
+                    payment_method_id = table.Column<int>(type: "int(11)", nullable: false),
+                    amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    reference_code = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_sale_payment", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_SALE_PAYMENT_METHOD",
+                        column: x => x.payment_method_id,
+                        principalTable: "payment_method",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_SALE_PAYMENT_SALE",
+                        column: x => x.sale_id,
+                        principalTable: "sale",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "service_catalog",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    service_type_id = table.Column<int>(type: "int", nullable: false),
+                    service_type_id = table.Column<int>(type: "int(11)", nullable: false),
                     name = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     description = table.Column<string>(type: "text", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
                 constraints: table =>
@@ -429,15 +531,15 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "service_price_by_version",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    service_catalog_id = table.Column<int>(type: "int", nullable: false),
+                    service_catalog_id = table.Column<int>(type: "int(11)", nullable: false),
                     brand_model_version_id = table.Column<int>(type: "int(11)", nullable: false),
                     price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    estimated_minutes = table.Column<int>(type: "int", nullable: false),
-                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    estimated_minutes = table.Column<int>(type: "int(11)", nullable: false),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
                 constraints: table =>
@@ -447,14 +549,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         name: "FK_SERVICE_PRICE_BRAND_MODEL_VERSION",
                         column: x => x.brand_model_version_id,
                         principalTable: "BrandModelVersion",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                     table.ForeignKey(
                         name: "FK_SERVICE_PRICE_CATALOG",
                         column: x => x.service_catalog_id,
                         principalTable: "service_catalog",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -462,13 +562,13 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "service_type",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
                 constraints: table =>
@@ -626,6 +726,34 @@ namespace ApiTaller.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "workshop_settings",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    setting_key = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    setting_value = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_workshop_settings", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_WORKSHOP_SETTINGS_USER",
+                        column: x => x.responsible_user_id,
+                        principalTable: "user",
+                        principalColumn: "id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "user_role_module",
                 columns: table => new
                 {
@@ -676,6 +804,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     status = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    down_payment = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -709,7 +838,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     work_order_id = table.Column<int>(type: "int(11)", nullable: false),
-                    photo_url = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false)
+                    photo_url = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     evidence_type = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -741,7 +870,7 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "work_order_history",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
+                    id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     work_order_id = table.Column<int>(type: "int(11)", nullable: false),
                     status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
@@ -750,25 +879,23 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     action_by = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    responsible_user_id = table.Column<int>(type: "int", nullable: true),
-                    ResponsibleUserIdNavigationId = table.Column<int>(type: "int(11)", nullable: false)
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PRIMARY", x => x.id);
+                    table.PrimaryKey("PK_work_order_history", x => x.id);
                     table.ForeignKey(
-                        name: "FK_work_order_history_order",
+                        name: "FK_HISTORY_RESPONSIBLE_USER",
+                        column: x => x.responsible_user_id,
+                        principalTable: "user",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_HISTORY_WORK_ORDER",
                         column: x => x.work_order_id,
                         principalTable: "work_order",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_work_order_history_user_ResponsibleUserIdNavigationId",
-                        column: x => x.ResponsibleUserIdNavigationId,
-                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -788,6 +915,9 @@ namespace ApiTaller.Infrastructure.Migrations
                     unit_price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     is_provided_by_customer = table.Column<ulong>(type: "bit(1)", nullable: false),
                     warranty_end_date = table.Column<DateTime>(type: "datetime", nullable: true),
+                    quote_photo_url = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_approved = table.Column<ulong>(type: "bit(1)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -827,6 +957,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     mechanic_id = table.Column<int>(type: "int(11)", nullable: false),
                     price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     warranty_end_date = table.Column<DateTime>(type: "datetime", nullable: true),
+                    is_approved = table.Column<ulong>(type: "bit(1)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -915,49 +1046,49 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "responsabilidad_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_ProductId",
+                name: "FK_inventory_product",
                 table: "inventory",
-                column: "ProductId");
+                column: "product_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_ResponsibleUserId",
+                name: "FK_inventory_responsible_user",
                 table: "inventory",
-                column: "ResponsibleUserId");
+                column: "responsible_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_history_ProductId",
+                name: "FK_inventory_history_product",
                 table: "inventory_history",
-                column: "ProductId");
+                column: "product_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_history_ResponsibleUserId",
+                name: "FK_inventory_history_responsible_user",
                 table: "inventory_history",
-                column: "ResponsibleUserId");
+                column: "responsible_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_history_SupplierId",
+                name: "FK_inventory_history_supplier",
                 table: "inventory_history",
-                column: "SupplierId");
+                column: "supplier_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_reception_ResponsibleUserId",
+                name: "FK_inventory_reception_responsible_user",
                 table: "inventory_reception",
-                column: "ResponsibleUserId");
+                column: "responsible_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_reception_SupplierId",
+                name: "FK_inventory_reception_supplier",
                 table: "inventory_reception",
-                column: "SupplierId");
+                column: "supplier_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_reception_detail_ProductId",
+                name: "FK_reception_detail_product",
                 table: "inventory_reception_detail",
-                column: "ProductId");
+                column: "product_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_inventory_reception_detail_ReceptionId",
+                name: "FK_reception_detail_reception",
                 table: "inventory_reception_detail",
-                column: "ReceptionId");
+                column: "reception_id");
 
             migrationBuilder.CreateIndex(
                 name: "FK_LOGIN_USER",
@@ -1015,32 +1146,82 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "role_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_catalog_responsible_user_id",
-                table: "service_catalog",
+                name: "FK_SALE_CUSTOMER",
+                table: "sale",
+                column: "customer_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_USER",
+                table: "sale",
                 column: "responsible_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_catalog_service_type_id",
+                name: "FK_SALE_WORK_ORDER",
+                table: "sale",
+                column: "work_order_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_DETAIL_PRODUCT",
+                table: "sale_detail",
+                column: "product_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_DETAIL_SALE",
+                table: "sale_detail",
+                column: "sale_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_DETAIL_SERVICE",
+                table: "sale_detail",
+                column: "service_catalog_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_DETAIL_USER",
+                table: "sale_detail",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_PAYMENT_METHOD",
+                table: "sale_payment",
+                column: "payment_method_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_PAYMENT_SALE",
+                table: "sale_payment",
+                column: "sale_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SALE_PAYMENT_USER",
+                table: "sale_payment",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SERVICE_CATALOG_SERVICE_TYPE",
                 table: "service_catalog",
                 column: "service_type_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_price_by_version_brand_model_version_id",
+                name: "FK_SERVICE_CATALOG_USER",
+                table: "service_catalog",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SERVICE_PRICE_BRAND_MODEL_VERSION",
                 table: "service_price_by_version",
                 column: "brand_model_version_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_price_by_version_responsible_user_id",
-                table: "service_price_by_version",
-                column: "responsible_user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_service_price_by_version_service_catalog_id",
+                name: "FK_SERVICE_PRICE_CATALOG",
                 table: "service_price_by_version",
                 column: "service_catalog_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_service_type_responsible_user_id",
+                name: "FK_SERVICE_PRICE_USER",
+                table: "service_price_by_version",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SERVICE_TYPE_USER",
                 table: "service_type",
                 column: "responsible_user_id");
 
@@ -1130,12 +1311,12 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "work_order_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_work_order_history_ResponsibleUserIdNavigationId",
+                name: "FK_HISTORY_RESPONSIBLE_USER",
                 table: "work_order_history",
-                column: "ResponsibleUserIdNavigationId");
+                column: "responsible_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_work_order_history_work_order_id",
+                name: "FK_HISTORY_WORK_ORDER",
                 table: "work_order_history",
                 column: "work_order_id");
 
@@ -1168,6 +1349,17 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "FK_SERVICE_WORK_ORDER",
                 table: "work_order_service",
                 column: "work_order_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_WORKSHOP_SETTINGS_USER",
+                table: "workshop_settings",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "UQ_WORKSHOP_SETTINGS_KEY",
+                table: "workshop_settings",
+                column: "setting_key",
+                unique: true);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ACTION_APLICATIONMODULE",
@@ -1242,56 +1434,56 @@ namespace ApiTaller.Infrastructure.Migrations
             migrationBuilder.AddForeignKey(
                 name: "FK_inventory_product",
                 table: "inventory",
-                column: "ProductId",
+                column: "product_id",
                 principalTable: "product",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_inventory_responsible_user",
                 table: "inventory",
-                column: "ResponsibleUserId",
+                column: "responsible_user_id",
                 principalTable: "user",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_inventory_history_product",
                 table: "inventory_history",
-                column: "ProductId",
+                column: "product_id",
                 principalTable: "product",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_inventory_history_responsible_user",
                 table: "inventory_history",
-                column: "ResponsibleUserId",
+                column: "responsible_user_id",
                 principalTable: "user",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_inventory_history_supplier",
                 table: "inventory_history",
-                column: "SupplierId",
+                column: "supplier_id",
                 principalTable: "supplier",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_inventory_reception_responsible_user",
                 table: "inventory_reception",
-                column: "ResponsibleUserId",
+                column: "responsible_user_id",
                 principalTable: "user",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_inventory_reception_supplier",
                 table: "inventory_reception",
-                column: "SupplierId",
+                column: "supplier_id",
                 principalTable: "supplier",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_reception_detail_product",
                 table: "inventory_reception_detail",
-                column: "ProductId",
+                column: "product_id",
                 principalTable: "product",
                 principalColumn: "id");
 
@@ -1359,12 +1551,46 @@ namespace ApiTaller.Infrastructure.Migrations
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_SALE_USER",
+                table: "sale",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SALE_WORK_ORDER",
+                table: "sale",
+                column: "work_order_id",
+                principalTable: "work_order",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SALE_DETAIL_SERVICE",
+                table: "sale_detail",
+                column: "service_catalog_id",
+                principalTable: "service_catalog",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SALE_DETAIL_USER",
+                table: "sale_detail",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SALE_PAYMENT_USER",
+                table: "sale_payment",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_SERVICE_CATALOG_SERVICE_TYPE",
                 table: "service_catalog",
                 column: "service_type_id",
                 principalTable: "service_type",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_SERVICE_CATALOG_USER",
@@ -1426,10 +1652,13 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "login");
 
             migrationBuilder.DropTable(
-                name: "payment_method");
+                name: "roleaction");
 
             migrationBuilder.DropTable(
-                name: "roleaction");
+                name: "sale_detail");
+
+            migrationBuilder.DropTable(
+                name: "sale_payment");
 
             migrationBuilder.DropTable(
                 name: "service_price_by_version");
@@ -1450,19 +1679,25 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "work_order_service");
 
             migrationBuilder.DropTable(
+                name: "workshop_settings");
+
+            migrationBuilder.DropTable(
                 name: "inventory_reception");
 
             migrationBuilder.DropTable(
                 name: "action");
 
             migrationBuilder.DropTable(
+                name: "payment_method");
+
+            migrationBuilder.DropTable(
+                name: "sale");
+
+            migrationBuilder.DropTable(
                 name: "service_catalog");
 
             migrationBuilder.DropTable(
                 name: "product");
-
-            migrationBuilder.DropTable(
-                name: "work_order");
 
             migrationBuilder.DropTable(
                 name: "supplier");
@@ -1472,6 +1707,9 @@ namespace ApiTaller.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "operation");
+
+            migrationBuilder.DropTable(
+                name: "work_order");
 
             migrationBuilder.DropTable(
                 name: "service_type");

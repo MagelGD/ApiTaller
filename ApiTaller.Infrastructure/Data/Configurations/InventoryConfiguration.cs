@@ -6,27 +6,58 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 {
     public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
     {
-        public void Configure(EntityTypeBuilder<Inventory> builder)
+        public void Configure(EntityTypeBuilder<Inventory> entity)
         {
-            builder.ToTable("inventory");
+            entity.HasKey(e => e.Id);
+            entity.ToTable("inventory");
 
-            builder.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ProductId, "FK_inventory_product");
+            entity.HasIndex(e => e.ResponsibleUserId, "FK_inventory_responsible_user");
 
-            builder.Property(e => e.StockQuantity).IsRequired();
-            builder.Property(e => e.MinStock).IsRequired();
-            builder.Property(e => e.CreatedAt).HasColumnType("datetime");
-            builder.Property(e => e.UpdatedAt).HasColumnType("datetime");
-            builder.Property(e => e.LastUpdate).HasColumnType("datetime");
+            entity.Property(e => e.Id)
+                .HasColumnType("int(11)")
+                .HasColumnName("id");
 
-            builder.HasOne(d => d.ProductNavigation)
-                .WithMany()
+            entity.Property(e => e.ProductId)
+                .HasColumnType("int(11)")
+                .HasColumnName("product_id");
+
+            entity.Property(e => e.StockQuantity)
+                .HasColumnType("int(11)")
+                .HasColumnName("stock_quantity");
+
+            entity.Property(e => e.MinStock)
+                .HasColumnType("int(11)")
+                .HasColumnName("min_stock");
+
+            entity.Property(e => e.IsActive)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_active");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.Property(e => e.LastUpdate)
+                .HasColumnType("datetime")
+                .HasColumnName("last_update");
+
+            entity.Property(e => e.ResponsibleUserId)
+                .HasColumnType("int(11)")
+                .HasColumnName("responsible_user_id");
+
+            entity.HasOne(d => d.ProductNavigation).WithMany()
                 .HasForeignKey(d => d.ProductId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_inventory_product");
 
-            builder.HasOne(d => d.ResponsibleUserIdNavigation)
-                .WithMany()
+            entity.HasOne(d => d.ResponsibleUserIdNavigation).WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_inventory_responsible_user");
         }
     }
