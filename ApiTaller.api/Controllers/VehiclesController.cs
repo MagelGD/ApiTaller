@@ -1,6 +1,7 @@
 using ApiTaller.Domain.Dtos.Vehicle;
 using ApiTaller.Domain.Interfaces.Services.Vehicles;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
@@ -10,6 +11,7 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class VehiclesController : ControllerBase
     {
         private readonly ILogger<VehiclesController> _logger;

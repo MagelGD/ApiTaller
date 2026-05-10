@@ -1,4 +1,4 @@
-﻿namespace ApiTaller.api.Controllers
+namespace ApiTaller.api.Controllers
 {
     internal interface IBrandModelService
     {

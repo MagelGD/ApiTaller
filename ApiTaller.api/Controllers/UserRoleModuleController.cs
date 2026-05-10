@@ -1,4 +1,4 @@
-ï»¿using ApiTaller.api.Hubs;
+using ApiTaller.api.Hubs;
 using ApiTaller.Domain.Dtos.UserRoleModule;
 using ApiTaller.Domain.Interfaces.Services.UserRoleModules;
 using Microsoft.AspNetCore.Authorization;
@@ -12,6 +12,7 @@ namespace ApiTaller.api.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [ApiController]
+    [Authorize]
     public class UserRoleModuleController : ControllerBase
     {
 
@@ -35,7 +36,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener los mÃ³dulos de rol de usuario");
+                _logger.LogError(ex, "Error al obtener los módulos de rol de usuario");
             }
             return BadRequest();
         }
@@ -50,7 +51,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el mÃ³dulo de rol de usuario por id");
+                _logger.LogError(ex, "Error al obtener el módulo de rol de usuario por id");
             }
             return BadRequest();
         }
@@ -67,7 +68,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al guardar o editar el mÃ³dulo de rol de usuario");
+                _logger.LogError(ex, "Error al guardar o editar el módulo de rol de usuario");
             }
             return BadRequest();
         }

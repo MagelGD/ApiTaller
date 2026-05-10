@@ -53,46 +53,38 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkshopSettings
 
         public async Task<bool> UpsertAsync(WorkshopSettingsDto dto, CancellationToken cancellation)
         {
-            try
+            int? userId = null;
+            if (int.TryParse(_currentUserService.UserId, out int parsedId))
+                userId = parsedId;
+
+            var existing = await _context.WorkshopSettings
+                .FirstOrDefaultAsync(s => s.SettingKey == dto.SettingKey, cancellation);
+
+            if (existing != null)
             {
-                int? userId = null;
-                if (int.TryParse(_currentUserService.UserId, out int parsedId))
-                    userId = parsedId;
-
-                var existing = await _context.WorkshopSettings
-                    .FirstOrDefaultAsync(s => s.SettingKey == dto.SettingKey, cancellation);
-
-                if (existing != null)
-                {
-                    // UPDATE
-                    existing.SettingValue = dto.SettingValue;
-                    existing.Description = dto.Description;
-                    existing.UpdatedAt = DateTime.Now;
-                    existing.IsActive = true;
-                    if (userId.HasValue) existing.ResponsibleUserId = userId;
-                }
-                else
-                {
-                    // INSERT
-                    var newSetting = new Domain.Models.WorkshopSettings
-                    {
-                        SettingKey = dto.SettingKey,
-                        SettingValue = dto.SettingValue,
-                        Description = dto.Description,
-                        IsActive = true,
-                        CreatedAt = DateTime.Now,
-                        ResponsibleUserId = userId
-                    };
-                    await _context.WorkshopSettings.AddAsync(newSetting, cancellation);
-                }
-
-                return await _context.SaveChangesAsync(cancellation) > 0;
+                // UPDATE
+                existing.SettingValue = dto.SettingValue;
+                existing.Description = dto.Description;
+                existing.UpdatedAt = DateTime.Now;
+                existing.IsActive = true;
+                if (userId.HasValue) existing.ResponsibleUserId = userId;
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, $"Error upserting workshop setting '{dto.SettingKey}'");
-                return false;
+                // INSERT
+                var newSetting = new Domain.Models.WorkshopSettings
+                {
+                    SettingKey = dto.SettingKey,
+                    SettingValue = dto.SettingValue,
+                    Description = dto.Description,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                };
+                await _context.WorkshopSettings.AddAsync(newSetting, cancellation);
             }
+
+            return await _context.SaveChangesAsync(cancellation) > 0;
         }
     }
 }

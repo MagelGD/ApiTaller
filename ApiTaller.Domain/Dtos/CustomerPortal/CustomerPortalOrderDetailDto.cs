@@ -15,8 +15,8 @@ namespace ApiTaller.Domain.Dtos.CustomerPortal
         public string FuelLevel { get; set; }
         public string? Observations { get; set; }
         public string Status { get; set; }
-        // Solo fotos de tipo "Ingreso"
-        public List<string> EntryPhotoUrls { get; set; } = new();
+        // Todas las evidencias de la orden
+        public List<CustomerPortalEvidenceDto> Evidences { get; set; } = new();
         // Ítems de cotización (sin info interna del mecánico)
         public List<CustomerPortalPartDto> Parts { get; set; } = new();
         public List<CustomerPortalServiceDto> Services { get; set; } = new();

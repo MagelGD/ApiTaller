@@ -12,6 +12,7 @@ namespace ApiTaller.api.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class InventoryReceptionController : ControllerBase
     {
         private readonly IInventoryReceptionService _receptionService;

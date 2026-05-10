@@ -146,10 +146,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
 
                 if (order == null) return null; // Orden no encontrada o no pertenece al cliente
 
-                // Solo fotos de tipo "Ingreso" — no se exponen fotos de proceso interno
-                var entryPhotos = order.Evidences
-                    .Where(e => e.IsActive && e.EvidenceType == "Ingreso")
-                    .Select(e => e.PhotoUrl)
+                // Todas las fotos de evidencias (ingreso y proceso)
+                var evidences = order.Evidences
+                    .Where(e => e.IsActive)
+                    .Select(e => new CustomerPortalEvidenceDto
+                    {
+                        EvidenceType = e.EvidenceType,
+                        PhotoUrl = e.PhotoUrl
+                    })
                     .ToList();
 
                 var activeParts = order.Parts.Where(p => p.IsActive).ToList();
@@ -181,7 +185,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                     FuelLevel = order.FuelLevel,
                     Observations = order.Observations,
                     Status = order.Status,
-                    EntryPhotoUrls = entryPhotos,
+                    Evidences = evidences,
                     Parts = activeParts.Select(p => new CustomerPortalPartDto
                     {
                         Id = p.Id,

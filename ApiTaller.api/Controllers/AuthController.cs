@@ -16,6 +16,7 @@ namespace ApiTaller.api.Controllers
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("Login")]
         public async Task<IActionResult> Pots(AuthDto auth, CancellationToken cancellationToken)
         {

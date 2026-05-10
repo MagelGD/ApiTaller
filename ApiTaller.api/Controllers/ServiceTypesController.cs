@@ -1,6 +1,7 @@
 using ApiTaller.Domain.Dtos.ServiceTypes;
 using ApiTaller.Domain.Interfaces.Services.ServiceTypes;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
@@ -10,6 +11,7 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ServiceTypesController : ControllerBase
     {
         private readonly ILogger<ServiceTypesController> _logger;

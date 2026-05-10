@@ -1,6 +1,7 @@
 using ApiTaller.Domain.Dtos.PaymentMethod;
 using ApiTaller.Domain.Interfaces.Services.PaymentMethods;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,6 +9,7 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PaymentMethodController : ControllerBase
     {
         private readonly ILogger<PaymentMethodController> _logger;

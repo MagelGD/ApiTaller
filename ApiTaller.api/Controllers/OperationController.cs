@@ -1,4 +1,4 @@
-ï»¿using ApiTaller.Domain.Dtos.Action;
+using ApiTaller.Domain.Dtos.Action;
 using ApiTaller.Domain.Dtos.Operation;
 using ApiTaller.Domain.Interfaces.Services.Operations;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +11,7 @@ namespace ApiTaller.api.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [ApiController]
+    [Authorize]
     public class OperationController : ControllerBase
     {
         private readonly ILogger<OperationController> _logger;
@@ -46,7 +47,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener la operaciÃ³n por id");
+                _logger.LogError(ex, "Error al obtener la operación por id");
             }
             return BadRequest();
         }
@@ -60,7 +61,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al guardar o editar la operaciÃ³n");
+                _logger.LogError(ex, "Error al guardar o editar la operación");
             }
             return BadRequest();
         }

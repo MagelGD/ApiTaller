@@ -1,6 +1,7 @@
 using ApiTaller.Domain.Dtos.Inventory;
 using ApiTaller.Domain.Interfaces.Services.Inventory;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,6 +9,8 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+    [Authorize]
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _service;

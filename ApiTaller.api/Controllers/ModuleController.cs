@@ -1,4 +1,4 @@
-ï»¿using ApiTaller.Domain.Dtos.Module;
+using ApiTaller.Domain.Dtos.Module;
 using ApiTaller.Domain.Interfaces.Services.Module;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +10,7 @@ namespace ApiTaller.api.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [ApiController]
+    [Authorize]
     public class ModuleController : ControllerBase
     {
         private readonly ILogger<ModuleController> _logger;
@@ -28,7 +29,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener los mÃ³dulos");
+                _logger.LogError(ex, "Error al obtener los módulos");
             }
             return BadRequest();
         }
@@ -41,7 +42,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex) 
             {
-                _logger.LogError(ex, "Error al obtener el mÃ³dulo por id");
+                _logger.LogError(ex, "Error al obtener el módulo por id");
             }
             return BadRequest();
         }
@@ -54,7 +55,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al guardar o editar el mÃ³dulo");
+                _logger.LogError(ex, "Error al guardar o editar el módulo");
             }
             return BadRequest();
         }

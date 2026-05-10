@@ -1,6 +1,7 @@
-﻿using ApiTaller.Domain.Dtos.Product;
+using ApiTaller.Domain.Dtos.Product;
 using ApiTaller.Domain.Interfaces.Services.Products;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,6 +9,7 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly ILogger<ProductsController> _logger;

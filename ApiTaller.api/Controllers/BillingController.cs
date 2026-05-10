@@ -1,6 +1,7 @@
 using ApiTaller.Domain.Dtos.Billing;
 using ApiTaller.Domain.Interfaces.Services.Billing;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
@@ -10,6 +11,8 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+    [Authorize]
     public class BillingController : ControllerBase
     {
         private readonly ILogger<BillingController> _logger;

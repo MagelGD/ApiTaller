@@ -1,6 +1,7 @@
 using ApiTaller.Domain.Dtos.WorkOrder;
 using ApiTaller.Domain.Interfaces.Services.WorkOrders;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
@@ -10,6 +11,8 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+    [Authorize]
     public class WorkOrdersController : ControllerBase
     {
         private readonly ILogger<WorkOrdersController> _logger;

@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Interfaces.Services.RoleActions;
+using ApiTaller.Domain.Interfaces.Services.RoleActions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,6 +9,7 @@ namespace ApiTaller.api.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [ApiController]
+    [Authorize]
     public class RoleActionsController : ControllerBase
     {
 

@@ -1,6 +1,8 @@
-﻿using ApiTaller.Domain.Dtos.Brand;
+using ApiTaller.Domain.Dtos.Brand;
 using ApiTaller.Domain.Interfaces.Services.Brands;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,6 +10,8 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+    [Authorize]
     public class BrandsController : ControllerBase
     {
         private readonly ILogger<BrandsController> _logger;

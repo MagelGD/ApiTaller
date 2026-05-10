@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Action;
+using ApiTaller.Domain.Dtos.Action;
 using ApiTaller.Domain.Interfaces.Services.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +10,7 @@ namespace ApiTaller.api.Controllers
     [Route("api/[controller]")]
     [Authorize]
     [ApiController]
+    [Authorize]
     public class ActionsController : ControllerBase
     {
         private readonly ILogger<ActionsController> _logger;
@@ -59,7 +60,7 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener la acción por id");
+                _logger.LogError(ex, "Error al obtener la acci�n por id");
             }
             return BadRequest();
         }

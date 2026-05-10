@@ -81,7 +81,9 @@ INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_u
 ('Tipos Servicio', 1, NOW(), NOW(), 1),
 ('Catalogos Servicio', 1, NOW(), NOW(), 1),
 ('Precios Servicio', 1, NOW(), NOW(), 1),
-('Inventario', 1, NOW(), NOW(), 1);
+('Inventario', 1, NOW(), NOW(), 1),
+('Logo del Taller', 1, NOW(), NOW(), 1),
+('Portal Cliente', 1, NOW(), NOW(), 1);
 
 -- 6. Crear Acciones
 INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
@@ -221,7 +223,15 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 ((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Editar'), 'Ajustar Inventario', 'Ajustar_Inventario', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Historial Inventario', 'Ver_Historial_Inventario', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Recepcion Masiva Inventario', 'Recepcion_Masiva_Inventario', 1, NOW(), NOW(), 1),
-((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Facturas Inventario', 'Ver_Facturas_Inventario', 1, NOW(), NOW(), 1);
+((SELECT id FROM module WHERE name = 'Inventario'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Facturas Inventario', 'Ver_Facturas_Inventario', 1, NOW(), NOW(), 1),
+
+-- MÓDULO: LOGO DEL TALLER
+((SELECT id FROM module WHERE name = 'Logo del Taller'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Logo Taller', 'config.logo.view', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Logo del Taller'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Logo Taller', 'config.logo.save', 1, NOW(), NOW(), 1),
+
+-- MÓDULO: PORTAL CLIENTE
+((SELECT id FROM module WHERE name = 'Portal Cliente'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Portal Cliente', 'Ver_Portal_Cliente', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Portal Cliente'), (SELECT id FROM operation WHERE name = 'Cambiar_Estado'), 'Aprobar Cotizacion Cliente', 'Aprobar_Portal_Cliente', 1, NOW(), NOW(), 1);
 
 -- 7. ASIGNAR MÓDULOS AL ROL SUPERADMIN
 INSERT INTO user_role_module (user_role_id, module_role_id, is_active, created_at, updated_at, responsible_user_id)
