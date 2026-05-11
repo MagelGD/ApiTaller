@@ -233,6 +233,16 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 ((SELECT id FROM module WHERE name = 'Portal Cliente'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Portal Cliente', 'Ver_Portal_Cliente', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Portal Cliente'), (SELECT id FROM operation WHERE name = 'Cambiar_Estado'), 'Aprobar Cotizacion Cliente', 'Aprobar_Portal_Cliente', 1, NOW(), NOW(), 1);
 
+-- 6.5 Crear Módulo Agenda (Fase 4)
+INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_user_id) VALUES 
+('Agenda', 1, NOW(), NOW(), 1);
+
+INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
+((SELECT id FROM module WHERE name = 'Agenda'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Agenda', 'Ver_Agenda', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Agenda'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Agenda', 'Guardar_Agenda', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Agenda'), (SELECT id FROM operation WHERE name = 'Editar'), 'Configuracion Agenda', 'Configuracion_Agenda', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Agenda'), (SELECT id FROM operation WHERE name = 'Cambiar_Estado'), 'Convertir OT', 'Convertir_OT_Agenda', 1, NOW(), NOW(), 1);
+
 -- 7. ASIGNAR MÓDULOS AL ROL SUPERADMIN
 INSERT INTO user_role_module (user_role_id, module_role_id, is_active, created_at, updated_at, responsible_user_id)
 SELECT ur.id, m.id, 1, NOW(), NOW(), 1

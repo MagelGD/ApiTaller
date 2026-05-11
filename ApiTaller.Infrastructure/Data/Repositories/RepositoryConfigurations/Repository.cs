@@ -86,6 +86,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IBillingRepository, BillingRepository>();
             services.TryAddScoped<IWorkshopSettingsRepository, WorkshopSettingsRepository>();
             services.TryAddScoped<ICustomerPortalRepository, CustomerPortalRepository>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Agenda.IAgendaRepository, ApiTaller.Infrastructure.Data.Repositories.Agenda.AgendaRepository>();
             return services;
         }
     }

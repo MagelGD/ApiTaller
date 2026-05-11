@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260511161521_Version3")]
+    partial class Version3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,7 +112,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("reason");
 
-                    b.Property<int?>("ResponsibleUserId")
+                    b.Property<int>("ResponsibleUserId")
                         .HasColumnType("int(11)")
                         .HasColumnName("responsible_user_id");
 
@@ -122,61 +125,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.HasIndex("ResponsibleUserId");
 
                     b.ToTable("agenda_block", (string)null);
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.AgendaDayConfig", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<int?>("CustomSlots")
-                        .HasColumnType("int")
-                        .HasColumnName("custom_slots");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<bool>("IsBlocked")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_blocked");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("reason");
-
-                    b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResponsibleUserId");
-
-                    b.ToTable("agenda_day_config", (string)null);
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.AgendaSettings", b =>
@@ -217,8 +165,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("responsible_user_id");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("date")
-                        .HasColumnName("start_date");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)")
@@ -2180,16 +2127,9 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
-
-                    b.Navigation("ResponsibleUserIdNavigation");
-                });
-
-            modelBuilder.Entity("ApiTaller.Domain.Models.AgendaDayConfig", b =>
-                {
-                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
-                        .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ResponsibleUserIdNavigation");
                 });

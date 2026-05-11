@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260511172412_Version4")]
+    partial class Version4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,7 +112,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("reason");
 
-                    b.Property<int?>("ResponsibleUserId")
+                    b.Property<int>("ResponsibleUserId")
                         .HasColumnType("int(11)")
                         .HasColumnName("responsible_user_id");
 
@@ -128,55 +131,43 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int?>("CustomSlots")
-                        .HasColumnType("int")
-                        .HasColumnName("custom_slots");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsBlocked")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_blocked");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Reason")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("reason");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int?>("ResponsibleUserId")
-                        .HasColumnType("int(11)")
-                        .HasColumnName("responsible_user_id");
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResponsibleUserId");
+                    b.HasIndex("ResponsibleUserIdNavigationId");
 
-                    b.ToTable("agenda_day_config", (string)null);
+                    b.ToTable("AgendaDayConfig");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.AgendaSettings", b =>
@@ -217,8 +208,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("responsible_user_id");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("date")
-                        .HasColumnName("start_date");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)")
@@ -2180,7 +2170,9 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ResponsibleUserIdNavigation");
                 });
@@ -2189,7 +2181,9 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ResponsibleUserIdNavigation");
                 });

@@ -56,6 +56,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                         .OrderByDescending(o => o.CreatedAt)
                         .ToListAsync(cancellation);
 
+                    var activeAppt = await _context.Appointment
+                        .FirstOrDefaultAsync(a => a.VehicleId == v.Id && a.IsActive && (a.Status == "Agendada" || a.Status == "Pendiente"), cancellation);
+
                     result.Add(new CustomerPortalVehicleDto
                     {
                         Id = v.Id,
@@ -67,7 +70,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                         CylinderCapacity = v.CylinderCapacity,
                         TotalOrders = orders.Count,
                         LastOrderStatus = orders.FirstOrDefault()?.Status,
-                        LastOrderDate = orders.FirstOrDefault()?.EntryDate
+                        LastOrderDate = orders.FirstOrDefault()?.EntryDate,
+                        ActiveWorkOrderStatus = orders.FirstOrDefault(o => o.IsActive && o.Status != "Entregado" && o.Status != "Cancelada")?.Status,
+                        ActiveAppointmentId = activeAppt?.Id
                     });
                 }
                 return result;
@@ -268,6 +273,59 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 _logger.LogError(ex, $"Error approving item {dto.ItemId} ({dto.ItemType})");
                 return false;
             }
+        }
+
+        public async Task<bool> CreateMyVehicleAsync(CustomerPortalCreateVehicleDto dto, CancellationToken cancellation)
+        {
+            try
+            {
+                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                if (customerId == null) return false;
+
+                var vehicle = new ApiTaller.Domain.Models.Vehicle
+                {
+                    Plate = dto.Plate.ToUpper().Trim(),
+                    BrandId = dto.BrandId,
+                    ModelId = dto.ModelId,
+                    VersionId = dto.VersionId,
+                    Color = dto.Color,
+                    CylinderCapacity = dto.CylinderCapacity,
+                    CustomerId = customerId.Value,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    ResponsibleUserId = int.Parse(_currentUserService.UserId)
+                };
+
+                _context.Vehicle.Add(vehicle);
+                return await _context.SaveChangesAsync(cancellation) > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating customer vehicle from portal");
+                return false;
+            }
+        }
+
+        public async Task<IEnumerable<CustomerPortalAppointmentDto>> GetMyAppointmentsAsync(CancellationToken cancellation)
+        {
+            var customerId = await GetCustomerIdFromUserAsync(cancellation);
+            if (customerId == null) return new List<CustomerPortalAppointmentDto>();
+
+            return await _context.Appointment
+                .Include(a => a.ServiceTypeNavigation)
+                .Where(a => a.CustomerId == customerId && a.IsActive)
+                .OrderByDescending(a => a.AppointmentDate)
+                .Select(a => new CustomerPortalAppointmentDto
+                {
+                    Id = a.Id,
+                    AppointmentDate = a.AppointmentDate,
+                    Status = a.Status,
+                    VehicleDescription = a.VehicleDescription,
+                    ServiceTypeName = a.ServiceTypeNavigation != null ? a.ServiceTypeNavigation.Name : "No especificado",
+                    CustomerNotes = a.CustomerNotes
+                })
+                .ToListAsync(cancellation);
         }
     }
 }

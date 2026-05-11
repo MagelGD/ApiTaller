@@ -96,5 +96,38 @@ namespace ApiTaller.api.Controllers
                 return BadRequest();
             }
         }
+
+        /// <summary>
+        /// Registra un nuevo vehículo para el cliente autenticado.
+        /// </summary>
+        [HttpPost("MyVehicles")]
+        public async Task<IActionResult> PostMyVehicle(CustomerPortalCreateVehicleDto dto, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _service.CreateMyVehicleAsync(dto, cancellationToken);
+                if (!result) return BadRequest(new { Message = "Error al registrar el vehículo. Verifique los datos." });
+                return Ok(new { Message = "Vehículo registrado con éxito." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al registrar vehículo en el portal del cliente");
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("MyAppointments")]
+        public async Task<IActionResult> GetMyAppointments(CancellationToken cancellationToken)
+        {
+            try
+            {
+                return Ok(await _service.GetMyAppointmentsAsync(cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener citas del portal del cliente");
+                return BadRequest();
+            }
+        }
     }
 }

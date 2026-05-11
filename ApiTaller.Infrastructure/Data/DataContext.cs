@@ -49,6 +49,12 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<SalePayment> SalePayment { get; set; }
         public DbSet<WorkshopSettings> WorkshopSettings { get; set; }
 
+        // Módulo Agenda
+        public DbSet<AgendaSettings> AgendaSettings { get; set; }
+        public DbSet<AgendaBlock> AgendaBlock { get; set; }
+        public DbSet<Appointment> Appointment { get; set; }
+        public DbSet<AgendaDayConfig> AgendaDayConfig { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

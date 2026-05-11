@@ -14,5 +14,7 @@ namespace ApiTaller.Domain.Dtos.CustomerPortal
         public int TotalOrders { get; set; }
         public string? LastOrderStatus { get; set; }
         public DateTime? LastOrderDate { get; set; }
+        public string? ActiveWorkOrderStatus { get; set; }
+        public int? ActiveAppointmentId { get; set; }
     }
 }

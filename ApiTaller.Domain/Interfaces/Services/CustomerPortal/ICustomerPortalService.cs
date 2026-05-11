@@ -11,5 +11,7 @@ namespace ApiTaller.Domain.Interfaces.Services.CustomerPortal
         Task<IEnumerable<CustomerPortalOrderSummaryDto>> GetMyOrdersByVehicleAsync(int vehicleId, CancellationToken cancellation);
         Task<CustomerPortalOrderDetailDto?> GetMyOrderDetailAsync(int orderId, CancellationToken cancellation);
         Task<bool> ApproveItemAsync(CustomerPortalApprovalDto dto, CancellationToken cancellation);
+        Task<bool> CreateMyVehicleAsync(CustomerPortalCreateVehicleDto dto, CancellationToken cancellation);
+        Task<IEnumerable<CustomerPortalAppointmentDto>> GetMyAppointmentsAsync(CancellationToken cancellation);
     }
 }
