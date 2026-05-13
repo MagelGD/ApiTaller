@@ -4,6 +4,7 @@ using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260513160750_Version9")]
+    partial class Version9
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2074,9 +2077,6 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("description");
 
-                    b.Property<int>("EstimatedMinutes")
-                        .HasColumnType("int");
-
                     b.Property<ulong>("IsActive")
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
@@ -2096,10 +2096,6 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int?>("ResponsibleUserId")
                         .HasColumnType("int(11)")
                         .HasColumnName("responsible_user_id");
-
-                    b.Property<string>("TimeUnit")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")

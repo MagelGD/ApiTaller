@@ -8,6 +8,8 @@ namespace ApiTaller.Domain.Models
         public string Description { get; set; }
         public int MechanicId { get; set; }
         public decimal Price { get; set; }
+        public int EstimatedMinutes { get; set; }
+        public string TimeUnit { get; set; }
         public DateTime? WarrantyEndDate { get; set; }
         public bool IsApproved { get; set; } = true;
 

@@ -47,6 +47,9 @@ namespace ApiTaller.Core.Services.ServiceCatalogs
                     ServiceTypeId = serviceCatalog.ServiceTypeId,
                     Name = serviceCatalog.Name,
                     Description = serviceCatalog.Description,
+                    DefaultPrice = serviceCatalog.DefaultPrice,
+                    DefaultMinutes = serviceCatalog.DefaultMinutes,
+                    TimeUnit = serviceCatalog.TimeUnit,
                     IsActive = serviceCatalog.IsActive,
                     CreatedAt = serviceCatalog.CreatedAt ?? DateTime.Now,
                     UpdatedAt = DateTime.UtcNow

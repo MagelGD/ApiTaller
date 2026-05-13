@@ -30,6 +30,18 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("text")
                 .HasColumnName("description");
 
+            entity.Property(e => e.DefaultPrice)
+                .HasColumnType("decimal(18,2)")
+                .HasColumnName("default_price");
+
+            entity.Property(e => e.DefaultMinutes)
+                .HasColumnType("int(11)")
+                .HasColumnName("default_minutes");
+
+            entity.Property(e => e.TimeUnit)
+                .HasMaxLength(20)
+                .HasColumnName("time_unit");
+
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

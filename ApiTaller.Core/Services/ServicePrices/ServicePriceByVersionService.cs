@@ -53,20 +53,29 @@ namespace ApiTaller.Core.Services.ServicePrices
                     BrandModelVersionId = servicePrice.BrandModelVersionId,
                     Price = servicePrice.Price,
                     EstimatedMinutes = servicePrice.EstimatedMinutes,
+                    TimeUnit = servicePrice.TimeUnit,
                     IsActive = servicePrice.IsActive,
                     CreatedAt = servicePrice.CreatedAt ?? DateTime.Now,
                     UpdatedAt = DateTime.UtcNow
                 };
 
                 bool exists = await ValidateExist(servicePrice.ServiceCatalogId, servicePrice.BrandModelVersionId, cancellationToken);
+                var existing = await _repository.ValidateExist(servicePrice.ServiceCatalogId, servicePrice.BrandModelVersionId, cancellationToken);
 
                 if (saveData.Id == 0 && !exists)
                 {
                     await _repository.CreateAsync(saveData, cancellationToken);
                     result = await _repository.ValidateExist(servicePrice.ServiceCatalogId, servicePrice.BrandModelVersionId, cancellationToken) ?? new GetServicePriceByVersionDto();
                 }
-                else if (saveData.Id != 0)
+                else
                 {
+                    // Si el Id es 0 pero existe, tomamos el Id existente para actualizar
+                    if (saveData.Id == 0 && existing != null)
+                    {
+                        saveData.Id = existing.Id;
+                        saveData.CreatedAt = existing.CreatedAt ?? DateTime.Now; // Preservar fecha original
+                    }
+
                     await _repository.UpdateAsync(saveData, cancellationToken);
                     result = await _repository.GetByIdAsync(saveData.Id, cancellationToken) ?? new GetServicePriceByVersionDto();
                 }

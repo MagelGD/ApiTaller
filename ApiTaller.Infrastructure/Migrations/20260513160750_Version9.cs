@@ -1,0 +1,30 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace ApiTaller.Infrastructure.Migrations
+{
+    /// <inheritdoc />
+    public partial class Version9 : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "time_unit",
+                table: "service_price_by_version",
+                type: "varchar(20)",
+                maxLength: 20,
+                nullable: true)
+                .Annotation("MySql:CharSet", "utf8mb4");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "time_unit",
+                table: "service_price_by_version");
+        }
+    }
+}

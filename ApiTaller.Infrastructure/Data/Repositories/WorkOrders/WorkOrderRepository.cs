@@ -127,6 +127,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             MechanicId = s.MechanicId,
                             MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
                             Price = s.Price,
+                            EstimatedMinutes = s.EstimatedMinutes,
+                            TimeUnit = s.TimeUnit,
                             WarrantyEndDate = s.WarrantyEndDate,
                             IsActive = s.IsActive,
                             IsApproved = s.IsApproved
@@ -201,6 +203,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                             MechanicId = s.MechanicId,
                             MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
                             Price = s.Price,
+                            EstimatedMinutes = s.EstimatedMinutes,
+                            TimeUnit = s.TimeUnit,
                             WarrantyEndDate = s.WarrantyEndDate,
                             IsActive = s.IsActive,
                             IsApproved = s.IsApproved
@@ -315,12 +319,17 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                 }
 
-                // Sincronizar Evidencias
+                // Sincronizar Evidencias con detalle por tipo
+                var addedByType = new Dictionary<string, int>();
+                var removedByType = new Dictionary<string, int>();
+
                 foreach (var existingEvidence in existingOrder.Evidences.ToList())
                 {
                     if (!update.Evidences.Any(e => e.Id == existingEvidence.Id))
                     {
-                        evidencesRemoved++;
+                        var type = existingEvidence.EvidenceType ?? "General";
+                        if (!removedByType.ContainsKey(type)) removedByType[type] = 0;
+                        removedByType[type]++;
                         _context.WorkOrderEvidence.Remove(existingEvidence);
                     }
                 }
@@ -333,7 +342,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                     else
                     {
-                        evidencesAdded++;
+                        var type = evidence.EvidenceType ?? "General";
+                        if (!addedByType.ContainsKey(type)) addedByType[type] = 0;
+                        addedByType[type]++;
+
                         evidence.WorkOrderId = existingOrder.Id;
                         evidence.CreatedAt = DateTime.Now;
                         if (userId != 0) evidence.ResponsibleUserId = userId;
@@ -357,9 +369,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 if (servicesAdded > 0) msgBuilder.Append($"\n- Se agregaron {servicesAdded} servicios.");
                 if (servicesRemoved > 0) msgBuilder.Append($"\n- Se eliminaron {servicesRemoved} servicios.");
                 if (servicesUpdated > 0) msgBuilder.Append($"\n- Se actualizaron {servicesUpdated} servicios.");
-                if (evidencesAdded > 0) msgBuilder.Append($"\n- Se agregaron {evidencesAdded} evidencias.");
-                if (evidencesRemoved > 0) msgBuilder.Append($"\n- Se eliminaron {evidencesRemoved} evidencias.");
-                if (partsAdded == 0 && partsRemoved == 0 && partsUpdated == 0 && servicesAdded == 0 && servicesRemoved == 0 && servicesUpdated == 0 && evidencesAdded == 0 && evidencesRemoved == 0)
+
+                // Detalle de evidencias por tipo
+                foreach (var kvp in addedByType) msgBuilder.Append($"\n- Se agregaron {kvp.Value} evidencias de {kvp.Key}.");
+                foreach (var kvp in removedByType) msgBuilder.Append($"\n- Se eliminaron {kvp.Value} evidencias de {kvp.Key}.");
+
+                if (partsAdded == 0 && partsRemoved == 0 && partsUpdated == 0 && 
+                    servicesAdded == 0 && servicesRemoved == 0 && servicesUpdated == 0 && 
+                    addedByType.Count == 0 && removedByType.Count == 0)
                 {
                     msgBuilder.Append("\n- Información general actualizada.");
                 }

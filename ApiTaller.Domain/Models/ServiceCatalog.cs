@@ -8,6 +8,9 @@ public partial class ServiceCatalog : GeneralEntity
     public int ServiceTypeId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
+    public decimal DefaultPrice { get; set; }
+    public int DefaultMinutes { get; set; }
+    public string? TimeUnit { get; set; }
 
     public virtual ServiceType ServiceTypeIdNavigation { get; set; }
 }

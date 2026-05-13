@@ -102,6 +102,8 @@ namespace ApiTaller.Core.Services.WorkOrders
                             Description = service.Description,
                             MechanicId = service.MechanicId,
                             Price = service.Price,
+                            EstimatedMinutes = service.EstimatedMinutes,
+                            TimeUnit = service.TimeUnit,
                             WarrantyEndDate = service.WarrantyEndDate,
                             IsApproved = service.IsApproved,
                             IsActive = service.IsActive,

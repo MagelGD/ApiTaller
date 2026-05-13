@@ -327,5 +327,60 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 })
                 .ToListAsync(cancellation);
         }
+
+        public async Task<bool> ApproveFullOrderAsync(int orderId, CancellationToken cancellation)
+        {
+            try
+            {
+                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                if (customerId == null) return false;
+
+                var order = await _context.WorkOrder
+                    .Include(o => o.Parts)
+                    .Include(o => o.Services)
+                    .Include(o => o.VehicleNavigation)
+                    .FirstOrDefaultAsync(o => o.Id == orderId && o.VehicleNavigation.CustomerId == customerId, cancellation);
+
+                if (order == null) return false;
+
+                // Solo permitir si está en estados de aprobación/cotización
+                var s = order.Status ?? "";
+                var validStatuses = new[] { "Cotización", "Cotizacion", "En Aprobación", "En Aprobacion", "Recepción", "Recepcion", "Ingreso" };
+                
+                if (!validStatuses.Any(vs => vs.Equals(s, StringComparison.OrdinalIgnoreCase) || s.Contains(vs, StringComparison.OrdinalIgnoreCase)))
+                {
+                    _logger.LogWarning("Intento de aprobación total en estado no permitido: {Status}", s);
+                    return false;
+                }
+
+                // 1. Aprobar todo lo activo
+                foreach (var p in order.Parts.Where(p => p.IsActive)) p.IsApproved = true;
+                foreach (var svc in order.Services.Where(s => s.IsActive)) svc.IsApproved = true;
+
+                // 2. Cambiar estado
+                order.Status = "Aprobado";
+                order.UpdatedAt = DateTime.Now;
+
+                // 3. Registrar historia
+                var history = new ApiTaller.Domain.Models.WorkOrderHistory
+                {
+                    WorkOrderId = order.Id,
+                    Status = "Aprobado",
+                    Observations = "Presupuesto aprobado por el cliente desde el portal.",
+                    CreatedAt = DateTime.Now,
+                    IsActive = true
+                };
+                if (int.TryParse(_currentUserService.UserId, out int userId)) history.ResponsibleUserId = userId;
+                
+                _context.WorkOrderHistory.Add(history);
+
+                return await _context.SaveChangesAsync(cancellation) > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error approving full order {orderId} in portal");
+                return false;
+            }
+        }
     }
 }

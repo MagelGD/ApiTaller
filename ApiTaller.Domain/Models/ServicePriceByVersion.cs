@@ -9,6 +9,7 @@ public partial class ServicePriceByVersion : GeneralEntity
     public int BrandModelVersionId { get; set; }
     public decimal Price { get; set; }
     public int EstimatedMinutes { get; set; }
+    public string? TimeUnit { get; set; }
 
     public virtual ServiceCatalog ServiceCatalogIdNavigation { get; set; }
     public virtual BrandModelVersion BrandModelVersionIdNavigation { get; set; }

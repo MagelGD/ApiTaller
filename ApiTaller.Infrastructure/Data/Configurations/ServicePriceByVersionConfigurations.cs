@@ -35,6 +35,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("int(11)")
                 .HasColumnName("estimated_minutes");
 
+            entity.Property(e => e.TimeUnit)
+                .HasColumnName("time_unit")
+                .HasMaxLength(20);
+
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

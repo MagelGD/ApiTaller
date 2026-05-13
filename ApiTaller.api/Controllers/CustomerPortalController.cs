@@ -98,6 +98,23 @@ namespace ApiTaller.api.Controllers
         }
 
         /// <summary>
+        /// Aprueba el presupuesto completo y cambia el estado a Aprobado.
+        /// </summary>
+        [HttpPost("ApproveFullOrder/{orderId}")]
+        public async Task<IActionResult> ApproveFullOrder(int orderId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return Ok(await _service.ApproveFullOrderAsync(orderId, cancellationToken));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al aprobar orden completa {orderId} en el portal del cliente");
+                return BadRequest();
+            }
+        }
+
+        /// <summary>
         /// Registra un nuevo vehículo para el cliente autenticado.
         /// </summary>
         [HttpPost("MyVehicles")]

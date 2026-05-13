@@ -28,6 +28,9 @@ namespace ApiTaller.Core.Services.CustomerPortal
         public async Task<bool> ApproveItemAsync(CustomerPortalApprovalDto dto, CancellationToken cancellation)
             => await _repository.ApproveItemAsync(dto, cancellation);
 
+        public async Task<bool> ApproveFullOrderAsync(int orderId, CancellationToken cancellation)
+            => await _repository.ApproveFullOrderAsync(orderId, cancellation);
+
         public async Task<bool> CreateMyVehicleAsync(CustomerPortalCreateVehicleDto dto, CancellationToken cancellation)
             => await _repository.CreateMyVehicleAsync(dto, cancellation);
 
