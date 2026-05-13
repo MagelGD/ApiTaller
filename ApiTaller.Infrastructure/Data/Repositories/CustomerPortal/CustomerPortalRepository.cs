@@ -338,7 +338,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 var order = await _context.WorkOrder
                     .Include(o => o.Parts)
                     .Include(o => o.Services)
-                    .Include(o => o.VehicleNavigation)
+                    .Include(o => o.VehicleNavigation).ThenInclude(v => v.CustomerNavigation)
                     .FirstOrDefaultAsync(o => o.Id == orderId && o.VehicleNavigation.CustomerId == customerId, cancellation);
 
                 if (order == null) return false;
@@ -367,6 +367,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                     WorkOrderId = order.Id,
                     Status = "Aprobado",
                     Observations = "Presupuesto aprobado por el cliente desde el portal.",
+                    ActionBy = order.VehicleNavigation?.CustomerNavigation?.FirstName ?? "Cliente (Portal)",
                     CreatedAt = DateTime.Now,
                     IsActive = true
                 };

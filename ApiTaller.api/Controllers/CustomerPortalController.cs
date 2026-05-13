@@ -11,7 +11,6 @@ namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Todos los endpoints requieren JWT válido
     [Authorize]
     public class CustomerPortalController : ControllerBase
     {
