@@ -14,11 +14,13 @@ namespace ApiTaller.Core.Services.WorkOrders
     public class WorkOrderService : IWorkOrderService
     {
         private readonly IWorkOrderRepository _workOrderRepository;
+        private readonly IWorkOrderNotificationService _notificationService;
         private readonly ILogger<WorkOrderService> _logger;
 
-        public WorkOrderService(IWorkOrderRepository workOrderRepository, ILogger<WorkOrderService> logger)
+        public WorkOrderService(IWorkOrderRepository workOrderRepository, IWorkOrderNotificationService notificationService, ILogger<WorkOrderService> logger)
         {
             _workOrderRepository = workOrderRepository;
+            _notificationService = notificationService;
             _logger = logger;
         }
 
@@ -131,14 +133,21 @@ namespace ApiTaller.Core.Services.WorkOrders
                     }
                 }
 
+                bool result;
                 if (model.Id == 0)
                 {
-                    return await _workOrderRepository.CreateAsync(model, cancellation);
+                    result = await _workOrderRepository.CreateAsync(model, cancellation);
                 }
                 else
                 {
-                    return await _workOrderRepository.UpdateAsync(model, cancellation);
+                    result = await _workOrderRepository.UpdateAsync(model, cancellation);
                 }
+
+                if (result)
+                {
+                    await _notificationService.NotifyWorkOrderUpdatedAsync(model.Id, model.CustomerId);
+                }
+                return result;
             }
             catch (Exception ex)
             {
@@ -151,7 +160,16 @@ namespace ApiTaller.Core.Services.WorkOrders
         {
             try
             {
-                return await _workOrderRepository.ChangeStatusAsync(id, status, cancellation);
+                var success = await _workOrderRepository.ChangeStatusAsync(id, status, cancellation);
+                if (success)
+                {
+                    var order = await _workOrderRepository.GetByIdAsync(id, cancellation);
+                    if (order != null)
+                    {
+                        await _notificationService.NotifyWorkOrderUpdatedAsync(id, order.CustomerId);
+                    }
+                }
+                return success;
             }
             catch (Exception ex)
             {

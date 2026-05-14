@@ -25,10 +25,10 @@ namespace ApiTaller.Domain.Models
         public int? WorkOrderId { get; set; }
 
         // Campos para clientes sin cuenta (Flujo 2 y Flujo 3 walk-in nuevo)
-        public string ContactName { get; set; }
-        public string ContactPhone { get; set; }
-        public string ContactEmail { get; set; }
-        public string VehicleDescription { get; set; }
+        public string? ContactName { get; set; }
+        public string? ContactPhone { get; set; }
+        public string? ContactEmail { get; set; }
+        public string? VehicleDescription { get; set; }
 
         // Navegación
         public virtual Customer CustomerNavigation { get; set; }

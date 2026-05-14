@@ -39,6 +39,7 @@ builder.Services.AddCors(options =>
 #endregion
 #region Inject Services
 builder.Services.AddServices();
+builder.Services.AddScoped<ApiTaller.Domain.Interfaces.Services.WorkOrders.IWorkOrderNotificationService, ApiTaller.api.Services.WorkOrderNotificationService>();
 #endregion
 #region Inject Repositories
 builder.Services.AddRespositories();
@@ -99,4 +100,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<PermissionsHub>("/hubs/permissions");
+app.MapHub<WorkOrderHub>("/hubs/work-orders");
 app.Run();

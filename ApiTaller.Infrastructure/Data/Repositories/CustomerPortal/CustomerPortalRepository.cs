@@ -1,6 +1,7 @@
 using ApiTaller.Domain.Dtos.CustomerPortal;
 using ApiTaller.Domain.Interfaces.Repositories.CustomerPortal;
 using ApiTaller.Domain.Interfaces.Services;
+using ApiTaller.Domain.Interfaces.Services.WorkOrders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -16,12 +17,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         private readonly DataContext _context;
         private readonly ILogger<CustomerPortalRepository> _logger;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IWorkOrderNotificationService _notificationService;
 
-        public CustomerPortalRepository(DataContext context, ILogger<CustomerPortalRepository> logger, ICurrentUserService currentUserService)
+        public CustomerPortalRepository(DataContext context, ILogger<CustomerPortalRepository> logger, ICurrentUserService currentUserService, IWorkOrderNotificationService notificationService)
         {
             _context = context;
             _logger = logger;
             _currentUserService = currentUserService;
+            _notificationService = notificationService;
         }
 
         // ─── Helper privado: resuelve customerId a partir del userId del JWT ───────
@@ -266,7 +269,27 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                     return false; // ItemType desconocido
                 }
 
-                return await _context.SaveChangesAsync(cancellation) > 0;
+                var saved = await _context.SaveChangesAsync(cancellation) > 0;
+                if (saved)
+                {
+                    int orderId = 0;
+                    if (dto.ItemType == "Part")
+                    {
+                        var p = await _context.WorkOrderPart.FindAsync(dto.ItemId);
+                        orderId = p?.WorkOrderId ?? 0;
+                    }
+                    else
+                    {
+                        var s = await _context.WorkOrderService.FindAsync(dto.ItemId);
+                        orderId = s?.WorkOrderId ?? 0;
+                    }
+
+                    if (orderId > 0)
+                    {
+                        await _notificationService.NotifyWorkOrderUpdatedAsync(orderId, customerId.Value);
+                    }
+                }
+                return saved;
             }
             catch (Exception ex)
             {
@@ -375,7 +398,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 
                 _context.WorkOrderHistory.Add(history);
 
-                return await _context.SaveChangesAsync(cancellation) > 0;
+                var saved = await _context.SaveChangesAsync(cancellation) > 0;
+                if (saved)
+                {
+                    await _notificationService.NotifyWorkOrderUpdatedAsync(orderId, customerId.Value);
+                }
+                return saved;
             }
             catch (Exception ex)
             {

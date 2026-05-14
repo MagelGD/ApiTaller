@@ -193,9 +193,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     return false;
                 }
 
+                // Obtener el CustomerId real a partir del UserId del token
+                var customer = await _context.Customer
+                    .FirstOrDefaultAsync(c => c.UserId == userId, ct);
+                
                 var appointment = new Appointment
                 {
                     AppointmentDate = dto.AppointmentDate.Date,
+                    CustomerId = customer?.Id, // Vínculo vital para el portal del cliente
                     VehicleId = dto.VehicleId,
                     ServiceTypeId = dto.ServiceTypeId,
                     Status = "Agendada",
@@ -203,7 +208,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     CreatedAt = DateTime.Now,
                     ResponsibleUserId = userId,
                     BookingSource = "Portal",
-                    CustomerNotes = dto.CustomerNotes ?? ""
+                    CustomerNotes = dto.CustomerNotes ?? "",
+                    // Inicializamos campos de contacto vacíos para evitar error de NOT NULL en DB
+                    ContactName = "",
+                    ContactPhone = "",
+                    ContactEmail = "",
+                    VehicleDescription = ""
                 };
 
                 await _context.Appointment.AddAsync(appointment, ct);

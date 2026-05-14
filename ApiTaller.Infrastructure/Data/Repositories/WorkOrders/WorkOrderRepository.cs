@@ -263,17 +263,24 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     var existingPart = existingOrder.Parts.FirstOrDefault(p => p.Id == part.Id && p.Id != 0);
                     if (existingPart != null)
                     {
-                        partsUpdated++;
-                        // Si cambió la cantidad y es del taller, ajustar inventario
-                        if (!existingPart.IsProvidedByCustomer && existingPart.ProductId.HasValue && existingPart.Quantity != part.Quantity)
+                        // Solo marcar como actualizado si hubo cambios reales
+                        if (existingPart.Quantity != part.Quantity || 
+                            existingPart.UnitPrice != part.UnitPrice || 
+                            existingPart.IsApproved != part.IsApproved ||
+                            existingPart.PartName != part.PartName)
                         {
-                            int diff = part.Quantity - existingPart.Quantity;
-                            string type = diff > 0 ? "Salida" : "Entrada";
-                            await RegisterInventoryMovement(existingPart.ProductId.Value, Math.Abs(diff), type, $"Ajuste de cantidad en WO #{existingOrder.Id}", existingOrder.Id, cancellation);
-                        }
+                            partsUpdated++;
+                            // Si cambió la cantidad y es del taller, ajustar inventario
+                            if (!existingPart.IsProvidedByCustomer && existingPart.ProductId.HasValue && existingPart.Quantity != part.Quantity)
+                            {
+                                int diff = part.Quantity - existingPart.Quantity;
+                                string type = diff > 0 ? "Salida" : "Entrada";
+                                await RegisterInventoryMovement(existingPart.ProductId.Value, Math.Abs(diff), type, $"Ajuste de cantidad en WO #{existingOrder.Id}", existingOrder.Id, cancellation);
+                            }
 
-                        _context.Entry(existingPart).CurrentValues.SetValues(part);
-                        existingPart.UpdatedAt = DateTime.Now;
+                            _context.Entry(existingPart).CurrentValues.SetValues(part);
+                            existingPart.UpdatedAt = DateTime.Now;
+                        }
                     }
                     else
                     {
@@ -305,9 +312,16 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     var existingService = existingOrder.Services.FirstOrDefault(s => s.Id == service.Id && s.Id != 0);
                     if (existingService != null)
                     {
-                        servicesUpdated++;
-                        _context.Entry(existingService).CurrentValues.SetValues(service);
-                        existingService.UpdatedAt = DateTime.Now;
+                        // Solo marcar como actualizado si hubo cambios reales
+                        if (existingService.Price != service.Price || 
+                            existingService.IsApproved != service.IsApproved ||
+                            existingService.Description != service.Description ||
+                            existingService.MechanicId != service.MechanicId)
+                        {
+                            servicesUpdated++;
+                            _context.Entry(existingService).CurrentValues.SetValues(service);
+                            existingService.UpdatedAt = DateTime.Now;
+                        }
                     }
                     else
                     {
