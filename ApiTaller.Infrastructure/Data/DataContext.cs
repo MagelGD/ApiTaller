@@ -48,6 +48,7 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<SaleDetail> SaleDetail { get; set; }
         public DbSet<SalePayment> SalePayment { get; set; }
         public DbSet<WorkshopSettings> WorkshopSettings { get; set; }
+        public DbSet<EmailSettings> EmailSettings { get; set; }
 
         // Módulo Agenda
         public DbSet<AgendaSettings> AgendaSettings { get; set; }

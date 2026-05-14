@@ -87,6 +87,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IWorkshopSettingsRepository, WorkshopSettingsRepository>();
             services.TryAddScoped<ICustomerPortalRepository, CustomerPortalRepository>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Agenda.IAgendaRepository, ApiTaller.Infrastructure.Data.Repositories.Agenda.AgendaRepository>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Email.IEmailService, ApiTaller.Infrastructure.Services.Email.EmailService>();
             return services;
         }
     }
