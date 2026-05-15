@@ -23,12 +23,12 @@ namespace ApiTaller.api.Controllers
             _service = service;
         }
 
-        [HttpGet("GetAll")]
+        [HttpGet("GetProductType")]
         public async Task<IActionResult> GetAll(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetProductType(cancellation));
+                return Ok(await _service.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -37,12 +37,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpGet("GetActive")]
+        [HttpGet("GetProductTypeActive")]
         public async Task<IActionResult> GetActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetProductTypeActive(cancellation));
+                return Ok(await _service.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -51,12 +51,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpGet("GetById/{id}")]
+        [HttpGet("GetProductTypeById/{id}")]
         public async Task<IActionResult> GetById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetProductTypeById(id, cancellation));
+                return Ok(await _service.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -65,7 +65,7 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpPost("SaveOrUpdate")]
+        [HttpPost("CreateOrEditProductType")]
         public async Task<IActionResult> SaveOrUpdate(GetProductTypeDto value, CancellationToken cancellation)
         {
             try

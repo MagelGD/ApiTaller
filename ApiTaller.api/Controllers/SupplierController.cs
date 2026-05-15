@@ -28,7 +28,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _supplierService.GetAllSuppliersAsync(cancellation));
+                return Ok(await _supplierService.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _supplierService.GetAllSuppliersActiveAsync(cancellation));
+                return Ok(await _supplierService.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _supplierService.GetSupplierByIdAsync(id, cancellation));
+                return Ok(await _supplierService.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {

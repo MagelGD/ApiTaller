@@ -28,7 +28,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _brandModelVersionService.GetBrandModelVersionAsync(cancellation));
+                return Ok(await _brandModelVersionService.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _brandModelVersionService.GetBrandModelVersionActiveAsync(cancellation));
+                return Ok(await _brandModelVersionService.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _brandModelVersionService.GetBrandModelVersionByIdAsync(id, cancellation));
+                return Ok(await _brandModelVersionService.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -70,7 +70,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _brandModelVersionService.CreateOrEditBrandModelVersion(value, cancellation));
+                return Ok(await _brandModelVersionService.CreateOrEditAsync(value, cancellation));
             }
             catch (Exception ex)
             {

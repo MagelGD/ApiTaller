@@ -28,7 +28,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _workshopSettingsService.GetAsync(cancellation));
+                return Ok(await _workshopSettingsService.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {

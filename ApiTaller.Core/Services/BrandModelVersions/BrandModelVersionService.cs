@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.BrandModelVersion;
+using ApiTaller.Domain.Dtos.BrandModelVersion;
 using ApiTaller.Domain.Interfaces.Repositories.BrandModelVersion;
 using ApiTaller.Domain.Interfaces.Services.BrandModelVersion;
 using ApiTaller.Domain.Models;
@@ -21,12 +21,12 @@ namespace ApiTaller.Core.Services.BrandModelVersions
         }
 
 
-        public async Task<IEnumerable<GetBrandModelVersionDto>> GetBrandModelVersionActiveAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<GetBrandModelVersionDto>> GetAllActiveAsync(CancellationToken cancellation)
         {
             IEnumerable<GetBrandModelVersionDto> result = [];
             try
             {
-                result = await _brandModelVersionRepository.GetBrandModelVersionActiveAsync(cancellationToken);
+                result = await _brandModelVersionRepository.GetAllActiveAsync(cancellation);
             }
             catch (Exception ex)
             {
@@ -35,12 +35,12 @@ namespace ApiTaller.Core.Services.BrandModelVersions
             return result;
         }
 
-        public async Task<IEnumerable<GetBrandModelVersionDto>> GetBrandModelVersionAsync(CancellationToken cancellationToken)
+        public async Task<IEnumerable<GetBrandModelVersionDto>> GetAllAsync(CancellationToken cancellation)
         {
             IEnumerable<GetBrandModelVersionDto> result = [];
             try
             {
-                result = await _brandModelVersionRepository.GetBrandModelVersionAsync(cancellationToken);
+                result = await _brandModelVersionRepository.GetAllAsync(cancellation);
             }
             catch (Exception ex)
             {
@@ -49,12 +49,12 @@ namespace ApiTaller.Core.Services.BrandModelVersions
             return result;
         }
 
-        public async Task<GetBrandModelVersionDto?> GetBrandModelVersionByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<GetBrandModelVersionDto?> GetByIdAsync(int id, CancellationToken cancellation)
         {
             GetBrandModelVersionDto? result = null;
             try
             {
-                result = await _brandModelVersionRepository.GetBrandModelVersionByIdAsync(id, cancellationToken);
+                result = await _brandModelVersionRepository.GetByIdAsync(id, cancellation);
             }
             catch (Exception ex)
             {
@@ -62,30 +62,30 @@ namespace ApiTaller.Core.Services.BrandModelVersions
             }
             return result;
         }
-        public async Task<GetBrandModelVersionDto> CreateOrEditBrandModelVersionAsync(GetBrandModelVersionDto getBrandModelVersionDto, CancellationToken cancellationToken)
+        public async Task<GetBrandModelVersionDto> CreateOrEditAsync(GetBrandModelVersionDto dto, CancellationToken cancellation)
         {
             GetBrandModelVersionDto result = new();
             try
             {
                 BrandModelVersion saveData = new()
                 {
-                    Id = getBrandModelVersionDto.Id,
-                    Version = getBrandModelVersionDto.Version,
-                    BrandId = getBrandModelVersionDto.brandDto.Id,
-                    ModelId = getBrandModelVersionDto.BrandModelsDto.Id,
-                    IsActive = getBrandModelVersionDto.IsActive,
-                    CreatedAt = getBrandModelVersionDto.CreatedAt ?? DateTime.Now
+                    Id = dto.Id,
+                    Version = dto.Version,
+                    BrandId = dto.brandDto.Id,
+                    ModelId = dto.BrandModelsDto.Id,
+                    IsActive = dto.IsActive,
+                    CreatedAt = dto.CreatedAt ?? DateTime.Now
                 };
-                bool isExit = await ValidateExist(getBrandModelVersionDto, cancellationToken);
+                bool isExit = await ValidateExist(dto, cancellation);
                 if (saveData.Id == 0 && !isExit)
                 {
-                    await _brandModelVersionRepository.CreateBrandModelVersionAsync(saveData, cancellationToken);
+                    await _brandModelVersionRepository.CreateAsync(saveData, cancellation);
                 }
                 else if (saveData.Id != 0)
                 {
-                    await _brandModelVersionRepository.UpdateBrandModelVersionAsync(saveData, cancellationToken);
+                    await _brandModelVersionRepository.UpdateAsync(saveData, cancellation);
                 }
-                result = await _brandModelVersionRepository.ValidateExist(getBrandModelVersionDto, cancellationToken) ?? new();
+                result = await _brandModelVersionRepository.ValidateExist(dto, cancellation) ?? new();
             }
             catch (Exception ex)
             {
@@ -93,12 +93,12 @@ namespace ApiTaller.Core.Services.BrandModelVersions
             }
             return result;
         }
-        private async Task<bool> ValidateExist(GetBrandModelVersionDto getBrandModelVersionDto, CancellationToken cancellationToken)
+        private async Task<bool> ValidateExist(GetBrandModelVersionDto dto, CancellationToken cancellation)
         {
             GetBrandModelVersionDto? result = null;
             try
             {
-                result = await _brandModelVersionRepository.ValidateExist(getBrandModelVersionDto, cancellationToken);
+                result = await _brandModelVersionRepository.ValidateExist(dto, cancellation);
             }
             catch (Exception ex)
             {

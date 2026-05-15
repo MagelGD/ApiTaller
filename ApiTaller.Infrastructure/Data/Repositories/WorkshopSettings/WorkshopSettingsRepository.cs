@@ -5,6 +5,8 @@ using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,6 +23,32 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkshopSettings
             _context = context;
             _logger = logger;
             _currentUserService = currentUserService;
+        }
+
+        public async Task<IEnumerable<WorkshopSettingsDto>> GetAllAsync(CancellationToken cancellation)
+        {
+            try
+            {
+                return await _context.WorkshopSettings
+                    .Where(s => s.IsActive)
+                    .Select(setting => new WorkshopSettingsDto
+                    {
+                        Id = setting.Id,
+                        SettingKey = setting.SettingKey,
+                        SettingValue = setting.SettingValue,
+                        Description = setting.Description,
+                        IsActive = setting.IsActive,
+                        CreatedAt = setting.CreatedAt,
+                        UpdatedAt = setting.UpdatedAt,
+                        ResponsibleUserId = setting.ResponsibleUserId
+                    })
+                    .ToListAsync(cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all workshop settings");
+                return Enumerable.Empty<WorkshopSettingsDto>();
+            }
         }
 
         public async Task<WorkshopSettingsDto?> GetByKeyAsync(string key, CancellationToken cancellation)

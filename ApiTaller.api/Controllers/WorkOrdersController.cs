@@ -52,11 +52,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("CreateOrEditWorkOrder")]
-        public async Task<IActionResult> CreateOrEditWorkOrder(GetWorkOrderDto value, CancellationToken cancellation)
+        public async Task<IActionResult> CreateOrEditWorkOrder(WorkOrderDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _workOrderService.CreateOrEditWorkOrder(value, cancellation));
+                return Ok(await _workOrderService.SaveAsync(value, cancellation));
             }
             catch (Exception ex)
             {

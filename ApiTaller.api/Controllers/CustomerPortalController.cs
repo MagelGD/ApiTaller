@@ -42,7 +42,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _service.GetMyOrdersAsync(vehicleId, cancellation));
+                return Ok(await _service.GetMyOrdersByVehicleAsync(vehicleId, cancellation));
             }
             catch (Exception ex)
             {
@@ -51,12 +51,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpGet("OrderDetails/{orderId}")]
+        [HttpGet("MyOrder/{orderId}")]
         public async Task<IActionResult> GetOrderDetails(int orderId, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetOrderDetailsAsync(orderId, cancellation));
+                return Ok(await _service.GetMyOrderDetailAsync(orderId, cancellation));
             }
             catch (Exception ex)
             {
@@ -70,7 +70,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _service.ApproveOrderAsync(orderId, cancellation));
+                return Ok(await _service.ApproveFullOrderAsync(orderId, cancellation));
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("RegisterVehicle")]
-        public async Task<IActionResult> RegisterVehicle([FromBody] CreateMyVehicleDto dto, CancellationToken cancellation)
+        public async Task<IActionResult> RegisterVehicle([FromBody] CustomerPortalCreateVehicleDto dto, CancellationToken cancellation)
         {
             try
             {

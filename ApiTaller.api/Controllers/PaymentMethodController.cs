@@ -28,7 +28,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _paymentMethodService.GetAllPaymentMethodsAsync(cancellation));
+                return Ok(await _paymentMethodService.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _paymentMethodService.GetAllPaymentMethodsActiveAsync(cancellation));
+                return Ok(await _paymentMethodService.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _paymentMethodService.GetPaymentMethodByIdAsync(id, cancellation));
+                return Ok(await _paymentMethodService.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {

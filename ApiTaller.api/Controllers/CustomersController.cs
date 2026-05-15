@@ -28,11 +28,25 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _customerService.GetAllCustomersAsync(cancellation));
+                return Ok(await _customerService.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener los clientes.");
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("GetCustomersActive")]
+        public async Task<IActionResult> GetCustomersActive(CancellationToken cancellation)
+        {
+            try
+            {
+                return Ok(await _customerService.GetAllActiveAsync(cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener los clientes activos.");
             }
             return BadRequest();
         }
@@ -42,7 +56,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _customerService.GetCustomerByIdAsync(id, cancellation));
+                return Ok(await _customerService.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -51,8 +65,8 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpPost("SaveOrEditCustomer")]
-        public async Task<IActionResult> SaveOrEditCustomer(GetCustomerDto value, CancellationToken cancellation)
+        [HttpPost("CreateOrEditCustomer")]
+        public async Task<IActionResult> CreateOrEditCustomer(GetCustomerDto value, CancellationToken cancellation)
         {
             try
             {

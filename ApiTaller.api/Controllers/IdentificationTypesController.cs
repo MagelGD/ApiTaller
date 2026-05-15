@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ApiTaller.Core.Services.IdentificationTypes;
 
 namespace ApiTaller.api.Controllers
 {
@@ -15,9 +16,9 @@ namespace ApiTaller.api.Controllers
     public class IdentificationTypesController : ControllerBase
     {
         private readonly ILogger<IdentificationTypesController> _logger;
-        private readonly IIdentificationTypeService _service;
-
-        public IdentificationTypesController(ILogger<IdentificationTypesController> logger, IIdentificationTypeService service)
+        private readonly IIdentificationTypesService _service;
+ 
+        public IdentificationTypesController(ILogger<IdentificationTypesController> logger, IIdentificationTypesService service)
         {
             _logger = logger;
             _service = service;
@@ -28,7 +29,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _service.GetIdentificationType(cancellation));
+                return Ok(await _service.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -42,7 +43,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _service.GetIdentificationTypeActive(cancellation));
+                return Ok(await _service.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -56,7 +57,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _service.GetIdentificationTypeById(id, cancellation));
+                return Ok(await _service.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
