@@ -1,40 +1,33 @@
 using ApiTaller.Domain.Interfaces.Services.RoleActions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
     [Authorize]
     public class RoleActionsController : ControllerBase
     {
-
-        private readonly IRoleActionService _roleActionService;
         private readonly ILogger<RoleActionsController> _logger;
+        private readonly IRoleActionService _roleActionService;
 
-        public RoleActionsController(IRoleActionService roleActionService, ILogger<RoleActionsController> logger)
+        public RoleActionsController(ILogger<RoleActionsController> logger, IRoleActionService roleActionService)
         {
-            _roleActionService = roleActionService;
             _logger = logger;
+            _roleActionService = roleActionService;
         }
-        // GET: api/<RoleActionsController>
-        //[HttpGet]
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
 
-        // GET api/<RoleActionsController>/5
         [HttpGet("GetRoleActions/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetRoleActions(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _roleActionService.GetActionsByRoleIdAsync(id, cancellationToken));
+                return Ok(await _roleActionService.GetActionsByRoleIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -44,11 +37,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("PermissionRole/{id}")]
-        public async Task<IActionResult> RoleActions(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> PermissionRole(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _roleActionService.GetActionsByRoleAsync(id, cancellationToken));
+                return Ok(await _roleActionService.GetActionsByRoleAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -56,23 +49,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// POST api/<RoleActionsController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<RoleActionsController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<RoleActionsController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

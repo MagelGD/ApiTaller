@@ -12,70 +12,55 @@ namespace ApiTaller.api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    [Authorize]
     public class CustomersController : ControllerBase
     {
         private readonly ILogger<CustomersController> _logger;
         private readonly ICustomerService _customerService;
 
-        public CustomersController(ICustomerService customerService, ILogger<CustomersController> logger)
+        public CustomersController(ILogger<CustomersController> logger, ICustomerService customerService)
         {
-            _customerService = customerService;
             _logger = logger;
+            _customerService = customerService;
         }
 
         [HttpGet("GetCustomers")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCustomers(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _customerService.GetAllAsync(cancellationToken));
+                return Ok(await _customerService.GetAllCustomersAsync(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener los clientes");
-            }
-            return BadRequest();
-        }
-
-        [HttpGet("GetCustomersActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
-        {
-            try
-            {
-                return Ok(await _customerService.GetAllActiveAsync(cancellationToken));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los clientes activos");
+                _logger.LogError(ex, "Error al obtener los clientes.");
             }
             return BadRequest();
         }
 
         [HttpGet("GetCustomer/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCustomerById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _customerService.GetByIdAsync(id, cancellationToken));
+                return Ok(await _customerService.GetCustomerByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener el cliente con id {id}");
+                _logger.LogError(ex, $"Error al obtener el cliente con ID {id}.");
             }
             return BadRequest();
         }
 
-        [HttpPost("CreateOrEditCustomer")]
-        public async Task<IActionResult> Post(GetCustomerDto value, CancellationToken cancellationToken)
+        [HttpPost("SaveOrEditCustomer")]
+        public async Task<IActionResult> SaveOrEditCustomer(GetCustomerDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _customerService.CreateOrEditCustomer(value, cancellationToken));
+                return Ok(await _customerService.CreateOrEditCustomer(value, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al crear o editar el cliente");
+                _logger.LogError(ex, "Error al guardar o editar el cliente.");
             }
             return BadRequest();
         }

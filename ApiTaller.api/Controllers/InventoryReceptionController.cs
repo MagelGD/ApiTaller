@@ -9,19 +9,18 @@ using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class InventoryReceptionController : ControllerBase
     {
-        private readonly IInventoryReceptionService _receptionService;
         private readonly ILogger<InventoryReceptionController> _logger;
+        private readonly IInventoryReceptionService _receptionService;
 
-        public InventoryReceptionController(IInventoryReceptionService receptionService, ILogger<InventoryReceptionController> logger)
+        public InventoryReceptionController(ILogger<InventoryReceptionController> logger, IInventoryReceptionService receptionService)
         {
-            _receptionService = receptionService;
             _logger = logger;
+            _receptionService = receptionService;
         }
 
         [HttpGet("GetReceptions")]
@@ -43,9 +42,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                if (dto == null) return BadRequest("Datos inválidos");
-                var result = await _receptionService.SaveReceptionAsync(dto, cancellation);
-                if (result) return Ok(new { message = "Recepción registrada exitosamente" });
+                return Ok(await _receptionService.SaveReceptionAsync(dto, cancellation));
             }
             catch (Exception ex)
             {

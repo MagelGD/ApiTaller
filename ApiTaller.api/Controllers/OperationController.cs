@@ -1,15 +1,15 @@
-using ApiTaller.Domain.Dtos.Action;
 using ApiTaller.Domain.Dtos.Operation;
 using ApiTaller.Domain.Interfaces.Services.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
     [Authorize]
     public class OperationController : ControllerBase
@@ -17,12 +17,11 @@ namespace ApiTaller.api.Controllers
         private readonly ILogger<OperationController> _logger;
         private readonly IOperationService _operationService;
 
-        public OperationController(IOperationService operationService, ILogger<OperationController> logger)
+        public OperationController(ILogger<OperationController> logger, IOperationService operationService)
         {
-            _operationService = operationService;
             _logger = logger;
+            _operationService = operationService;
         }
-
 
         [HttpGet("GetOperations")]
         public async Task<IActionResult> GetOperations(CancellationToken cancellation)
@@ -38,8 +37,8 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpGet("GetOperartions/{id}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellation)
+        [HttpGet("GetOperation/{id}")]
+        public async Task<IActionResult> GetOperationById(int id, CancellationToken cancellation)
         {
             try
             {
@@ -47,13 +46,13 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener la operación por id");
+                _logger.LogError(ex, "Error al obtener la operaciÃ³n por id");
             }
             return BadRequest();
         }
 
         [HttpPost("SaveOrEditOperation")]
-        public async Task<IActionResult> SaveOrEdit(GetOperationDto getOperation, CancellationToken cancellation)
+        public async Task<IActionResult> SaveOrEditOperation(GetOperationDto getOperation, CancellationToken cancellation)
         {
             try
             {
@@ -61,10 +60,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al guardar o editar la operación");
+                _logger.LogError(ex, "Error al guardar o editar la operaciÃ³n");
             }
             return BadRequest();
         }
-
     }
 }

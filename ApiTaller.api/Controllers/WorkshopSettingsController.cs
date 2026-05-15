@@ -14,48 +14,41 @@ namespace ApiTaller.api.Controllers
     [Authorize]
     public class WorkshopSettingsController : ControllerBase
     {
-        private readonly IWorkshopSettingsService _workshopSettingsService;
         private readonly ILogger<WorkshopSettingsController> _logger;
+        private readonly IWorkshopSettingsService _workshopSettingsService;
 
-        public WorkshopSettingsController(IWorkshopSettingsService workshopSettingsService, ILogger<WorkshopSettingsController> logger)
+        public WorkshopSettingsController(ILogger<WorkshopSettingsController> logger, IWorkshopSettingsService workshopSettingsService)
         {
-            _workshopSettingsService = workshopSettingsService;
             _logger = logger;
+            _workshopSettingsService = workshopSettingsService;
         }
 
-        [HttpGet("GetWorkshopSettingByKey/{key}")]
-        public async Task<IActionResult> GetWorkshopSettingByKey(string key, CancellationToken cancellationToken)
+        [HttpGet("GetWorkshopSetting")]
+        public async Task<IActionResult> GetWorkshopSetting(CancellationToken cancellation)
         {
             try
             {
-                var result = await _workshopSettingsService.GetByKeyAsync(key, cancellationToken);
-                if (result == null) return NotFound();
-                return Ok(result);
+                return Ok(await _workshopSettingsService.GetAsync(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener la configuración con clave '{key}'");
-                return StatusCode(500, new { message = ex.Message, detail = ex.InnerException?.Message });
+                _logger.LogError(ex, "Error al obtener la configuración del taller");
             }
+            return BadRequest();
         }
 
         [HttpPost("CreateOrEditWorkshopSetting")]
-        public async Task<IActionResult> CreateOrEditWorkshopSetting(WorkshopSettingsDto dto, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateOrEditWorkshopSetting(WorkshopSettingsDto dto, CancellationToken cancellation)
         {
             try
             {
-                var result = await _workshopSettingsService.UpsertAsync(dto, cancellationToken);
-                if (!result)
-                {
-                    return BadRequest(new { message = "No se pudo guardar la configuración. Verifique los datos." });
-                }
-                return Ok(true);
+                return Ok(await _workshopSettingsService.UpsertAsync(dto, cancellation));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al guardar la configuración del taller");
-                return StatusCode(500, new { message = ex.Message, detail = ex.InnerException?.Message });
             }
+            return BadRequest();
         }
     }
 }

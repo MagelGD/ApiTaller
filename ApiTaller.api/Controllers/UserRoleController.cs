@@ -1,31 +1,34 @@
 using ApiTaller.Domain.Dtos.UserRole;
 using ApiTaller.Domain.Interfaces.Services.UserRoles;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
     [Authorize]
     public class UserRoleController : ControllerBase
     {
-        private readonly IUserRoleService _userRoleService;
         private readonly ILogger<UserRoleController> _logger;
-        public UserRoleController(IUserRoleService userRoleService, ILogger<UserRoleController> logger)
+        private readonly IUserRoleService _userRoleService;
+
+        public UserRoleController(ILogger<UserRoleController> logger, IUserRoleService userRoleService)
         {
-            _userRoleService = userRoleService;
             _logger = logger;
+            _userRoleService = userRoleService;
         }
 
         [HttpGet("GetUsersRoles")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUsersRoles(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _userRoleService.GetUserRoles(cancellationToken));
+                return Ok(await _userRoleService.GetUserRoles(cancellation));
             }
             catch (Exception ex)
             {
@@ -34,12 +37,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpGet("GetUserRoleId/{id}")]
-        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
+        [HttpGet("GetUserRole/{id}")]
+        public async Task<IActionResult> GetUserRoleById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _userRoleService.GetUserRoleById(id, cancellationToken));
+                return Ok(await _userRoleService.GetUserRoleById(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -49,11 +52,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("SaveOrEditUserRole")]
-        public async Task<IActionResult> SaveOrEdit(GetUserRoleDto userRole, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrEditUserRole(GetUserRoleDto userRole, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _userRoleService.SaveOrEditUserRole(userRole, cancellationToken));
+                return Ok(await _userRoleService.SaveOrEditUserRole(userRole, cancellation));
             }
             catch (Exception ex)
             {

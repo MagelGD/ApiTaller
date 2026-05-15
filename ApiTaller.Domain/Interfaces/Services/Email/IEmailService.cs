@@ -6,8 +6,8 @@ namespace ApiTaller.Domain.Interfaces.Services.Email
 {
     public interface IEmailService
     {
-        Task SendEmailAsync(EmailRequest request);
-        Task<bool> TestConnectionAsync(EmailSettings settings);
+        Task SendEmailAsync(EmailRequest request, System.Threading.CancellationToken ct = default);
+        Task<bool> TestConnectionAsync(EmailSettings settings, System.Threading.CancellationToken ct = default);
     }
 
     public class EmailRequest

@@ -2,6 +2,7 @@ using ApiTaller.Domain.Dtos.Agenda;
 using ApiTaller.Domain.Interfaces.Services.Agenda;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,123 +14,212 @@ namespace ApiTaller.api.Controllers
     [Authorize]
     public class AgendaController : ControllerBase
     {
+        private readonly ILogger<AgendaController> _logger;
         private readonly IAgendaService _agendaService;
 
-        public AgendaController(IAgendaService agendaService)
+        public AgendaController(ILogger<AgendaController> logger, IAgendaService agendaService)
         {
+            _logger = logger;
             _agendaService = agendaService;
         }
 
         [HttpGet("Settings")]
-        public async Task<IActionResult> GetSettings(CancellationToken ct)
+        public async Task<IActionResult> GetSettings(CancellationToken cancellation)
         {
-            var result = await _agendaService.GetSettingsAsync(ct);
-            if (result == null) return NoContent();
-            return Ok(result);
+            try
+            {
+                return Ok(await _agendaService.GetSettingsAsync(cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener la configuración de la agenda");
+            }
+            return BadRequest();
         }
 
         [HttpPut("Settings")]
-        public async Task<IActionResult> UpdateSettings([FromBody] AgendaSettingsDto dto, CancellationToken ct)
+        public async Task<IActionResult> UpdateSettings([FromBody] AgendaSettingsDto dto, CancellationToken cancellation)
         {
-            var result = await _agendaService.UpdateSettingsAsync(dto, ct);
-            if (!result) return BadRequest(new { Message = "Error al actualizar la configuración." });
-            return Ok(new { Message = "Configuración actualizada con éxito." });
+            try
+            {
+                return Ok(await _agendaService.UpdateSettingsAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar la configuración de la agenda");
+            }
+            return BadRequest();
         }
 
         [HttpPost("BlockDate")]
-        public async Task<IActionResult> BlockDate([FromBody] AgendaBlockDto dto, CancellationToken ct)
+        public async Task<IActionResult> BlockDate([FromBody] AgendaBlockDto dto, CancellationToken cancellation)
         {
-            var result = await _agendaService.AddBlockDateAsync(dto, ct);
-            if (!result) return BadRequest(new { Message = "La fecha ya se encuentra bloqueada." });
-            return Ok(new { Message = "Día bloqueado con éxito." });
+            try
+            {
+                return Ok(await _agendaService.AddBlockDateAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al bloquear fecha");
+            }
+            return BadRequest();
         }
 
         [AllowAnonymous]
         [HttpGet("AvailableDates")]
-        public async Task<IActionResult> GetAvailableDates(CancellationToken ct)
+        public async Task<IActionResult> GetAvailableDates(CancellationToken cancellation)
         {
-            var result = await _agendaService.GetAvailableDatesAsync(ct);
-            return Ok(result);
+            try
+            {
+                return Ok(await _agendaService.GetAvailableDatesAsync(cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener fechas disponibles");
+            }
+            return BadRequest();
         }
 
         [HttpPost("Book")]
-        public async Task<IActionResult> Book([FromBody] BookAppointmentDto dto, CancellationToken ct)
+        public async Task<IActionResult> Book([FromBody] BookAppointmentDto dto, CancellationToken cancellation)
         {
-            var result = await _agendaService.BookAsync(dto, ct);
-            if (!result) return BadRequest(new { Message = "Error al agendar la cita. Verifique sus datos o la disponibilidad." });
-            return Ok(new { Message = "Cita agendada con éxito." });
+            try
+            {
+                return Ok(await _agendaService.BookAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al agendar cita");
+            }
+            return BadRequest();
         }
 
         [AllowAnonymous]
         [HttpPost("PreRegister")]
-        public async Task<IActionResult> PreRegister([FromBody] PreRegisterAppointmentDto dto, CancellationToken ct)
+        public async Task<IActionResult> PreRegister([FromBody] PreRegisterAppointmentDto dto, CancellationToken cancellation)
         {
-            var result = await _agendaService.PreRegisterAsync(dto, ct);
-            if (!result) return BadRequest(new { Message = "Error al registrar la solicitud." });
-            return Ok(new { Message = "Solicitud de cita enviada. Nos pondremos en contacto pronto." });
+            try
+            {
+                return Ok(await _agendaService.PreRegisterAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al pre-registrar cita");
+            }
+            return BadRequest();
         }
 
         [HttpPost("AdminBook")]
-        public async Task<IActionResult> AdminBook([FromBody] AdminBookAppointmentDto dto, CancellationToken ct)
+        public async Task<IActionResult> AdminBook([FromBody] AdminBookAppointmentDto dto, CancellationToken cancellation)
         {
-            var result = await _agendaService.AdminBookAsync(dto, ct);
-            if (!result) return BadRequest(new { Message = "No hay cupos disponibles para esta fecha. Use 'Forzar Agendamiento' si es necesario." });
-            return Ok(new { Message = "Cita agendada con éxito." });
+            try
+            {
+                return Ok(await _agendaService.AdminBookAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al agendar cita (Admin)");
+            }
+            return BadRequest();
         }
 
         [HttpGet("Daily")]
-        public async Task<IActionResult> GetDaily([FromQuery] DateTime date, CancellationToken ct)
+        public async Task<IActionResult> GetDaily([FromQuery] DateTime date, CancellationToken cancellation)
         {
-            var result = await _agendaService.GetDailyAsync(date, ct);
-            return Ok(result);
+            try
+            {
+                return Ok(await _agendaService.GetDailyAsync(date, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener agenda diaria");
+            }
+            return BadRequest();
         }
 
         [HttpPost("Confirm/{id}")]
-        public async Task<IActionResult> ConfirmPreRegister(int id, [FromBody] ConfirmPreRegisterDto dto, CancellationToken ct)
+        public async Task<IActionResult> ConfirmPreRegister(int id, [FromBody] ConfirmPreRegisterDto dto, CancellationToken cancellation)
         {
-            if (id != dto.AppointmentId) return BadRequest();
-
-            var result = await _agendaService.ConfirmPreRegisterAsync(dto, ct);
-            if (!result) return BadRequest(new { Message = "Error al confirmar la cita o la cita no está pendiente." });
-            return Ok(new { Message = "Cita confirmada con éxito." });
+            try
+            {
+                if (id != dto.AppointmentId) return BadRequest();
+                return Ok(await _agendaService.ConfirmPreRegisterAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al confirmar cita");
+            }
+            return BadRequest();
         }
 
         [HttpPost("ConvertToWorkOrder/{id}")]
-        public async Task<IActionResult> ConvertToWorkOrder(int id, CancellationToken ct)
+        public async Task<IActionResult> ConvertToWorkOrder(int id, CancellationToken cancellation)
         {
-            var workOrderId = await _agendaService.ConvertToWorkOrderAsync(id, ct);
-            if (workOrderId == null) return BadRequest(new { Message = "No se pudo convertir la cita. Verifique que la cita exista y tenga un vehículo asociado." });
-            return Ok(new { Message = "Orden de trabajo creada con éxito.", WorkOrderId = workOrderId });
+            try
+            {
+                return Ok(await _agendaService.ConvertToWorkOrderAsync(id, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al convertir cita a OT");
+            }
+            return BadRequest();
         }
 
         [HttpGet("DayConfigs")]
-        public async Task<IActionResult> GetDayConfigs([FromQuery] int? weeks, [FromQuery] DateTime? start, CancellationToken ct)
+        public async Task<IActionResult> GetDayConfigs([FromQuery] int? weeks, [FromQuery] DateTime? start, CancellationToken cancellation)
         {
-            return Ok(await _agendaService.GetDayConfigsAsync(weeks, start, ct));
+            try
+            {
+                return Ok(await _agendaService.GetDayConfigsAsync(weeks, start, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener configuración de días");
+            }
+            return BadRequest();
         }
 
         [HttpPut("DayConfig")]
-        public async Task<IActionResult> UpdateDayConfig([FromBody] AgendaDayConfigDto dto, CancellationToken ct)
+        public async Task<IActionResult> UpdateDayConfig([FromBody] AgendaDayConfigDto dto, CancellationToken cancellation)
         {
-            var result = await _agendaService.UpdateDayConfigAsync(dto, ct);
-            if (!result) return BadRequest();
-            return Ok(new { Message = "Configuración del día actualizada." });
+            try
+            {
+                return Ok(await _agendaService.UpdateDayConfigAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar configuración de día");
+            }
+            return BadRequest();
         }
 
         [HttpPost("Cancel/{id}")]
-        public async Task<IActionResult> CancelAppointment(int id, CancellationToken ct)
+        public async Task<IActionResult> CancelAppointment(int id, CancellationToken cancellation)
         {
-            var result = await _agendaService.CancelAppointmentAsync(id, ct);
-            if (!result) return BadRequest(new { Message = "No se pudo cancelar la cita." });
-            return Ok(new { Message = "Cita cancelada con éxito." });
+            try
+            {
+                return Ok(await _agendaService.CancelAppointmentAsync(id, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cancelar cita");
+            }
+            return BadRequest();
         }
 
         [HttpPost("Reschedule/{id}")]
-        public async Task<IActionResult> Reschedule(int id, [FromQuery] DateTime date, CancellationToken ct)
+        public async Task<IActionResult> Reschedule(int id, [FromQuery] DateTime date, CancellationToken cancellation)
         {
-            var result = await _agendaService.RescheduleAsync(id, date, ct);
-            if (!result) return BadRequest(new { Message = "No se pudo reprogramar la cita." });
-            return Ok(new { Message = "Cita reprogramada con éxito." });
+            try
+            {
+                return Ok(await _agendaService.RescheduleAsync(id, date, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al reprogramar cita");
+            }
+            return BadRequest();
         }
     }
 }

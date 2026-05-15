@@ -3,14 +3,14 @@ using ApiTaller.Domain.Interfaces.Services.BrandModelVersion;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     [Authorize]
     public class BrandModelVersionsController : ControllerBase
     {
@@ -22,75 +22,61 @@ namespace ApiTaller.api.Controllers
             _logger = logger;
             _brandModelVersionService = brandModelVersionService;
         }
-        // GET: api/<BrandModelVersionsController>
+
         [HttpGet("GetBrandModelVersions")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandModelVersions(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelVersionService.GetBrandModelVersionAsync(cancellationToken));
+                return Ok(await _brandModelVersionService.GetBrandModelVersionAsync(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener las versiones de modelos de marca.");
+                _logger.LogError(ex, "Error al obtener las versiones de modelo de marca.");
             }
             return BadRequest();
         }
 
         [HttpGet("GetBrandModelVersionsActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandModelVersionsActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelVersionService.GetBrandModelVersionActiveAsync(cancellationToken));
+                return Ok(await _brandModelVersionService.GetBrandModelVersionActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener las versiones de modelos de marca activos.");
+                _logger.LogError(ex, "Error al obtener las versiones de modelo de marca activas.");
             }
             return BadRequest();
         }
 
-        // GET api/<BrandModelVersionsController>/5
         [HttpGet("GetBrandModelVersion/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandModelVersionById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelVersionService.GetBrandModelVersionByIdAsync(id, cancellationToken));
+                return Ok(await _brandModelVersionService.GetBrandModelVersionByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener la versión del modelo de marca con ID {id}.");
+                _logger.LogError(ex, $"Error al obtener la versión de modelo de marca con ID {id}.");
             }
             return BadRequest();
         }
 
-        // POST api/<BrandModelVersionsController>
         [HttpPost("CreateOrEditBrandModelVersion")]
-        public async Task<IActionResult> Post(GetBrandModelVersionDto value, CancellationToken cancellationToken  )
+        public async Task<IActionResult> CreateOrEditBrandModelVersion(GetBrandModelVersionDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelVersionService.CreateOrEditBrandModelVersionAsync(value, cancellationToken));
+                return Ok(await _brandModelVersionService.CreateOrEditBrandModelVersion(value, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al crear o editar la versión del modelo de marca.");
+                _logger.LogError(ex, "Error al crear o editar la versión de modelo de marca.");
             }
             return BadRequest();
         }
-
-        //// PUT api/<BrandModelVersionsController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<BrandModelVersionsController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

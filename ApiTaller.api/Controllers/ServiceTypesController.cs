@@ -17,18 +17,18 @@ namespace ApiTaller.api.Controllers
         private readonly ILogger<ServiceTypesController> _logger;
         private readonly IServiceTypeService _service;
 
-        public ServiceTypesController(IServiceTypeService service, ILogger<ServiceTypesController> logger)
+        public ServiceTypesController(ILogger<ServiceTypesController> logger, IServiceTypeService service)
         {
-            _service = service;
             _logger = logger;
+            _service = service;
         }
 
         [HttpGet("GetServiceType")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetServiceType(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllAsync(cancellationToken));
+                return Ok(await _service.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetServiceTypeActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetServiceTypeActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllActiveAsync(cancellationToken));
+                return Ok(await _service.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -52,11 +52,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetServiceType/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetServiceTypeById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetByIdAsync(id, cancellationToken));
+                return Ok(await _service.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -66,11 +66,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("SaveOrUpdate")]
-        public async Task<IActionResult> Post(GetServiceTypeDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrUpdate(GetServiceTypeDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.CreateOrEditServiceType(value, cancellationToken));
+                return Ok(await _service.CreateOrEditServiceType(value, cancellation));
             }
             catch (Exception ex)
             {

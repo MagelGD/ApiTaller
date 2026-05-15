@@ -2,8 +2,10 @@ using ApiTaller.Domain.Dtos.Product;
 using ApiTaller.Domain.Interfaces.Services.Products;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
@@ -20,42 +22,41 @@ namespace ApiTaller.api.Controllers
             _logger = logger;
             _service = service;
         }
-        // GET: api/<ProductsController>
+
         [HttpGet("GetProducts")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetProducts(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllAsync(cancellationToken));
+                return Ok(await _service.GetAllAsync(cancellation));
             }
-            catch (Exception EX)
+            catch (Exception ex)
             {
-                _logger.LogError(EX, "Error retrieving products");
+                _logger.LogError(ex, "Error retrieving products");
             }
             return BadRequest();
         }
 
         [HttpGet("GetProductsActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetProductsActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllActiveAsync(cancellationToken));
+                return Ok(await _service.GetAllActiveAsync(cancellation));
             }
-            catch (Exception EX)
+            catch (Exception ex)
             {
-                _logger.LogError(EX, "Error retrieving active products");
+                _logger.LogError(ex, "Error retrieving active products");
             }
             return BadRequest();
         }
 
-        // GET api/<ProductsController>/5
         [HttpGet("GetProduct/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetProductById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetByIdAsync(id, cancellationToken));
+                return Ok(await _service.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -64,13 +65,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // POST api/<ProductsController>
         [HttpPost("SaveOrEditProducts")]
-        public async Task<IActionResult> Post(GetProductDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrEditProducts(GetProductDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.CreateOrEditProductType(value, cancellationToken));
+                return Ok(await _service.CreateOrEditProductType(value, cancellation));
             }
             catch (Exception ex)
             {
@@ -78,17 +78,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// PUT api/<ProductsController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<ProductsController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

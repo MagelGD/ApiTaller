@@ -3,14 +3,14 @@ using ApiTaller.Domain.Interfaces.Services.Brands;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     [Authorize]
     public class BrandsController : ControllerBase
     {
@@ -22,13 +22,13 @@ namespace ApiTaller.api.Controllers
             _logger = logger;
             _brandService = brandService;
         }
-        // GET: api/<BrandsController>
+
         [HttpGet("GetBrands")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrands(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandService.GetAllBrandsAsync(cancellationToken));
+                return Ok(await _brandService.GetAllBrandsAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetBrandsActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandsActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandService.GetAllBrandsActiveAsync(cancellationToken));
+                return Ok(await _brandService.GetAllBrandsActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -51,13 +51,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // GET api/<BrandsController>/5
         [HttpGet("GetBrands/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandService.GetBrandByIdAsync(id, cancellationToken));
+                return Ok(await _brandService.GetBrandByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -66,13 +65,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // POST api/<BrandsController>
         [HttpPost("SaveOrEditBrands")]
-        public async Task<IActionResult> Post(GetBrandDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrEditBrands(GetBrandDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandService.CreateOrEditBrand(value, cancellationToken));
+                return Ok(await _brandService.CreateOrEditBrand(value, cancellation));
             }
             catch (Exception ex)
             {
@@ -80,17 +78,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// PUT api/<BrandsController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<BrandsController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

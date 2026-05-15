@@ -17,18 +17,18 @@ namespace ApiTaller.api.Controllers
         private readonly ILogger<VehiclesController> _logger;
         private readonly IVehicleService _vehicleService;
 
-        public VehiclesController(IVehicleService vehicleService, ILogger<VehiclesController> logger)
+        public VehiclesController(ILogger<VehiclesController> logger, IVehicleService vehicleService)
         {
-            _vehicleService = vehicleService;
             _logger = logger;
+            _vehicleService = vehicleService;
         }
 
         [HttpGet("GetVehicles")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetVehicles(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _vehicleService.GetAllAsync(cancellationToken));
+                return Ok(await _vehicleService.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetVehiclesActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetVehiclesActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _vehicleService.GetAllActiveAsync(cancellationToken));
+                return Ok(await _vehicleService.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -52,11 +52,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetVehicle/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetVehicleById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _vehicleService.GetByIdAsync(id, cancellationToken));
+                return Ok(await _vehicleService.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -66,11 +66,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("CreateOrEditVehicle")]
-        public async Task<IActionResult> Post(GetVehicleDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateOrEditVehicle(GetVehicleDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _vehicleService.CreateOrEditVehicle(value, cancellationToken));
+                return Ok(await _vehicleService.CreateOrEditVehicle(value, cancellation));
             }
             catch (Exception ex)
             {

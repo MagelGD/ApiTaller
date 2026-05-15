@@ -1,88 +1,68 @@
 using ApiTaller.Domain.Interfaces.Services.Email;
 using ApiTaller.Domain.Models;
-using ApiTaller.Infrastructure.Data;
-using ApiTaller.Infrastructure.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class EmailSettingsController : ControllerBase
     {
-        private readonly DataContext _context;
-        private readonly IEmailService _emailService;
+        private readonly ILogger<EmailSettingsController> _logger;
+        private readonly IEmailSettingsService _emailSettingsService;
 
-        public EmailSettingsController(DataContext context, IEmailService emailService)
+        public EmailSettingsController(ILogger<EmailSettingsController> logger, IEmailSettingsService emailSettingsService)
         {
-            _context = context;
-            _emailService = emailService;
+            _logger = logger;
+            _emailSettingsService = emailSettingsService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        [HttpGet("GetEmailSettings")]
+        public async Task<IActionResult> GetEmailSettings(CancellationToken cancellation)
         {
-            var settings = await _context.EmailSettings.FirstOrDefaultAsync();
-            if (settings == null) return NotFound(new { message = "No hay configuración cargada" });
-            
-            // Enmascaramos la contraseña por seguridad
-            settings.Password = "********"; 
-            return Ok(settings);
+            try
+            {
+                return Ok(await _emailSettingsService.GetSettingsAsync(cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener la configuración de correo");
+            }
+            return BadRequest();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] EmailSettings settings)
+        [HttpPost("SaveEmailSettings")]
+        public async Task<IActionResult> SaveEmailSettings([FromBody] EmailSettings settings, CancellationToken cancellation)
         {
-            var existing = await _context.EmailSettings.FirstOrDefaultAsync();
-            
-            if (settings.Password == "********" && existing != null)
+            try
             {
-                settings.Password = existing.Password;
+                return Ok(await _emailSettingsService.SaveSettingsAsync(settings, cancellation));
             }
-            else
+            catch (Exception ex)
             {
-                settings.Password = SecurityHelper.Encrypt(settings.Password);
+                _logger.LogError(ex, "Error al guardar la configuración de correo");
             }
-
-            if (existing == null)
-            {
-                settings.CreatedAt = DateTime.Now;
-                settings.IsActive = true;
-                _context.EmailSettings.Add(settings);
-            }
-            else
-            {
-                existing.Host = settings.Host;
-                existing.Port = settings.Port;
-                existing.UserName = settings.UserName;
-                existing.Password = settings.Password;
-                existing.EnableSsl = settings.EnableSsl;
-                existing.SenderName = settings.SenderName;
-                existing.SenderEmail = settings.SenderEmail;
-                existing.UpdatedAt = DateTime.Now;
-            }
-
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Configuración guardada correctamente" });
+            return BadRequest();
         }
 
-        [HttpPost("test")]
-        public async Task<IActionResult> Test([FromBody] EmailSettings settings)
+        [HttpPost("TestEmailConnection")]
+        public async Task<IActionResult> TestEmailConnection([FromBody] EmailSettings settings, CancellationToken cancellation)
         {
-            var existing = await _context.EmailSettings.AsNoTracking().FirstOrDefaultAsync();
-            
-            // Si es una prueba de configuración ya guardada
-            if (settings.Password == "********" && existing != null)
+            try
             {
-                settings.Password = existing.Password;
+                return Ok(await _emailSettingsService.TestConnectionAsync(settings, cancellation));
             }
-
-            bool success = await _emailService.TestConnectionAsync(settings);
-            if (success) return Ok(new { message = "Conexión exitosa" });
-            return BadRequest(new { message = "Error al conectar con el servidor SMTP. Verifique sus credenciales." });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en la prueba de conexión SMTP");
+            }
+            return BadRequest();
         }
     }
 }

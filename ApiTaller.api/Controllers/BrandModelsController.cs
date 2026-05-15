@@ -3,14 +3,14 @@ using ApiTaller.Domain.Interfaces.Services.BrandModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     [Authorize]
     public class BrandModelsController : ControllerBase
     {
@@ -22,13 +22,13 @@ namespace ApiTaller.api.Controllers
             _logger = logger;
             _brandModelService = brandModelService;
         }
-        // GET: api/<BrandModelsController>
+
         [HttpGet("GetBrandModels")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandModels(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelService.GetAllBrandModelsAsync(cancellationToken));
+                return Ok(await _brandModelService.GetAllBrandModelsAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetBrandModelsActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandModelsActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelService.GetAllBrandModelsActiveAsync(cancellationToken));
+                return Ok(await _brandModelService.GetAllBrandModelsActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -51,13 +51,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // GET api/<BrandModelsController>/5
         [HttpGet("GetBrandModel/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetBrandModelById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelService.GetBrandModelByIdAsync(id, cancellationToken));
+                return Ok(await _brandModelService.GetBrandModelByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -66,13 +65,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // POST api/<BrandModelsController>
         [HttpPost("CreateOrEditBrandModel")]
-        public async Task<IActionResult> Post(GetBrandModelsDto value, CancellationToken cancellationToken  )
+        public async Task<IActionResult> CreateOrEditBrandModel(GetBrandModelsDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandModelService.CreateOrEditBrandModel(value, cancellationToken));
+                return Ok(await _brandModelService.CreateOrEditBrandModel(value, cancellation));
             }
             catch (Exception ex)
             {
@@ -80,17 +78,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// PUT api/<BrandModelsController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<BrandModelsController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

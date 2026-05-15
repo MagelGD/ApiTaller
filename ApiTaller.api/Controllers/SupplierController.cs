@@ -2,8 +2,10 @@ using ApiTaller.Domain.Dtos.Supplier;
 using ApiTaller.Domain.Interfaces.Services.Suppliers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
@@ -15,18 +17,18 @@ namespace ApiTaller.api.Controllers
         private readonly ILogger<SupplierController> _logger;
         private readonly ISupplierService _supplierService;
 
-        public SupplierController(ISupplierService supplierService, ILogger<SupplierController> logger)
+        public SupplierController(ILogger<SupplierController> logger, ISupplierService supplierService)
         {
-            _supplierService = supplierService;
             _logger = logger;
+            _supplierService = supplierService;
         }
-        // GET: api/<SupplierController>
+
         [HttpGet("GetSuppliers")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSuppliers(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _supplierService.GetAllAsync(cancellationToken));
+                return Ok(await _supplierService.GetAllSuppliersAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -36,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetSuppliersActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSuppliersActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _supplierService.GetAllActiveAsync(cancellationToken));
+                return Ok(await _supplierService.GetAllSuppliersActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -49,13 +51,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // GET api/<SupplierController>/5
         [HttpGet("GetSupplier/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetSupplierById(int id, CancellationToken cancellation)
         {
             try
             {
-               return Ok(await _supplierService.GetByIdAsync(id, cancellationToken));
+                return Ok(await _supplierService.GetSupplierByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -63,13 +64,13 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-        // POST api/<SupplierController>
+
         [HttpPost("CreateOrEditSupplier")]
-        public async Task<IActionResult> Post(GetSupplierDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateOrEditSupplier(GetSupplierDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _supplierService.CreateOrEditSupplier(value, cancellationToken));
+                return Ok(await _supplierService.CreateOrEditSupplier(value, cancellation));
             }
             catch (Exception ex)
             {
@@ -77,17 +78,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// PUT api/<SupplierController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<SupplierController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

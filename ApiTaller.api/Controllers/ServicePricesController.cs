@@ -17,18 +17,18 @@ namespace ApiTaller.api.Controllers
         private readonly ILogger<ServicePricesController> _logger;
         private readonly IServicePriceByVersionService _service;
 
-        public ServicePricesController(IServicePriceByVersionService service, ILogger<ServicePricesController> logger)
+        public ServicePricesController(ILogger<ServicePricesController> logger, IServicePriceByVersionService service)
         {
-            _service = service;
             _logger = logger;
+            _service = service;
         }
 
         [HttpGet("GetServicePrice")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetServicePrice(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllAsync(cancellationToken));
+                return Ok(await _service.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetServicePriceActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetServicePriceActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllActiveAsync(cancellationToken));
+                return Ok(await _service.GetAllActiveAsync(cancellation));
             }
             catch (Exception ex)
             {
@@ -52,11 +52,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetServicePrice/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetServicePriceById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetByIdAsync(id, cancellationToken));
+                return Ok(await _service.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -66,11 +66,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetServicePriceByVersion/{versionId}")]
-        public async Task<IActionResult> GetByVersion(int versionId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetServicePriceByVersion(int versionId, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetByVersionAsync(versionId, cancellationToken));
+                return Ok(await _service.GetByVersionAsync(versionId, cancellation));
             }
             catch (Exception ex)
             {
@@ -80,11 +80,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("SaveOrUpdate")]
-        public async Task<IActionResult> Post(GetServicePriceByVersionDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrUpdate(GetServicePriceByVersionDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.CreateOrEditServicePrice(value, cancellationToken));
+                return Ok(await _service.CreateOrEditServicePrice(value, cancellation));
             }
             catch (Exception ex)
             {

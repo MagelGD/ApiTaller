@@ -9,6 +9,7 @@ using MimeKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ApiTaller.Infrastructure.Services.Email
@@ -22,9 +23,9 @@ namespace ApiTaller.Infrastructure.Services.Email
             _context = context;
         }
 
-        public async Task SendEmailAsync(EmailRequest request)
+        public async Task SendEmailAsync(EmailRequest request, CancellationToken ct = default)
         {
-            var config = await _context.EmailSettings.FirstOrDefaultAsync(x => x.IsActive);
+            var config = await _context.EmailSettings.FirstOrDefaultAsync(x => x.IsActive, ct);
             if (config == null)
             {
                 throw new Exception("No hay una configuración de correo activa.");
@@ -51,36 +52,32 @@ namespace ApiTaller.Infrastructure.Services.Email
             {
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                await client.ConnectAsync(config.Host, config.Port, config.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+                await client.ConnectAsync(config.Host, config.Port, config.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto, ct);
                 
                 string decryptedPassword = SecurityHelper.Decrypt(config.Password);
-                await client.AuthenticateAsync(config.UserName, decryptedPassword);
+                await client.AuthenticateAsync(config.UserName, decryptedPassword, ct);
                 
-                await client.SendAsync(message);
-                await client.DisconnectAsync(true);
+                await client.SendAsync(message, ct);
+                await client.DisconnectAsync(true, ct);
             }
         }
 
-        public async Task<bool> TestConnectionAsync(EmailSettings settings)
+        public async Task<bool> TestConnectionAsync(EmailSettings settings, CancellationToken ct = default)
         {
             try
             {
                 using (var client = new SmtpClient())
                 {
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    await client.ConnectAsync(settings.Host, settings.Port, settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto);
+                    await client.ConnectAsync(settings.Host, settings.Port, settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto, ct);
                     
-                    // Si la contraseña ya viene encriptada (desde el form si es una edición), la desencriptamos. 
-                    // Si viene plana (nueva configuración), la usamos plana para el test.
                     string passwordToUse = settings.Password;
                     try {
                         passwordToUse = SecurityHelper.Decrypt(settings.Password);
-                    } catch {
-                        // Si falla es que estaba plana
-                    }
+                    } catch { }
 
-                    await client.AuthenticateAsync(settings.UserName, passwordToUse);
-                    await client.DisconnectAsync(true);
+                    await client.AuthenticateAsync(settings.UserName, passwordToUse, ct);
+                    await client.DisconnectAsync(true, ct);
                     return true;
                 }
             }

@@ -14,136 +14,97 @@ namespace ApiTaller.api.Controllers
     [Authorize]
     public class CustomerPortalController : ControllerBase
     {
-        private readonly ICustomerPortalService _service;
         private readonly ILogger<CustomerPortalController> _logger;
+        private readonly ICustomerPortalService _service;
 
-        public CustomerPortalController(ICustomerPortalService service, ILogger<CustomerPortalController> logger)
+        public CustomerPortalController(ILogger<CustomerPortalController> logger, ICustomerPortalService service)
         {
-            _service = service;
             _logger = logger;
+            _service = service;
         }
 
-        /// <summary>
-        /// Retorna los vehículos del cliente autenticado (filtrado por JWT).
-        /// </summary>
         [HttpGet("MyVehicles")]
-        public async Task<IActionResult> GetMyVehicles(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetMyVehicles(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetMyVehiclesAsync(cancellationToken));
+                return Ok(await _service.GetMyVehiclesAsync(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener los vehículos del portal del cliente");
-                return BadRequest();
+                _logger.LogError(ex, "Error al obtener vehiculos del portal del cliente");
             }
+            return BadRequest();
         }
 
-        /// <summary>
-        /// Retorna las órdenes de un vehículo del cliente autenticado.
-        /// Si el vehículo no pertenece al cliente, retorna lista vacía (no 403).
-        /// </summary>
         [HttpGet("MyOrders/{vehicleId}")]
-        public async Task<IActionResult> GetMyOrders(int vehicleId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetMyOrders(int vehicleId, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetMyOrdersByVehicleAsync(vehicleId, cancellationToken));
+                return Ok(await _service.GetMyOrdersAsync(vehicleId, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener órdenes del vehículo {vehicleId} en el portal");
-                return BadRequest();
+                _logger.LogError(ex, "Error al obtener ordenes del portal del cliente");
             }
+            return BadRequest();
         }
 
-        /// <summary>
-        /// Retorna el detalle completo de una orden.
-        /// Si la orden no pertenece al cliente, retorna 404 (sin confirmar existencia).
-        /// </summary>
-        [HttpGet("MyOrder/{orderId}")]
-        public async Task<IActionResult> GetMyOrder(int orderId, CancellationToken cancellationToken)
+        [HttpGet("OrderDetails/{orderId}")]
+        public async Task<IActionResult> GetOrderDetails(int orderId, CancellationToken cancellation)
         {
             try
             {
-                var result = await _service.GetMyOrderDetailAsync(orderId, cancellationToken);
-                if (result == null) return NotFound();
-                return Ok(result);
+                return Ok(await _service.GetOrderDetailsAsync(orderId, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener el detalle de la orden {orderId} en el portal");
-                return BadRequest();
+                _logger.LogError(ex, "Error al obtener detalles de orden del portal del cliente");
             }
+            return BadRequest();
         }
 
-        /// <summary>
-        /// Aprueba o rechaza un ítem de cotización (Part o Service).
-        /// Verifica la cadena completa de pertenencia antes de modificar.
-        /// </summary>
-        [HttpPost("ApproveItem")]
-        public async Task<IActionResult> ApproveItem(CustomerPortalApprovalDto dto, CancellationToken cancellationToken)
+        [HttpPost("ApproveOrder/{orderId}")]
+        public async Task<IActionResult> ApproveOrder(int orderId, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.ApproveItemAsync(dto, cancellationToken));
+                return Ok(await _service.ApproveOrderAsync(orderId, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al aprobar/rechazar ítem en el portal del cliente");
-                return BadRequest();
+                _logger.LogError(ex, "Error al aprobar orden del portal del cliente");
             }
+            return BadRequest();
         }
 
-        /// <summary>
-        /// Aprueba el presupuesto completo y cambia el estado a Aprobado.
-        /// </summary>
-        [HttpPost("ApproveFullOrder/{orderId}")]
-        public async Task<IActionResult> ApproveFullOrder(int orderId, CancellationToken cancellationToken)
+        [HttpPost("RegisterVehicle")]
+        public async Task<IActionResult> RegisterVehicle([FromBody] CreateMyVehicleDto dto, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.ApproveFullOrderAsync(orderId, cancellationToken));
+                return Ok(await _service.CreateMyVehicleAsync(dto, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al aprobar orden completa {orderId} en el portal del cliente");
-                return BadRequest();
+                _logger.LogError(ex, "Error al registrar vehculo en el portal del cliente");
             }
-        }
-
-        /// <summary>
-        /// Registra un nuevo vehículo para el cliente autenticado.
-        /// </summary>
-        [HttpPost("MyVehicles")]
-        public async Task<IActionResult> PostMyVehicle(CustomerPortalCreateVehicleDto dto, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var result = await _service.CreateMyVehicleAsync(dto, cancellationToken);
-                if (!result) return BadRequest(new { Message = "Error al registrar el vehículo. Verifique los datos." });
-                return Ok(new { Message = "Vehículo registrado con éxito." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al registrar vehículo en el portal del cliente");
-                return BadRequest();
-            }
+            return BadRequest();
         }
 
         [HttpGet("MyAppointments")]
-        public async Task<IActionResult> GetMyAppointments(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetMyAppointments(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetMyAppointmentsAsync(cancellationToken));
+                return Ok(await _service.GetMyAppointmentsAsync(cancellation));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener citas del portal del cliente");
-                return BadRequest();
             }
+            return BadRequest();
         }
     }
 }

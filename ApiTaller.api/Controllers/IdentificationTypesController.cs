@@ -2,32 +2,33 @@ using ApiTaller.Domain.Dtos.IdentificationTypes;
 using ApiTaller.Domain.Interfaces.Services.IdentificationTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    [Authorize]
     public class IdentificationTypesController : ControllerBase
     {
         private readonly ILogger<IdentificationTypesController> _logger;
-        private readonly IIdentificationTypesService _service;
+        private readonly IIdentificationTypeService _service;
 
-        public IdentificationTypesController(IIdentificationTypesService service, ILogger<IdentificationTypesController> logger)
+        public IdentificationTypesController(ILogger<IdentificationTypesController> logger, IIdentificationTypeService service)
         {
-            _service = service;
             _logger = logger;
+            _service = service;
         }
+
         [HttpGet("GetIdentificationTypes")]
-        public async Task<IActionResult> Get(CancellationToken cancellation)
+        public async Task<IActionResult> GetIdentificationTypes(CancellationToken cancellation)
         {
             try
             {
-                var result = await _service.GetAllAsync(cancellation);
-                return Ok(result);
+                return Ok(await _service.GetIdentificationType(cancellation));
             }
             catch (Exception ex)
             {
@@ -36,42 +37,40 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        [HttpGet("GetIdentificationTypesActives")]
-        public async Task<IActionResult> GetIdentificationTypesActives(CancellationToken cancellation)
+        [HttpGet("GetIdentificationTypesActive")]
+        public async Task<IActionResult> GetIdentificationTypesActive(CancellationToken cancellation)
         {
             try
             {
-                var result = await _service.GetAllActiveAsync(cancellation);
-                return Ok(result);
+                return Ok(await _service.GetIdentificationTypeActive(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting identification types");
+                _logger.LogError(ex, "Error getting active identification types");
             }
             return BadRequest();
         }
 
         [HttpGet("GetIdentificationType/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellation)
+        public async Task<IActionResult> GetIdentificationTypeById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetByIdAsync(id, cancellation));
+                return Ok(await _service.GetIdentificationTypeById(id, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting identification type with id {id}");
+                _logger.LogError(ex, "Error getting identification type by id");
             }
             return BadRequest();
         }
 
-        
         [HttpPost("SaveOrEditIdentificationTypes")]
-        public async Task<IActionResult> Post(GetIdentificationTypeDto saveData, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrEditIdentificationTypes(GetIdentificationTypeDto saveData, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.CreateOrEditIdentificationType(saveData, cancellationToken));
+                return Ok(await _service.CreateOrEditIdentificationType(saveData, cancellation));
             }
             catch (Exception ex)
             {
@@ -79,17 +78,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// PUT api/<IdentificationTypesController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<IdentificationTypesController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

@@ -12,38 +12,37 @@ namespace ApiTaller.api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    [Authorize]
     public class WorkOrdersController : ControllerBase
     {
         private readonly ILogger<WorkOrdersController> _logger;
         private readonly IWorkOrderService _workOrderService;
 
-        public WorkOrdersController(IWorkOrderService workOrderService, ILogger<WorkOrdersController> logger)
+        public WorkOrdersController(ILogger<WorkOrdersController> logger, IWorkOrderService workOrderService)
         {
-            _workOrderService = workOrderService;
             _logger = logger;
+            _workOrderService = workOrderService;
         }
 
         [HttpGet("GetWorkOrders")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkOrders(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _workOrderService.GetAllAsync(cancellationToken));
+                return Ok(await _workOrderService.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener las órdenes de trabajo");
+                _logger.LogError(ex, "Error al obtener las ordenes de trabajo");
             }
             return BadRequest();
         }
 
         [HttpGet("GetWorkOrder/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetWorkOrderById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _workOrderService.GetByIdAsync(id, cancellationToken));
+                return Ok(await _workOrderService.GetByIdAsync(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -53,25 +52,25 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("CreateOrEditWorkOrder")]
-        public async Task<IActionResult> Post(WorkOrderDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateOrEditWorkOrder(GetWorkOrderDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _workOrderService.SaveAsync(value, cancellationToken));
+                return Ok(await _workOrderService.CreateOrEditWorkOrder(value, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al guardar la orden de trabajo");
+                _logger.LogError(ex, "Error al crear o editar la orden de trabajo");
             }
             return BadRequest();
         }
 
         [HttpPost("ChangeStatus/{id}/{status}")]
-        public async Task<IActionResult> ChangeStatus(int id, string status, CancellationToken cancellationToken)
+        public async Task<IActionResult> ChangeStatus(int id, string status, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _workOrderService.ChangeStatusAsync(id, status, cancellationToken));
+                return Ok(await _workOrderService.ChangeStatusAsync(id, status, cancellation));
             }
             catch (Exception ex)
             {
@@ -81,11 +80,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetHistory/{workOrderId}")]
-        public async Task<IActionResult> GetHistory(int workOrderId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetHistory(int workOrderId, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _workOrderService.GetHistoryAsync(workOrderId, cancellationToken));
+                return Ok(await _workOrderService.GetHistoryAsync(workOrderId, cancellation));
             }
             catch (Exception ex)
             {

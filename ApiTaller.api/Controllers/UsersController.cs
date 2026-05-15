@@ -2,8 +2,10 @@ using ApiTaller.Domain.Dtos.Users;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
@@ -12,23 +14,21 @@ namespace ApiTaller.api.Controllers
     [Authorize]
     public class UsersController : ControllerBase
     {
-
         private readonly ILogger<UsersController> _logger;
         private readonly IUserService _userService;
 
-        public UsersController(IUserService userService, ILogger<UsersController> logger)
+        public UsersController(ILogger<UsersController> logger, IUserService userService)
         {
-            _userService = userService;
             _logger = logger;
+            _userService = userService;
         }
 
-
         [HttpGet("GetUsers")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUsers(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _userService.GetUsers(cancellationToken));
+                return Ok(await _userService.GetUsers(cancellation));
             }
             catch (Exception ex)
             {
@@ -37,29 +37,26 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // GET api/<UsersController>/5
         [HttpGet("GetUser/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUserById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _userService.GetUserById(id, cancellationToken));
+                return Ok(await _userService.GetUserById(id, cancellation));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting user by id");
             }
             return BadRequest();
-
         }
 
-        // POST api/<UsersController>
         [HttpPost("SaveOrEditUsers")]
-        public async Task<IActionResult> Post(GetUsersDto getUsersDto, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrEditUsers(GetUsersDto getUsersDto, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _userService.CreateOrEditUser(getUsersDto, cancellationToken));
+                return Ok(await _userService.CreateOrEditUser(getUsersDto, cancellation));
             }
             catch (Exception ex)
             {
@@ -67,17 +64,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// PUT api/<UsersController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<UsersController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

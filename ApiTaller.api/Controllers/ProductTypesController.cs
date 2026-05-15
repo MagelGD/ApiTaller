@@ -2,8 +2,10 @@ using ApiTaller.Domain.Dtos.ProductType;
 using ApiTaller.Domain.Interfaces.Services.ProductTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
@@ -15,33 +17,32 @@ namespace ApiTaller.api.Controllers
         private readonly ILogger<ProductTypesController> _logger;
         private readonly IProductTypeService _service;
 
-        public ProductTypesController(IProductTypeService service, ILogger<ProductTypesController> logger)
+        public ProductTypesController(ILogger<ProductTypesController> logger, IProductTypeService service)
         {
-            _service = service;
             _logger = logger;
+            _service = service;
         }
 
-
-        [HttpGet("GetProductType")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllAsync(cancellationToken));
+                return Ok(await _service.GetProductType(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving product types");
+                _logger.LogError(ex, "Error retrieving all product types");
             }
             return BadRequest();
         }
 
-        [HttpGet("GetProductTypeActive")]
-        public async Task<IActionResult> GetActive(CancellationToken cancellationToken)
+        [HttpGet("GetActive")]
+        public async Task<IActionResult> GetActive(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetAllActiveAsync(cancellationToken));
+                return Ok(await _service.GetProductTypeActive(cancellation));
             }
             catch (Exception ex)
             {
@@ -50,13 +51,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // GET api/<ProductTypesController>/5
-        [HttpGet("GetProductType/{id}")]
-        public async Task<IActionResult> Get(int id, CancellationToken cancellationToken)
+        [HttpGet("GetById/{id}")]
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.GetByIdAsync(id, cancellationToken));
+                return Ok(await _service.GetProductTypeById(id, cancellation));
             }
             catch (Exception ex)
             {
@@ -65,13 +65,12 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
-        // POST api/<ProductTypesController>
         [HttpPost("SaveOrUpdate")]
-        public async Task<IActionResult> Post(GetProductTypeDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveOrUpdate(GetProductTypeDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _service.CreateOrEditProductType(value, cancellationToken));
+                return Ok(await _service.CreateOrEditProductType(value, cancellation));
             }
             catch (Exception ex)
             {
@@ -79,17 +78,5 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
-
-        //// PUT api/<ProductTypesController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<ProductTypesController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

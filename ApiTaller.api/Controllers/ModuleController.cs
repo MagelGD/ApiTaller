@@ -2,60 +2,65 @@ using ApiTaller.Domain.Dtos.Module;
 using ApiTaller.Domain.Interfaces.Services.Module;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
     [ApiController]
     [Authorize]
     public class ModuleController : ControllerBase
     {
         private readonly ILogger<ModuleController> _logger;
         private readonly IModuleService _moduleService;
+
         public ModuleController(ILogger<ModuleController> logger, IModuleService moduleService)
         {
             _logger = logger;
             _moduleService = moduleService;
         }
+
         [HttpGet("GetModules")]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetModules(CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _moduleService.GetModules(cancellationToken));
+                return Ok(await _moduleService.GetModules(cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener los módulos");
+                _logger.LogError(ex, "Error al obtener los mÃ³dulos");
             }
             return BadRequest();
         }
-        [HttpGet("GetModule{id}")]
-        public async Task<IActionResult> GetId(int id, CancellationToken cancellationToken)
+
+        [HttpGet("GetModule/{id}")]
+        public async Task<IActionResult> GetModuleById(int id, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _moduleService.GetModuleById(id, cancellationToken));
+                return Ok(await _moduleService.GetModuleById(id, cancellation));
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el módulo por id");
+                _logger.LogError(ex, "Error al obtener el mÃ³dulo por id");
             }
             return BadRequest();
         }
+
         [HttpPost("SaveModule")]
-        public async Task<IActionResult> Post(GetModuleDto value, CancellationToken cancellationToken)
+        public async Task<IActionResult> SaveModule(GetModuleDto value, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _moduleService.SaveOrEditModule(value, cancellationToken));
+                return Ok(await _moduleService.SaveOrEditModule(value, cancellation));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al guardar o editar el módulo");
+                _logger.LogError(ex, "Error al guardar o editar el mÃ³dulo");
             }
             return BadRequest();
         }

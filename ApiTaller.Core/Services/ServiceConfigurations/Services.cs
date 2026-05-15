@@ -89,6 +89,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IWorkshopSettingsService, WorkshopSettingsService>();
             services.TryAddScoped<ICustomerPortalService, CustomerPortalService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Agenda.IAgendaService, ApiTaller.Core.Services.Agenda.AgendaService>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Email.IEmailSettingsService, ApiTaller.Core.Services.Email.EmailSettingsService>();
             return services;
         }
     }
