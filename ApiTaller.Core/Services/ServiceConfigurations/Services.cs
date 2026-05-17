@@ -51,6 +51,8 @@ using ApiTaller.Domain.Interfaces.Services.WorkshopSettings;
 using ApiTaller.Core.Services.WorkshopSettings;
 using ApiTaller.Domain.Interfaces.Services.CustomerPortal;
 using ApiTaller.Core.Services.CustomerPortal;
+using ApiTaller.Domain.Interfaces.Services.Portal;
+using ApiTaller.Core.Services.Portal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -88,8 +90,10 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<IBillingService, BillingService>();
             services.TryAddScoped<IWorkshopSettingsService, WorkshopSettingsService>();
             services.TryAddScoped<ICustomerPortalService, CustomerPortalService>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Portal.IPortalService, ApiTaller.Core.Services.Portal.PortalService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Agenda.IAgendaService, ApiTaller.Core.Services.Agenda.AgendaService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Email.IEmailSettingsService, ApiTaller.Core.Services.Email.EmailSettingsService>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.IDashboardService, ApiTaller.Core.Services.Dashboard.DashboardService>();
             return services;
         }
     }

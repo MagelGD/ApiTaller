@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Models;
+using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -31,6 +31,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 entity.Property(e => e.IsActive)
                     .HasColumnType("bit(1)")
                     .HasColumnName("is_active");
+                entity.Property(e => e.MustChangePassword)
+                    .HasColumnType("bit(1)")
+                    .HasColumnName("must_change_password")
+                    .HasDefaultValue(false);
                 entity.Property(e => e.AssignmentDate)
                     .HasColumnType("datetime")
                     .HasColumnName("assignment_date");

@@ -50,6 +50,7 @@ using ApiTaller.Domain.Interfaces.Repositories.WorkshopSettings;
 using ApiTaller.Infrastructure.Data.Repositories.WorkshopSettings;
 using ApiTaller.Domain.Interfaces.Repositories.CustomerPortal;
 using ApiTaller.Infrastructure.Data.Repositories.CustomerPortal;
+using ApiTaller.Infrastructure.Data.Repositories.Portal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -86,8 +87,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<IBillingRepository, BillingRepository>();
             services.TryAddScoped<IWorkshopSettingsRepository, WorkshopSettingsRepository>();
             services.TryAddScoped<ICustomerPortalRepository, CustomerPortalRepository>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Auth.IPasswordResetTokenRepository, ApiTaller.Infrastructure.Data.Repositories.Auth.PasswordResetTokenRepository>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Portal.IPortalRepository, PortalRepository>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Agenda.IAgendaRepository, ApiTaller.Infrastructure.Data.Repositories.Agenda.AgendaRepository>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Email.IEmailService, ApiTaller.Infrastructure.Services.Email.EmailService>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.IDashboardRepository, ApiTaller.Infrastructure.Data.Repositories.Dashboard.DashboardRepository>();
             return services;
         }
     }

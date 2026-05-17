@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Options;
+using ApiTaller.Domain.Dtos.Options;
 using ApiTaller.Domain.Dtos.Users;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,6 +23,35 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
                 new(ClaimTypes.Sid, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.Jti, jti)
             ];
+            JwtSecurityToken token = new(
+                issuer: options.Issuer,
+                audience: options.Audience,
+                claims: claims,
+                notBefore: DateTime.UtcNow,
+                expires: expiresUtc,
+                signingCredentials: creds
+            );
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public static string CreateJwt(this Domain.Models.User user, int? customerId, JwtOptions options)
+        {
+            SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(options.JwtSigningKey));
+            SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
+            string jti = NewToken();
+            DateTime expiresUtc = DateTime.UtcNow.AddMinutes(options.AccessTokenMinutes);
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+                new Claim(ClaimTypes.Role, user.UserRoleId.ToString()),
+                new Claim(ClaimTypes.Sid, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, jti),
+                new Claim("mustChangePassword", user.MustChangePassword.ToString().ToLower())
+            };
+            if (customerId.HasValue)
+            {
+                claims.Add(new Claim("customerId", customerId.Value.ToString()));
+            }
             JwtSecurityToken token = new(
                 issuer: options.Issuer,
                 audience: options.Audience,

@@ -243,6 +243,13 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 ((SELECT id FROM module WHERE name = 'Agenda'), (SELECT id FROM operation WHERE name = 'Editar'), 'Configuracion Agenda', 'Configuracion_Agenda', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Agenda'), (SELECT id FROM operation WHERE name = 'Cambiar_Estado'), 'Convertir OT', 'Convertir_OT_Agenda', 1, NOW(), NOW(), 1);
 
+-- 6.6 Crear Módulo Centro de Control (Fase 8)
+INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_user_id) VALUES 
+('Centro de Control', 1, NOW(), NOW(), 1);
+
+INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
+((SELECT id FROM module WHERE name = 'Centro de Control'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Dashboard Administrativo', 'dashboard.admin.view', 1, NOW(), NOW(), 1);
+
 -- 7. ASIGNAR MÓDULOS AL ROL SUPERADMIN
 INSERT INTO user_role_module (user_role_id, module_role_id, is_active, created_at, updated_at, responsible_user_id)
 SELECT ur.id, m.id, 1, NOW(), NOW(), 1

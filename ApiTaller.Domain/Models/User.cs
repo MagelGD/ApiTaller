@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ApiTaller.Domain.Models;
@@ -21,6 +21,7 @@ public partial class User
     public DateTime? AssignmentDate { get; set; }
     public DateTime? ExpirationDate { get; set; }
     public bool IsActive { get; set; }
+    public bool MustChangePassword { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public virtual UserRole UserRoleIdNavigation { get; set; }
