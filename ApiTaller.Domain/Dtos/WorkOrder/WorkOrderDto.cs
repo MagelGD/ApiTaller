@@ -22,6 +22,7 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
         public string? VehiclePlate { get; set; }
         public string? VehicleBrand { get; set; }
         public string? VehicleVersion { get; set; }
+        public bool IsBilled { get; set; }
 
         public List<WorkOrderEvidenceDto>? Evidences { get; set; } 
         public List<WorkOrderPartDto>? Parts { get; set; }

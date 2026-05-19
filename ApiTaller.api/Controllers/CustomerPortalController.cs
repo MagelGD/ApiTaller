@@ -65,6 +65,7 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
+        [HttpPost("ApproveFullOrder/{orderId}")]
         [HttpPost("ApproveOrder/{orderId}")]
         public async Task<IActionResult> ApproveOrder(int orderId, CancellationToken cancellation)
         {
@@ -75,6 +76,20 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al aprobar orden del portal del cliente");
+            }
+            return BadRequest();
+        }
+
+        [HttpPost("ApproveItem")]
+        public async Task<IActionResult> ApproveItem([FromBody] CustomerPortalApprovalDto dto, CancellationToken cancellation)
+        {
+            try
+            {
+                return Ok(await _service.ApproveItemAsync(dto, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al aprobar ítem del portal del cliente");
             }
             return BadRequest();
         }

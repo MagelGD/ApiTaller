@@ -37,6 +37,7 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
+        [HttpGet("GetWorkOrderById/{id}")]
         [HttpGet("GetWorkOrder/{id}")]
         public async Task<IActionResult> GetWorkOrderById(int id, CancellationToken cancellation)
         {
@@ -70,7 +71,12 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _workOrderService.ChangeStatusAsync(id, status, cancellation));
+                var success = await _workOrderService.ChangeStatusAsync(id, status, cancellation);
+                if (!success)
+                {
+                    return BadRequest("No se pudo cambiar el estado de la orden (verifique que tenga repuestos o servicios).");
+                }
+                return Ok(success);
             }
             catch (Exception ex)
             {

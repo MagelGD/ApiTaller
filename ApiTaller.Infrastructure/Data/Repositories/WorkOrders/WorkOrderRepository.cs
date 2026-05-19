@@ -93,6 +93,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         Observations = w.Observations,
                         Status = w.Status,
                         IsActive = w.IsActive,
+                        IsBilled = _context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive),
                         CreatedAt = w.CreatedAt,
                         UpdatedAt = w.UpdatedAt,
                         Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
@@ -169,6 +170,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         Observations = w.Observations,
                         Status = w.Status,
                         IsActive = w.IsActive,
+                        IsBilled = _context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive),
                         CreatedAt = w.CreatedAt,
                         UpdatedAt = w.UpdatedAt,
                         Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
@@ -230,6 +232,25 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     .FirstOrDefaultAsync(w => w.Id == update.Id, cancellation);
 
                 if (existingOrder == null) return false;
+
+                // Validar que no se inactive una orden facturada
+                if (!update.IsActive && existingOrder.IsActive)
+                {
+                    bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == update.Id && s.IsActive, cancellation);
+                    if (isBilled)
+                    {
+                        throw new InvalidOperationException("No se puede inactivar una orden de trabajo que ya ha sido facturada.");
+                    }
+                }
+
+                // Validar que no se pase a En Aprobación o Aprobado sin repuestos ni servicios
+                if (update.Status.Equals("En Aprobación", StringComparison.OrdinalIgnoreCase) || update.Status.Equals("Aprobado", StringComparison.OrdinalIgnoreCase))
+                {
+                    if ((update.Parts == null || update.Parts.Count == 0) && (update.Services == null || update.Services.Count == 0))
+                    {
+                        throw new InvalidOperationException("No es posible pasar a aprobación o aprobado una orden de trabajo que no posee repuestos ni servicios registrados.");
+                    }
+                }
 
                 // Actualizar cabecera
                 _context.Entry(existingOrder).CurrentValues.SetValues(update);
@@ -422,6 +443,17 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
 
                 var oldStatus = workOrder.Status;
                 if (oldStatus == status) return true;
+
+                // VALIDACIÓN DE NEGOCIO: Evitar pasar a En Aprobación o Aprobado sin repuestos ni servicios
+                if (status.Equals("En Aprobación", StringComparison.OrdinalIgnoreCase) || status.Equals("Aprobado", StringComparison.OrdinalIgnoreCase))
+                {
+                    bool hasParts = await _context.WorkOrderPart.AnyAsync(p => p.WorkOrderId == id && p.IsActive, cancellation);
+                    bool hasServices = await _context.WorkOrderService.AnyAsync(s => s.WorkOrderId == id && s.IsActive, cancellation);
+                    if (!hasParts && !hasServices)
+                    {
+                        throw new InvalidOperationException("No es posible pasar a aprobación o aprobado una orden de trabajo que no posee repuestos ni servicios registrados.");
+                    }
+                }
 
                 workOrder.Status = status;
                 workOrder.UpdatedAt = DateTime.Now;
