@@ -37,6 +37,20 @@ namespace ApiTaller.api.Controllers
             return BadRequest();
         }
 
+        [HttpGet("GetWorkshopSettingByKey/{key}")]
+        public async Task<IActionResult> GetWorkshopSettingByKey(string key, CancellationToken cancellation)
+        {
+            try
+            {
+                return Ok(await _workshopSettingsService.GetByKeyAsync(key, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener la configuración por llave: {key}");
+            }
+            return BadRequest();
+        }
+
         [HttpPost("CreateOrEditWorkshopSetting")]
         public async Task<IActionResult> CreateOrEditWorkshopSetting(WorkshopSettingsDto dto, CancellationToken cancellation)
         {
