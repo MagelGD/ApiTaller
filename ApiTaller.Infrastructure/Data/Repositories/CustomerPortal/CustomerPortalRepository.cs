@@ -305,9 +305,16 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 var customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return false;
 
+                var plateUpper = dto.Plate.ToUpper().Trim();
+                var exists = await _context.Vehicle.AnyAsync(v => v.Plate == plateUpper, cancellation);
+                if (exists)
+                {
+                    throw new InvalidOperationException("La placa ya se encuentra registrada en el sistema.");
+                }
+
                 var vehicle = new ApiTaller.Domain.Models.Vehicle
                 {
-                    Plate = dto.Plate.ToUpper().Trim(),
+                    Plate = plateUpper,
                     BrandId = dto.BrandId,
                     ModelId = dto.ModelId,
                     VersionId = dto.VersionId,
@@ -322,6 +329,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
 
                 _context.Vehicle.Add(vehicle);
                 return await _context.SaveChangesAsync(cancellation) > 0;
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

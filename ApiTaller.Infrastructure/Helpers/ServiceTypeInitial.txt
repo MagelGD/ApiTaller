@@ -1,0 +1,14 @@
+USE tallermoto;
+
+-- ==============================================================================
+-- CARGA DE TIPOS DE SERVICIO
+-- ==============================================================================
+
+INSERT IGNORE INTO service_type (name, is_active, created_at, updated_at, responsible_user_id) VALUES
+('Mantenimiento Preventivo', 1, NOW(), NOW(), 1),
+('Mantenimiento Correctivo', 1, NOW(), NOW(), 1),
+('Garantía', 1, NOW(), NOW(), 1),
+('Revisión General / Viaje', 1, NOW(), NOW(), 1),
+('Modificaciones / Personalización', 1, NOW(), NOW(), 1),
+('Lavado y Detallado', 1, NOW(), NOW(), 1),
+('Diagnóstico Escáner', 1, NOW(), NOW(), 1);

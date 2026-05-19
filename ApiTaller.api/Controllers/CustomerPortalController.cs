@@ -86,11 +86,15 @@ namespace ApiTaller.api.Controllers
             {
                 return Ok(await _service.CreateMyVehicleAsync(dto, cancellation));
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al registrar vehculo en el portal del cliente");
+                _logger.LogError(ex, "Error al registrar vehículo en el portal del cliente");
+                return BadRequest(new { message = "Ocurrió un error al registrar el vehículo." });
             }
-            return BadRequest();
         }
 
         [HttpGet("MyAppointments")]

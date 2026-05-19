@@ -11,5 +11,6 @@ namespace ApiTaller.Domain.Interfaces.Services.Customers
         Task<IEnumerable<GetCustomerDto>> GetAllActiveAsync(CancellationToken cancellation);
         Task<GetCustomerDto?> GetByIdAsync(int id, CancellationToken cancellation);
         Task<GetCustomerDto> CreateOrEditCustomer(GetCustomerDto customer, CancellationToken cancellationToken);
+        Task<bool> ResendWelcomeEmailAsync(int customerId, CancellationToken cancellation);
     }
 }

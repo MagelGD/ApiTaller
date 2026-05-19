@@ -78,5 +78,24 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
+
+        [HttpPost("ResendWelcomeEmail/{id}")]
+        public async Task<IActionResult> ResendWelcomeEmail(int id, CancellationToken cancellation)
+        {
+            try
+            {
+                bool success = await _customerService.ResendWelcomeEmailAsync(id, cancellation);
+                if (success)
+                {
+                    return Ok(new { message = "Correo reenviado exitosamente." });
+                }
+                return BadRequest(new { message = "No se pudo reenviar el correo de bienvenida." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al reenviar correo de bienvenida para el cliente con ID {id}.");
+            }
+            return BadRequest();
+        }
     }
 }
