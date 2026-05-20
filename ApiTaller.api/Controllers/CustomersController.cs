@@ -75,8 +75,8 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al guardar o editar el cliente.");
+                return BadRequest(ex.Message);
             }
-            return BadRequest();
         }
 
         [HttpPost("ResendWelcomeEmail/{id}")]

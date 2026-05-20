@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Brand;
+using ApiTaller.Domain.Dtos.Brand;
 using ApiTaller.Domain.Dtos.BrandModels;
 using System;
 using System.Collections.Generic;
@@ -10,8 +10,8 @@ namespace ApiTaller.Domain.Dtos.BrandModelVersion
     {
         public int Id { get; set; }
         public string Version { get; set; }
-        public GetBrandDto brandDto { get; set; }
-        public GetBrandModelsDto BrandModelsDto { get; set; }
+        public GetBrandDto? brandDto { get; set; }
+        public GetBrandModelsDto? BrandModelsDto { get; set; }
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

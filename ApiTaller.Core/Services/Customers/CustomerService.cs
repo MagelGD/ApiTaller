@@ -111,6 +111,7 @@ namespace ApiTaller.Core.Services.Customers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error al crear o editar el cliente con identificación {customer.IdentificationNumber}");
+                throw;
             }
             return result;
         }

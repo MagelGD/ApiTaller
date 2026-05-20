@@ -154,18 +154,38 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
         {
             try
             {
+                var existingVehicle = await _context.Vehicle.FindAsync(new object[] { update.Id }, cancellation);
+                if (existingVehicle == null)
+                {
+                    return false;
+                }
+
+                if (!update.IsActive && existingVehicle.IsActive)
+                {
+                    var activeWorkOrder = await _context.WorkOrder
+                        .Where(w => w.VehicleId == update.Id && w.IsActive && (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))
+                        .FirstOrDefaultAsync(cancellation);
+
+                    if (activeWorkOrder != null)
+                    {
+                        throw new InvalidOperationException($"No es posible inactivar el vehículo porque tiene la orden de trabajo #{activeWorkOrder.Id} activa en estado '{activeWorkOrder.Status}'");
+                    }
+                }
+
                 if (int.TryParse(_currentUserService.UserId, out int userId))
                 {
                     update.ResponsibleUserId = userId;
                 }
                 update.UpdatedAt = DateTime.Now;
-                _context.Vehicle.Update(update);
+
+                _context.Entry(existingVehicle).CurrentValues.SetValues(update);
+                return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating vehicle");
+                throw;
             }
-            return await _context.SaveChangesAsync(cancellation) > 0;
         }
 
         public async Task<GetVehicleDto?> ValidateExist(string plate, CancellationToken cancellation)

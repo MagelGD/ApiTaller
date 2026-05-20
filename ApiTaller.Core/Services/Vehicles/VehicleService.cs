@@ -56,6 +56,7 @@ namespace ApiTaller.Core.Services.Vehicles
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error al crear o editar el vehículo con placa {vehicle.Plate}");
+                throw;
             }
             return result;
         }

@@ -233,6 +233,25 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
 
                 if (existingOrder == null) return false;
 
+                // Validar que no se modifique una orden de trabajo que ya ha sido entregada o facturada
+                bool isBilledBeforeUpdate = await _context.Sale.AnyAsync(s => s.WorkOrderId == update.Id && s.IsActive, cancellation);
+                bool isDeliveredBeforeUpdate = existingOrder.Status.Equals("Entregado", StringComparison.OrdinalIgnoreCase);
+
+                if (isBilledBeforeUpdate || isDeliveredBeforeUpdate)
+                {
+                    if (existingOrder.EstimatedDeliveryDate != update.EstimatedDeliveryDate ||
+                        existingOrder.Observations != update.Observations ||
+                        existingOrder.Mileage != update.Mileage ||
+                        existingOrder.FuelLevel != update.FuelLevel ||
+                        existingOrder.CustomerId != update.CustomerId ||
+                        existingOrder.VehicleId != update.VehicleId ||
+                        existingOrder.EntryDate != update.EntryDate ||
+                        existingOrder.DownPayment != update.DownPayment)
+                    {
+                        throw new InvalidOperationException("No se pueden modificar los datos de una orden de trabajo que ya ha sido entregada o facturada.");
+                    }
+                }
+
                 // Validar que no se inactive una orden facturada, terminada o entregada
                 if (!update.IsActive && existingOrder.IsActive)
                 {

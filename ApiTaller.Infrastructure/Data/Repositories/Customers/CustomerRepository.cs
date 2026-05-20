@@ -139,18 +139,39 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Customers
         {
             try
             {
+                var existingCustomer = await _context.Customer.FindAsync(new object[] { update.Id }, cancellation);
+                if (existingCustomer == null)
+                {
+                    return false;
+                }
+
+                if (!update.IsActive && existingCustomer.IsActive)
+                {
+                    var activeWorkOrder = await _context.WorkOrder
+                        .Include(w => w.VehicleNavigation)
+                        .Where(w => w.CustomerId == update.Id && w.IsActive && (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))
+                        .FirstOrDefaultAsync(cancellation);
+
+                    if (activeWorkOrder != null)
+                    {
+                        throw new InvalidOperationException($"No es posible inactivar al cliente porque el vehículo con placa '{activeWorkOrder.VehicleNavigation?.Plate?.ToUpper()}' tiene la orden de trabajo #{activeWorkOrder.Id} activa en estado '{activeWorkOrder.Status}'");
+                    }
+                }
+
                 if (int.TryParse(_currentUserService.UserId, out int userId))
                 {
                     update.ResponsibleUserId = userId;
                 }
                 update.UpdatedAt = DateTime.Now;
-                _context.Customer.Update(update);
+
+                _context.Entry(existingCustomer).CurrentValues.SetValues(update);
+                return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating customer");
+                throw;
             }
-            return await _context.SaveChangesAsync(cancellation) > 0;
         }
 
         public async Task<GetCustomerDto?> ValidateExist(GetCustomerDto data, CancellationToken cancellation)

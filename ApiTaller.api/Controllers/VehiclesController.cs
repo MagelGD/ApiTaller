@@ -75,8 +75,8 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear o editar el vehículo");
+                return BadRequest(ex.Message);
             }
-            return BadRequest();
         }
     }
 }
