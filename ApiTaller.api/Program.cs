@@ -26,14 +26,15 @@ builder.Services.AddOpenApi();
 #region Cors
 builder.Services.AddCors(options =>
 {
-        options.AddPolicy("AllowAll", policy =>
-    {
-        policy
-               .WithOrigins("http://localhost:4200")
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
-    });
+    options.AddPolicy("AllowAll", policy =>
+{
+    policy
+//.WithOrigins("http://localhost:4200")
+.AllowAnyOrigin()
+.AllowAnyMethod()
+.AllowAnyHeader();
+
+});
 
 });
 #endregion
