@@ -233,13 +233,29 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
 
                 if (existingOrder == null) return false;
 
-                // Validar que no se inactive una orden facturada
+                // Validar que no se inactive una orden facturada, terminada o entregada
                 if (!update.IsActive && existingOrder.IsActive)
                 {
                     bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == update.Id && s.IsActive, cancellation);
                     if (isBilled)
                     {
                         throw new InvalidOperationException("No se puede inactivar una orden de trabajo que ya ha sido facturada.");
+                    }
+
+                    if (existingOrder.Status.Equals("Terminado", StringComparison.OrdinalIgnoreCase) || 
+                        existingOrder.Status.Equals("Entregado", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException("No se puede inactivar una orden de trabajo que ya ha sido terminada o entregada.");
+                    }
+                }
+
+                // Validar que no se cambie el estado si ya está facturada
+                if (existingOrder.Status != update.Status)
+                {
+                    bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == update.Id && s.IsActive, cancellation);
+                    if (isBilled)
+                    {
+                        throw new InvalidOperationException("No se puede cambiar el estado de una orden de trabajo que ya ha sido facturada.");
                     }
                 }
 
@@ -443,6 +459,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
 
                 var oldStatus = workOrder.Status;
                 if (oldStatus == status) return true;
+
+                // VALIDACIÓN DE NEGOCIO: Evitar cambiar el estado si la orden ya ha sido facturada
+                bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == id && s.IsActive, cancellation);
+                if (isBilled)
+                {
+                    throw new InvalidOperationException("No se puede cambiar el estado de una orden de trabajo que ya ha sido facturada.");
+                }
 
                 // VALIDACIÓN DE NEGOCIO: Evitar pasar a En Aprobación o Aprobado sin repuestos ni servicios
                 if (status.Equals("En Aprobación", StringComparison.OrdinalIgnoreCase) || status.Equals("Aprobado", StringComparison.OrdinalIgnoreCase))
