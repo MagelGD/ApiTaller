@@ -68,7 +68,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating work order");
-                return false;
+                throw;
             }
         }
 
@@ -408,7 +408,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     var existingEvidence = existingOrder.Evidences.FirstOrDefault(e => e.Id == evidence.Id && e.Id != 0);
                     if (existingEvidence != null)
                     {
+                        var originalPhotoUrl = existingEvidence.PhotoUrl;
                         _context.Entry(existingEvidence).CurrentValues.SetValues(evidence);
+                        if (string.IsNullOrEmpty(existingEvidence.PhotoUrl) || existingEvidence.PhotoUrl == originalPhotoUrl)
+                        {
+                            existingEvidence.PhotoUrl = originalPhotoUrl;
+                            _context.Entry(existingEvidence).Property(e => e.PhotoUrl).IsModified = false;
+                        }
                     }
                     else
                     {
@@ -464,7 +470,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating work order with children");
-                return false;
+                throw;
             }
         }
 
@@ -526,7 +532,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             {
                 await transaction.RollbackAsync(cancellation);
                 _logger.LogError(ex, "Error changing work order status with history");
-                return false;
+                throw;
             }
         }
 
@@ -604,6 +610,45 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             if (int.TryParse(_currentUserService.UserId, out int userId)) movement.ResponsibleUserId = userId;
 
             await _context.InventoryHistory.AddAsync(movement, cancellation);
+        }
+
+        public async Task<WorkOrderEvidence> AddEvidenceAsync(WorkOrderEvidence evidence, CancellationToken cancellation)
+        {
+            try
+            {
+                evidence.CreatedAt = DateTime.Now;
+                evidence.IsActive = true;
+                if (int.TryParse(_currentUserService.UserId, out int userId))
+                {
+                    evidence.ResponsibleUserId = userId;
+                }
+
+                await _context.WorkOrderEvidence.AddAsync(evidence, cancellation);
+                await _context.SaveChangesAsync(cancellation);
+                return evidence;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al agregar la evidencia individual");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteEvidenceAsync(int id, CancellationToken cancellation)
+        {
+            try
+            {
+                var evidence = await _context.WorkOrderEvidence.FindAsync(new object[] { id }, cancellation);
+                if (evidence == null) return false;
+
+                _context.WorkOrderEvidence.Remove(evidence);
+                return await _context.SaveChangesAsync(cancellation) > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al eliminar la evidencia individual con id {id}");
+                throw;
+            }
         }
     }
 }

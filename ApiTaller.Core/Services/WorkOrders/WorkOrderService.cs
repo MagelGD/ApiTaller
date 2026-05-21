@@ -152,7 +152,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving work order in service");
-                return false;
+                throw;
             }
         }
 
@@ -174,7 +174,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error changing status for work order {id}");
-                return false;
+                throw;
             }
         }
 
@@ -188,6 +188,51 @@ namespace ApiTaller.Core.Services.WorkOrders
             {
                 _logger.LogError(ex, $"Error getting history for work order {workOrderId}");
                 return new List<WorkOrderHistoryDto>();
+            }
+        }
+
+        public async Task<WorkOrderEvidenceDto> AddEvidenceAsync(WorkOrderEvidenceDto dto, CancellationToken cancellation)
+        {
+            try
+            {
+                var model = new WorkOrderEvidence
+                {
+                    WorkOrderId = dto.WorkOrderId,
+                    PhotoUrl = dto.PhotoUrl,
+                    EvidenceType = dto.EvidenceType,
+                    Description = dto.Description,
+                    IsActive = true
+                };
+
+                var savedModel = await _workOrderRepository.AddEvidenceAsync(model, cancellation);
+
+                return new WorkOrderEvidenceDto
+                {
+                    Id = savedModel.Id,
+                    WorkOrderId = savedModel.WorkOrderId,
+                    PhotoUrl = savedModel.PhotoUrl,
+                    EvidenceType = savedModel.EvidenceType,
+                    Description = savedModel.Description,
+                    IsActive = savedModel.IsActive
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al agregar evidencia en el servicio");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteEvidenceAsync(int id, CancellationToken cancellation)
+        {
+            try
+            {
+                return await _workOrderRepository.DeleteEvidenceAsync(id, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al eliminar evidencia {id} en el servicio");
+                throw;
             }
         }
     }

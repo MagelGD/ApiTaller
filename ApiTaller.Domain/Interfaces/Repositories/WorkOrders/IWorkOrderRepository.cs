@@ -15,5 +15,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories.WorkOrders
         Task<bool> UpdateAsync(WorkOrder update, CancellationToken cancellation);
         Task<bool> ChangeStatusAsync(int id, string status, CancellationToken cancellation);
         Task<IEnumerable<WorkOrderHistoryDto>> GetHistoryAsync(int workOrderId, CancellationToken cancellation);
+        Task<WorkOrderEvidence> AddEvidenceAsync(WorkOrderEvidence evidence, CancellationToken cancellation);
+        Task<bool> DeleteEvidenceAsync(int id, CancellationToken cancellation);
     }
 }

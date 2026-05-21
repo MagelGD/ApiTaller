@@ -57,13 +57,18 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _workOrderService.SaveAsync(value, cancellation));
+                var success = await _workOrderService.SaveAsync(value, cancellation);
+                if (!success)
+                {
+                    return BadRequest("No se pudo guardar la orden de trabajo (verifique que los datos sean correctos).");
+                }
+                return Ok(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear o editar la orden de trabajo");
+                return StatusCode(500, ex.Message);
             }
-            return BadRequest();
         }
 
         [HttpPost("ChangeStatus/{id}/{status}")]
@@ -81,8 +86,8 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error al cambiar el estado de la orden {id}");
+                return StatusCode(500, ex.Message);
             }
-            return BadRequest();
         }
 
         [HttpGet("GetHistory/{workOrderId}")]
@@ -97,6 +102,40 @@ namespace ApiTaller.api.Controllers
                 _logger.LogError(ex, $"Error al obtener el historial de la orden {workOrderId}");
             }
             return BadRequest();
+        }
+
+        [HttpPost("AddEvidence")]
+        public async Task<IActionResult> AddEvidence(WorkOrderEvidenceDto value, CancellationToken cancellation)
+        {
+            try
+            {
+                var result = await _workOrderService.AddEvidenceAsync(value, cancellation);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al agregar evidencia individual");
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteEvidence/{id}")]
+        public async Task<IActionResult> DeleteEvidence(int id, CancellationToken cancellation)
+        {
+            try
+            {
+                var success = await _workOrderService.DeleteEvidenceAsync(id, cancellation);
+                if (!success)
+                {
+                    return BadRequest("No se pudo eliminar la evidencia individual.");
+                }
+                return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al eliminar la evidencia individual {id}");
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }
