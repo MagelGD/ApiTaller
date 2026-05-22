@@ -52,7 +52,11 @@ namespace ApiTaller.Infrastructure.Services.Email
             {
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                await client.ConnectAsync(config.Host, config.Port, config.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto, ct);
+                var socketOptions = config.EnableSsl 
+                    ? (config.Port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls) 
+                    : SecureSocketOptions.None;
+
+                await client.ConnectAsync(config.Host, config.Port, socketOptions, ct);
                 
                 string decryptedPassword = SecurityHelper.Decrypt(config.Password);
                 await client.AuthenticateAsync(config.UserName, decryptedPassword, ct);
@@ -69,7 +73,12 @@ namespace ApiTaller.Infrastructure.Services.Email
                 using (var client = new SmtpClient())
                 {
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                    await client.ConnectAsync(settings.Host, settings.Port, settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.Auto, ct);
+                    
+                    var socketOptions = settings.EnableSsl 
+                        ? (settings.Port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls) 
+                        : SecureSocketOptions.None;
+
+                    await client.ConnectAsync(settings.Host, settings.Port, socketOptions, ct);
                     
                     string passwordToUse = settings.Password;
                     try {

@@ -1,5 +1,5 @@
 using ApiTaller.Domain.Interfaces.Services.Email;
-using ApiTaller.Domain.Models;
+using ApiTaller.Domain.Dtos.WorkshopConfig;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -38,31 +38,41 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("SaveEmailSettings")]
-        public async Task<IActionResult> SaveEmailSettings([FromBody] EmailSettings settings, CancellationToken cancellation)
+        public async Task<IActionResult> SaveEmailSettings([FromBody] EmailSettingsDto dto, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _emailSettingsService.SaveSettingsAsync(settings, cancellation));
+                var result = await _emailSettingsService.SaveSettingsAsync(dto, cancellation);
+                if (result)
+                {
+                    return Ok(true);
+                }
+                return BadRequest("No se pudo guardar la configuración de correo. Verifique los datos e intente nuevamente.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al guardar la configuración de correo");
             }
-            return BadRequest();
+            return BadRequest("Error interno al intentar guardar la configuración de correo.");
         }
 
         [HttpPost("TestEmailConnection")]
-        public async Task<IActionResult> TestEmailConnection([FromBody] EmailSettings settings, CancellationToken cancellation)
+        public async Task<IActionResult> TestEmailConnection([FromBody] EmailSettingsDto dto, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _emailSettingsService.TestConnectionAsync(settings, cancellation));
+                var result = await _emailSettingsService.TestConnectionAsync(dto, cancellation);
+                if (result)
+                {
+                    return Ok(true);
+                }
+                return BadRequest("La prueba de conexión SMTP falló. Verifique los datos del servidor e intente de nuevo.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error en la prueba de conexión SMTP");
             }
-            return BadRequest();
+            return BadRequest("Error al intentar realizar la prueba de conexión SMTP.");
         }
     }
 }

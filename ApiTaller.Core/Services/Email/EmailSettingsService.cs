@@ -1,8 +1,9 @@
+using ApiTaller.Domain.Dtos.WorkshopConfig;
+using ApiTaller.Domain.Interfaces.Repositories.EmailSettings;
+using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Interfaces.Services.Email;
 using ApiTaller.Domain.Models;
-using ApiTaller.Infrastructure.Data;
 using ApiTaller.Infrastructure.Helpers;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,67 +12,99 @@ namespace ApiTaller.Core.Services.Email
 {
     public class EmailSettingsService : IEmailSettingsService
     {
-        private readonly DataContext _context;
+        private readonly IEmailSettingsRepository _emailSettingsRepository;
         private readonly IEmailService _emailSender;
+        private readonly ICurrentUserService _currentUserService;
 
-        public EmailSettingsService(DataContext context, IEmailService emailSender)
+        public EmailSettingsService(
+            IEmailSettingsRepository emailSettingsRepository, 
+            IEmailService emailSender, 
+            ICurrentUserService currentUserService)
         {
-            _context = context;
+            _emailSettingsRepository = emailSettingsRepository;
             _emailSender = emailSender;
+            _currentUserService = currentUserService;
         }
 
-        public async Task<EmailSettings> GetSettingsAsync(CancellationToken ct)
+        public async Task<EmailSettingsDto?> GetSettingsAsync(CancellationToken ct)
         {
-            var settings = await _context.EmailSettings.FirstOrDefaultAsync(ct);
-            if (settings != null)
+            var settings = await _emailSettingsRepository.GetSettingsAsync(ct);
+            if (settings == null) return null;
+
+            return new EmailSettingsDto
             {
-                settings.Password = "********";
-            }
-            return settings;
+                Id = settings.Id,
+                Host = settings.Host,
+                Port = settings.Port,
+                UserName = settings.UserName,
+                Password = "********", // Enmascarado en capa de presentación/DTO, sin corromper el modelo de base de datos
+                EnableSsl = settings.EnableSsl,
+                SenderName = settings.SenderName,
+                SenderEmail = settings.SenderEmail,
+                IsActive = settings.IsActive,
+                ResponsibleUserId = settings.ResponsibleUserId
+            };
         }
 
-        public async Task<bool> SaveSettingsAsync(EmailSettings settings, CancellationToken ct)
+        public async Task<bool> SaveSettingsAsync(EmailSettingsDto dto, CancellationToken ct)
         {
-            var existing = await _context.EmailSettings.FirstOrDefaultAsync(ct);
+            var existing = await _emailSettingsRepository.GetSettingsAsync(ct);
 
-            if (settings.Password == "********" && existing != null)
+            string finalPassword;
+            if (dto.Password == "********" && existing != null)
             {
-                settings.Password = existing.Password;
+                finalPassword = existing.Password;
             }
             else
             {
-                settings.Password = SecurityHelper.Encrypt(settings.Password);
+                finalPassword = SecurityHelper.Encrypt(dto.Password);
             }
 
-            if (existing == null)
+            int? userId = null;
+            if (int.TryParse(_currentUserService.UserId, out int parsedId))
+                userId = parsedId;
+
+            var settings = new EmailSettings
             {
-                settings.CreatedAt = DateTime.Now;
-                settings.IsActive = true;
-                await _context.EmailSettings.AddAsync(settings, ct);
+                Id = dto.Id,
+                Host = dto.Host,
+                Port = dto.Port,
+                UserName = dto.UserName,
+                Password = finalPassword,
+                EnableSsl = dto.EnableSsl,
+                SenderName = dto.SenderName,
+                SenderEmail = dto.SenderEmail,
+                IsActive = true,
+                ResponsibleUserId = userId
+            };
+
+            return await _emailSettingsRepository.SaveSettingsAsync(settings, ct);
+        }
+
+        public async Task<bool> TestConnectionAsync(EmailSettingsDto dto, CancellationToken ct)
+        {
+            var existing = await _emailSettingsRepository.GetSettingsAsync(ct);
+
+            string finalPassword;
+            if (dto.Password == "********" && existing != null)
+            {
+                finalPassword = existing.Password;
             }
             else
             {
-                existing.Host = settings.Host;
-                existing.Port = settings.Port;
-                existing.UserName = settings.UserName;
-                existing.Password = settings.Password;
-                existing.EnableSsl = settings.EnableSsl;
-                existing.SenderName = settings.SenderName;
-                existing.SenderEmail = settings.SenderEmail;
-                existing.UpdatedAt = DateTime.Now;
+                finalPassword = SecurityHelper.Encrypt(dto.Password);
             }
 
-            return await _context.SaveChangesAsync(ct) > 0;
-        }
-
-        public async Task<bool> TestConnectionAsync(EmailSettings settings, CancellationToken ct)
-        {
-            var existing = await _context.EmailSettings.AsNoTracking().FirstOrDefaultAsync(ct);
-            
-            if (settings.Password == "********" && existing != null)
+            var settings = new EmailSettings
             {
-                settings.Password = existing.Password;
-            }
+                Host = dto.Host,
+                Port = dto.Port,
+                UserName = dto.UserName,
+                Password = finalPassword,
+                EnableSsl = dto.EnableSsl,
+                SenderName = dto.SenderName,
+                SenderEmail = dto.SenderEmail
+            };
 
             return await _emailSender.TestConnectionAsync(settings, ct);
         }

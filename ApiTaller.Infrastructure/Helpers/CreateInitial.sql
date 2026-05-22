@@ -83,7 +83,8 @@ INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_u
 ('Precios Servicio', 1, NOW(), NOW(), 1),
 ('Inventario', 1, NOW(), NOW(), 1),
 ('Logo del Taller', 1, NOW(), NOW(), 1),
-('Portal Cliente', 1, NOW(), NOW(), 1);
+('Portal Cliente', 1, NOW(), NOW(), 1),
+('Envío Correo', 1, NOW(), NOW(), 1);
 
 -- 6. Crear Acciones
 INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
@@ -228,6 +229,11 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 -- MÓDULO: LOGO DEL TALLER
 ((SELECT id FROM module WHERE name = 'Logo del Taller'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Logo Taller', 'config.logo.view', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Logo del Taller'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Logo Taller', 'config.logo.save', 1, NOW(), NOW(), 1),
+
+-- MÓDULO: ENVÍO CORREO
+((SELECT id FROM module WHERE name = 'Envío Correo'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Configuración Correo', 'config.email.view', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Envío Correo'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Configuración Correo', 'config.email.save', 1, NOW(), NOW(), 1),
+
 
 -- MÓDULO: PORTAL CLIENTE
 ((SELECT id FROM module WHERE name = 'Portal Cliente'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Portal Cliente', 'Ver_Portal_Cliente', 1, NOW(), NOW(), 1),
