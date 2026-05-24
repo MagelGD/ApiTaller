@@ -34,6 +34,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("date")
                 .HasColumnName("start_date");
 
+            builder.Property(e => e.WorkingDays)
+                .HasMaxLength(50)
+                .HasColumnName("working_days");
+
             builder.Property(e => e.IsActive)
                 .IsRequired()
                 .HasDefaultValue(true)

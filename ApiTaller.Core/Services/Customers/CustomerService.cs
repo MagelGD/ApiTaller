@@ -95,14 +95,27 @@ namespace ApiTaller.Core.Services.Customers
                     }
                     await _customerRepository.CreateAsync(saveData, cancellationToken);
 
-                    // Send welcome email if the user was successfully created
                     if (wasUserCreated && savedUser != null && !string.IsNullOrEmpty(savedUser.Email))
-                    {
                         await SendWelcomeEmailAsync(savedUser, customer.IdentificationNumber, cancellationToken);
-                    }
                 }
                 else if (saveData.Id != 0)
                 {
+                    // REGLA DE NEGOCIO: No inactivar cliente con órdenes de trabajo activas
+                    if (!saveData.IsActive)
+                    {
+                        var existingDto = await _customerRepository.GetByIdAsync(saveData.Id, cancellationToken);
+                        if (existingDto != null && existingDto.IsActive)
+                        {
+                            var activeWo = await _customerRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
+                            if (activeWo.HasValue)
+                            {
+                                throw new InvalidOperationException(
+                                    $"No es posible inactivar al cliente porque el vehículo con placa '{activeWo.Value.Plate}' " +
+                                    $"tiene la orden de trabajo #{activeWo.Value.WorkOrderId} activa en estado '{activeWo.Value.Status}'");
+                            }
+                        }
+                    }
+
                     await _customerRepository.UpdateAsync(saveData, cancellationToken);
                 }
 
@@ -110,11 +123,12 @@ namespace ApiTaller.Core.Services.Customers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al crear o editar el cliente con identificación {customer.IdentificationNumber}");
+                _logger.LogError(ex, "Error al crear o editar el cliente con identificación {Doc}", customer.IdentificationNumber);
                 throw;
             }
             return result;
         }
+
 
         public async Task<bool> ResendWelcomeEmailAsync(int customerId, CancellationToken cancellation)
         {

@@ -1,11 +1,13 @@
 using ApiTaller.Domain.Dtos;
 using ApiTaller.Domain.Dtos.WorkOrder;
 using ApiTaller.Domain.Interfaces.Repositories.WorkOrders;
+using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Interfaces.Services.WorkOrders;
 using ApiTaller.Domain.Models;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,12 +17,18 @@ namespace ApiTaller.Core.Services.WorkOrders
     {
         private readonly IWorkOrderRepository _workOrderRepository;
         private readonly IWorkOrderNotificationService _notificationService;
+        private readonly ICurrentUserService _currentUserService;
         private readonly ILogger<WorkOrderService> _logger;
 
-        public WorkOrderService(IWorkOrderRepository workOrderRepository, IWorkOrderNotificationService notificationService, ILogger<WorkOrderService> logger)
+        public WorkOrderService(
+            IWorkOrderRepository workOrderRepository,
+            IWorkOrderNotificationService notificationService,
+            ICurrentUserService currentUserService,
+            ILogger<WorkOrderService> logger)
         {
             _workOrderRepository = workOrderRepository;
             _notificationService = notificationService;
+            _currentUserService = currentUserService;
             _logger = logger;
         }
 
@@ -32,7 +40,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting all work orders in service");
+                _logger.LogError(ex, "Error al obtener todas las órdenes de trabajo");
                 return new List<WorkOrderDto>();
             }
         }
@@ -45,7 +53,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting work order {id} in service");
+                _logger.LogError(ex, "Error al obtener la orden de trabajo {Id}", id);
                 return null;
             }
         }
@@ -54,6 +62,7 @@ namespace ApiTaller.Core.Services.WorkOrders
         {
             try
             {
+                // ─── Construir el modelo de dominio ──────────────────────────────────────
                 WorkOrder model = new()
                 {
                     Id = dto.Id,
@@ -87,7 +96,7 @@ namespace ApiTaller.Core.Services.WorkOrders
                             QuotePhotoUrl = part.QuotePhotoUrl,
                             IsApproved = part.IsApproved,
                             IsActive = part.IsActive,
-                            CreatedAt = part.Id == 0 ? DateTime.Now : dto.CreatedAt, // Si es nuevo usamos ahora, si no, conservamos (aprox)
+                            CreatedAt = part.Id == 0 ? DateTime.Now : dto.CreatedAt,
                             UpdatedAt = DateTime.Now
                         });
                     }
@@ -134,24 +143,103 @@ namespace ApiTaller.Core.Services.WorkOrders
                 }
 
                 bool result;
+
                 if (model.Id == 0)
                 {
+                    // ─── Creación nueva ───────────────────────────────────────────────────
                     result = await _workOrderRepository.CreateAsync(model, cancellation);
+
+                    if (result)
+                    {
+                        // Registrar historial de creación
+                        string userName = await ResolveCurrentUserNameAsync(cancellation);
+                        int? userId = ResolveCurrentUserId();
+                        await _workOrderRepository.AddHistoryEntryAsync(
+                            model.Id,
+                            model.Status,
+                            $"Orden de trabajo creada con estado inicial: {model.Status}",
+                            userId,
+                            userName,
+                            cancellation);
+                    }
                 }
                 else
                 {
+                    // ─── Actualización ────────────────────────────────────────────────────
+
+                    // REGLA DE NEGOCIO: No modificar una orden facturada o entregada
+                    bool isBilled = await _workOrderRepository.IsBilledAsync(model.Id, cancellation);
+                    var existing = await _workOrderRepository.GetByIdAsync(model.Id, cancellation);
+
+                    if (existing != null)
+                    {
+                        bool isDelivered = existing.Status.Equals("Entregado", StringComparison.OrdinalIgnoreCase);
+
+                        if (isBilled || isDelivered)
+                        {
+                            if (existing.EstimatedDeliveryDate != dto.EstimatedDeliveryDate ||
+                                existing.Observations != dto.Observations ||
+                                existing.Mileage != dto.Mileage ||
+                                existing.FuelLevel != dto.FuelLevel ||
+                                existing.CustomerId != dto.CustomerId ||
+                                existing.VehicleId != dto.VehicleId ||
+                                existing.EntryDate != dto.EntryDate)
+                            {
+                                throw new InvalidOperationException("No se pueden modificar los datos de una orden de trabajo que ya ha sido entregada o facturada.");
+                            }
+                        }
+
+                        // REGLA DE NEGOCIO: No inactivar una orden facturada/terminada/entregada
+                        if (!dto.IsActive && existing.IsActive)
+                        {
+                            if (isBilled)
+                                throw new InvalidOperationException("No se puede inactivar una orden de trabajo que ya ha sido facturada.");
+
+                            if (existing.Status.Equals("Terminado", StringComparison.OrdinalIgnoreCase) ||
+                                existing.Status.Equals("Entregado", StringComparison.OrdinalIgnoreCase))
+                                throw new InvalidOperationException("No se puede inactivar una orden de trabajo que ya ha sido terminada o entregada.");
+                        }
+
+                        // REGLA DE NEGOCIO: No cambiar estado si ya está facturada
+                        if (existing.Status != dto.Status && isBilled)
+                            throw new InvalidOperationException("No se puede cambiar el estado de una orden de trabajo que ya ha sido facturada.");
+
+                        // REGLA DE NEGOCIO: No pasar a aprobación sin repuestos ni servicios
+                        if (dto.Status.Equals("En Aprobación", StringComparison.OrdinalIgnoreCase) ||
+                            dto.Status.Equals("Aprobado", StringComparison.OrdinalIgnoreCase))
+                        {
+                            bool hasItems = await _workOrderRepository.HasPartsOrServicesAsync(model.Id, cancellation);
+                            if (!hasItems && (dto.Parts == null || dto.Parts.Count == 0) && (dto.Services == null || dto.Services.Count == 0))
+                                throw new InvalidOperationException("No es posible pasar a aprobación o aprobado una orden de trabajo que no posee repuestos ni servicios registrados.");
+                        }
+                    }
+
                     result = await _workOrderRepository.UpdateAsync(model, cancellation);
+
+                    // ─── Registrar historial de actualización ─────────────────────────────
+                    if (result && dto.Parts != null)
+                    {
+                        string userName = await ResolveCurrentUserNameAsync(cancellation);
+                        int? userId = ResolveCurrentUserId();
+                        string message = BuildUpdateHistoryMessage(dto);
+                        await _workOrderRepository.AddHistoryEntryAsync(
+                            model.Id,
+                            model.Status,
+                            message,
+                            userId,
+                            userName,
+                            cancellation);
+                    }
                 }
 
                 if (result)
-                {
                     await _notificationService.NotifyWorkOrderUpdatedAsync(model.Id, model.CustomerId);
-                }
+
                 return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error saving work order in service");
+                _logger.LogError(ex, "Error al guardar la orden de trabajo");
                 throw;
             }
         }
@@ -160,20 +248,41 @@ namespace ApiTaller.Core.Services.WorkOrders
         {
             try
             {
-                var success = await _workOrderRepository.ChangeStatusAsync(id, status, cancellation);
-                if (success)
+                // ─── Obtener estado actual ────────────────────────────────────────────────
+                var existing = await _workOrderRepository.GetByIdAsync(id, cancellation);
+                if (existing == null) return false;
+
+                string oldStatus = existing.Status;
+                if (oldStatus == status) return true;
+
+                // REGLA DE NEGOCIO: No cambiar estado si ya está facturada
+                bool isBilled = await _workOrderRepository.IsBilledAsync(id, cancellation);
+                if (isBilled)
+                    throw new InvalidOperationException("No se puede cambiar el estado de una orden de trabajo que ya ha sido facturada.");
+
+                // REGLA DE NEGOCIO: No pasar a aprobación/aprobado sin repuestos ni servicios
+                if (status.Equals("En Aprobación", StringComparison.OrdinalIgnoreCase) ||
+                    status.Equals("Aprobado", StringComparison.OrdinalIgnoreCase))
                 {
-                    var order = await _workOrderRepository.GetByIdAsync(id, cancellation);
-                    if (order != null)
-                    {
-                        await _notificationService.NotifyWorkOrderUpdatedAsync(id, order.CustomerId);
-                    }
+                    bool hasItems = await _workOrderRepository.HasPartsOrServicesAsync(id, cancellation);
+                    if (!hasItems)
+                        throw new InvalidOperationException("No es posible pasar a aprobación o aprobado una orden de trabajo que no posee repuestos ni servicios registrados.");
                 }
+
+                // Resolver datos del usuario responsable
+                string userName = await ResolveCurrentUserNameAsync(cancellation);
+                int? userId = ResolveCurrentUserId();
+
+                bool success = await _workOrderRepository.ChangeStatusAsync(id, status, oldStatus, userName, userId, cancellation);
+
+                if (success)
+                    await _notificationService.NotifyWorkOrderUpdatedAsync(id, existing.CustomerId);
+
                 return success;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error changing status for work order {id}");
+                _logger.LogError(ex, "Error al cambiar el estado de la orden {Id}", id);
                 throw;
             }
         }
@@ -186,7 +295,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting history for work order {workOrderId}");
+                _logger.LogError(ex, "Error al obtener el historial de la orden {Id}", workOrderId);
                 return new List<WorkOrderHistoryDto>();
             }
         }
@@ -231,9 +340,39 @@ namespace ApiTaller.Core.Services.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al eliminar evidencia {id} en el servicio");
+                _logger.LogError(ex, "Error al eliminar la evidencia {Id}", id);
                 throw;
             }
+        }
+
+        // ─── Helpers privados ────────────────────────────────────────────────────────
+
+        private int? ResolveCurrentUserId()
+        {
+            return int.TryParse(_currentUserService.UserId, out int id) ? id : null;
+        }
+
+        private async Task<string> ResolveCurrentUserNameAsync(CancellationToken cancellation)
+        {
+            // El servicio no accede al contexto directamente; retorna el ID como texto.
+            // Si se requiere el nombre completo, inyectar IUserRepository.
+            return _currentUserService.UserId ?? "Sistema";
+        }
+
+        private static string BuildUpdateHistoryMessage(WorkOrderDto dto)
+        {
+            var msg = new StringBuilder("Actualización de la orden:");
+
+            int partsAdded   = dto.Parts?.FindAll(p => p.Id == 0).Count ?? 0;
+            int servicesAdded = dto.Services?.FindAll(s => s.Id == 0).Count ?? 0;
+
+            if (partsAdded > 0)    msg.Append($"\n- Se agregaron {partsAdded} repuestos.");
+            if (servicesAdded > 0) msg.Append($"\n- Se agregaron {servicesAdded} servicios.");
+
+            if (partsAdded == 0 && servicesAdded == 0)
+                msg.Append("\n- Información general actualizada.");
+
+            return msg.ToString();
         }
     }
 }

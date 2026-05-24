@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiTaller.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixVersion1 : Migration
+    public partial class Version_Fix_1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,6 +35,109 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_action", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "agenda_block",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    block_date = table.Column<DateTime>(type: "date", nullable: false),
+                    reason = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_agenda_block", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "agenda_day_config",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    date = table.Column<DateTime>(type: "date", nullable: false),
+                    custom_slots = table.Column<int>(type: "int", nullable: true),
+                    is_blocked = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: false),
+                    reason = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_agenda_day_config", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "agenda_settings",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    weeks_to_open = table.Column<int>(type: "int", nullable: false),
+                    daily_slots = table.Column<int>(type: "int", nullable: false),
+                    business_hours_start = table.Column<TimeSpan>(type: "time(6)", nullable: false),
+                    business_hours_end = table.Column<TimeSpan>(type: "time(6)", nullable: false),
+                    start_date = table.Column<DateTime>(type: "date", nullable: false),
+                    working_days = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_agenda_settings", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "appointment",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    customer_id = table.Column<int>(type: "int(11)", nullable: true),
+                    vehicle_id = table.Column<int>(type: "int(11)", nullable: true),
+                    service_type_id = table.Column<int>(type: "int(11)", nullable: true),
+                    appointment_date = table.Column<DateTime>(type: "date", nullable: false),
+                    appointment_time = table.Column<TimeSpan>(type: "time(6)", nullable: true),
+                    customer_notes = table.Column<string>(type: "text", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    booking_source = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    work_order_id = table.Column<int>(type: "int(11)", nullable: true),
+                    contact_name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    contact_phone = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    contact_email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_appointment", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -135,6 +238,36 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_customer", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "EmailSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Host = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Port = table.Column<int>(type: "int", nullable: false),
+                    UserName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Password = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EnableSsl = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SenderName = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SenderEmail = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    ResponsibleUserId = table.Column<int>(type: "int", nullable: true),
+                    ResponsibleUserIdNavigationId = table.Column<int>(type: "int(11)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmailSettings", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -274,6 +407,50 @@ namespace ApiTaller.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "mechanic_payment_settings",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    mechanic_id = table.Column<int>(type: "int(11)", nullable: false),
+                    payment_type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    value = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mechanic_payment_settings", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "mechanic_payment_settlement",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    mechanic_id = table.Column<int>(type: "int(11)", nullable: false),
+                    settlement_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    total_amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    services_count = table.Column<int>(type: "int(11)", nullable: false),
+                    start_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    end_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mechanic_payment_settlement", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "module",
                 columns: table => new
                 {
@@ -308,6 +485,28 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_operation", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "password_reset_token",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    user_id = table.Column<int>(type: "int(11)", nullable: false),
+                    token = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    expiration_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    is_used = table.Column<ulong>(type: "bit(1)", nullable: false, defaultValue: 0ul),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false, defaultValue: 1ul),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_password_reset_token", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -516,6 +715,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     description = table.Column<string>(type: "text", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    default_price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    default_minutes = table.Column<int>(type: "int(11)", nullable: false),
+                    time_unit = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -537,6 +740,8 @@ namespace ApiTaller.Infrastructure.Migrations
                     brand_model_version_id = table.Column<int>(type: "int(11)", nullable: false),
                     price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     estimated_minutes = table.Column<int>(type: "int(11)", nullable: false),
+                    time_unit = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -635,6 +840,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     assignment_date = table.Column<DateTime>(type: "datetime", nullable: true),
                     expiration_date = table.Column<DateTime>(type: "datetime", nullable: true),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    must_change_password = table.Column<ulong>(type: "bit(1)", nullable: false, defaultValue: 0ul),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true)
                 },
@@ -956,8 +1162,14 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     mechanic_id = table.Column<int>(type: "int(11)", nullable: false),
                     price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    EstimatedMinutes = table.Column<int>(type: "int", nullable: false),
+                    TimeUnit = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     warranty_end_date = table.Column<DateTime>(type: "datetime", nullable: true),
                     is_approved = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    is_paid_to_mechanic = table.Column<ulong>(type: "bit(1)", nullable: false),
+                    paid_to_mechanic_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    mechanic_payment_settlement_id = table.Column<int>(type: "int(11)", nullable: true),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -976,6 +1188,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         column: x => x.responsible_user_id,
                         principalTable: "user",
                         principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_SERVICE_SETTLEMENT",
+                        column: x => x.mechanic_payment_settlement_id,
+                        principalTable: "mechanic_payment_settlement",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_SERVICE_WORK_ORDER",
                         column: x => x.work_order_id,
@@ -999,6 +1217,46 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "FK_ACTION_USER",
                 table: "action",
                 column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agenda_block_responsible_user_id",
+                table: "agenda_block",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agenda_day_config_responsible_user_id",
+                table: "agenda_day_config",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agenda_settings_responsible_user_id",
+                table: "agenda_settings",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_appointment_customer_id",
+                table: "appointment",
+                column: "customer_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_appointment_responsible_user_id",
+                table: "appointment",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_appointment_service_type_id",
+                table: "appointment",
+                column: "service_type_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_appointment_vehicle_id",
+                table: "appointment",
+                column: "vehicle_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_appointment_work_order_id",
+                table: "appointment",
+                column: "work_order_id");
 
             migrationBuilder.CreateIndex(
                 name: "FK_BRAND_USER",
@@ -1039,6 +1297,11 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "FK_CUSTOMER_USER",
                 table: "customer",
                 column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EmailSettings_ResponsibleUserIdNavigationId",
+                table: "EmailSettings",
+                column: "ResponsibleUserIdNavigationId");
 
             migrationBuilder.CreateIndex(
                 name: "FK_TYPE_IDENTIFICATION_USER",
@@ -1101,6 +1364,26 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "ResponsibleUserId");
 
             migrationBuilder.CreateIndex(
+                name: "FK_PAYMENT_SETTINGS_MECHANIC",
+                table: "mechanic_payment_settings",
+                column: "mechanic_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_mechanic_payment_settings_responsible_user_id",
+                table: "mechanic_payment_settings",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_SETTLEMENT_MECHANIC",
+                table: "mechanic_payment_settlement",
+                column: "mechanic_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_mechanic_payment_settlement_responsible_user_id",
+                table: "mechanic_payment_settlement",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
                 name: "FK_MODULE_USER",
                 table: "module",
                 column: "responsible_user_id");
@@ -1109,6 +1392,16 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "FK_OPERATION_USER",
                 table: "operation",
                 column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_PASSWORD_RESET_TOKEN_RESP_USER",
+                table: "password_reset_token",
+                column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "FK_PASSWORD_RESET_TOKEN_USER",
+                table: "password_reset_token",
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "FK_PAYMENT_METHOD_USER",
@@ -1351,6 +1644,11 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "work_order_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_work_order_service_mechanic_payment_settlement_id",
+                table: "work_order_service",
+                column: "mechanic_payment_settlement_id");
+
+            migrationBuilder.CreateIndex(
                 name: "FK_WORKSHOP_SETTINGS_USER",
                 table: "workshop_settings",
                 column: "responsible_user_id");
@@ -1380,6 +1678,62 @@ namespace ApiTaller.Infrastructure.Migrations
                 table: "action",
                 column: "responsible_user_id",
                 principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_agenda_block_user_responsible_user_id",
+                table: "agenda_block",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_agenda_day_config_user_responsible_user_id",
+                table: "agenda_day_config",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_agenda_settings_user_responsible_user_id",
+                table: "agenda_settings",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_appointment_customer_customer_id",
+                table: "appointment",
+                column: "customer_id",
+                principalTable: "customer",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_appointment_service_type_service_type_id",
+                table: "appointment",
+                column: "service_type_id",
+                principalTable: "service_type",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_appointment_user_responsible_user_id",
+                table: "appointment",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_appointment_vehicle_vehicle_id",
+                table: "appointment",
+                column: "vehicle_id",
+                principalTable: "vehicle",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_appointment_work_order_work_order_id",
+                table: "appointment",
+                column: "work_order_id",
+                principalTable: "work_order",
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
@@ -1423,6 +1777,14 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "user_id",
                 principalTable: "user",
                 principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_EmailSettings_user_ResponsibleUserIdNavigationId",
+                table: "EmailSettings",
+                column: "ResponsibleUserIdNavigationId",
+                principalTable: "user",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_TYPE_IDENTIFICATION_USER",
@@ -1495,6 +1857,36 @@ namespace ApiTaller.Infrastructure.Migrations
                 principalColumn: "id");
 
             migrationBuilder.AddForeignKey(
+                name: "FK_PAYMENT_SETTINGS_MECHANIC",
+                table: "mechanic_payment_settings",
+                column: "mechanic_id",
+                principalTable: "user",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PAYMENT_SETTINGS_RESPONSIBLE_USER",
+                table: "mechanic_payment_settings",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SETTLEMENT_MECHANIC",
+                table: "mechanic_payment_settlement",
+                column: "mechanic_id",
+                principalTable: "user",
+                principalColumn: "id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_SETTLEMENT_RESPONSIBLE_USER",
+                table: "mechanic_payment_settlement",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_MODULE_USER",
                 table: "module",
                 column: "responsible_user_id",
@@ -1505,6 +1897,20 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "FK_OPERACIONES_USUARIO",
                 table: "operation",
                 column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PASSWORD_RESET_TOKEN_RESP_USER",
+                table: "password_reset_token",
+                column: "responsible_user_id",
+                principalTable: "user",
+                principalColumn: "id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PASSWORD_RESET_TOKEN_USER",
+                table: "password_reset_token",
+                column: "user_id",
                 principalTable: "user",
                 principalColumn: "id");
 
@@ -1640,6 +2046,21 @@ namespace ApiTaller.Infrastructure.Migrations
                 table: "userrole");
 
             migrationBuilder.DropTable(
+                name: "agenda_block");
+
+            migrationBuilder.DropTable(
+                name: "agenda_day_config");
+
+            migrationBuilder.DropTable(
+                name: "agenda_settings");
+
+            migrationBuilder.DropTable(
+                name: "appointment");
+
+            migrationBuilder.DropTable(
+                name: "EmailSettings");
+
+            migrationBuilder.DropTable(
                 name: "inventory");
 
             migrationBuilder.DropTable(
@@ -1650,6 +2071,12 @@ namespace ApiTaller.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "login");
+
+            migrationBuilder.DropTable(
+                name: "mechanic_payment_settings");
+
+            migrationBuilder.DropTable(
+                name: "password_reset_token");
 
             migrationBuilder.DropTable(
                 name: "roleaction");
@@ -1698,6 +2125,9 @@ namespace ApiTaller.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "product");
+
+            migrationBuilder.DropTable(
+                name: "mechanic_payment_settlement");
 
             migrationBuilder.DropTable(
                 name: "supplier");

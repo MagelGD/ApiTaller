@@ -221,5 +221,33 @@ namespace ApiTaller.api.Controllers
             }
             return BadRequest();
         }
+
+        [HttpGet("BlockedDates")]
+        public async Task<IActionResult> GetBlockedDates(CancellationToken cancellation)
+        {
+            try
+            {
+                return Ok(await _agendaService.GetBlockedExceptionDatesAsync(cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener fechas excepcionales bloqueadas");
+            }
+            return BadRequest();
+        }
+
+        [HttpDelete("BlockDate/{id}")]
+        public async Task<IActionResult> DeleteBlockedExceptionDate(int id, CancellationToken cancellation)
+        {
+            try
+            {
+                return Ok(await _agendaService.DeleteBlockedExceptionDateAsync(id, cancellation));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al desbloquear fecha excepcional");
+            }
+            return BadRequest();
+        }
     }
 }

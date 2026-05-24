@@ -8,5 +8,6 @@ namespace ApiTaller.Domain.Dtos.Agenda
         public string BusinessHoursStart { get; set; } = null!;
         public string BusinessHoursEnd { get; set; } = null!;
         public DateTime StartDate { get; set; }
+        public string? WorkingDays { get; set; }
     }
 }

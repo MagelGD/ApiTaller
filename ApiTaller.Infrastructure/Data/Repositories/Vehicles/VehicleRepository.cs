@@ -155,36 +155,38 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
             try
             {
                 var existingVehicle = await _context.Vehicle.FindAsync(new object[] { update.Id }, cancellation);
-                if (existingVehicle == null)
-                {
-                    return false;
-                }
-
-                if (!update.IsActive && existingVehicle.IsActive)
-                {
-                    var activeWorkOrder = await _context.WorkOrder
-                        .Where(w => w.VehicleId == update.Id && w.IsActive && (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))
-                        .FirstOrDefaultAsync(cancellation);
-
-                    if (activeWorkOrder != null)
-                    {
-                        throw new InvalidOperationException($"No es posible inactivar el vehículo porque tiene la orden de trabajo #{activeWorkOrder.Id} activa en estado '{activeWorkOrder.Status}'");
-                    }
-                }
+                if (existingVehicle == null) return false;
 
                 if (int.TryParse(_currentUserService.UserId, out int userId))
-                {
                     update.ResponsibleUserId = userId;
-                }
-                update.UpdatedAt = DateTime.Now;
 
+                update.UpdatedAt = DateTime.Now;
                 _context.Entry(existingVehicle).CurrentValues.SetValues(update);
                 return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating vehicle");
+                _logger.LogError(ex, "Error al actualizar el vehículo {Id}", update.Id);
                 throw;
+            }
+        }
+
+        public async Task<(bool HasActive, int WorkOrderId, string Status)?> GetActiveWorkOrderInfoAsync(int vehicleId, CancellationToken cancellation)
+        {
+            try
+            {
+                var wo = await _context.WorkOrder
+                    .Where(w => w.VehicleId == vehicleId && w.IsActive &&
+                                (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))
+                    .FirstOrDefaultAsync(cancellation);
+
+                if (wo == null) return null;
+                return (true, wo.Id, wo.Status);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al verificar órdenes activas del vehículo {Id}", vehicleId);
+                return null;
             }
         }
 

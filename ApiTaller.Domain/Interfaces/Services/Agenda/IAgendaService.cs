@@ -22,5 +22,9 @@ namespace ApiTaller.Domain.Interfaces.Services.Agenda
         Task<bool> UpdateDayConfigAsync(AgendaDayConfigDto dto, CancellationToken ct);
         Task<bool> CancelAppointmentAsync(int appointmentId, CancellationToken ct);
         Task<bool> RescheduleAsync(int appointmentId, DateTime newDate, CancellationToken ct);
+        
+        // Excepciones de bloqueo
+        Task<IEnumerable<AgendaBlockDto>> GetBlockedExceptionDatesAsync(CancellationToken ct);
+        Task<bool> DeleteBlockedExceptionDateAsync(int id, CancellationToken ct);
     }
 }

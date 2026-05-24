@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260513154046_Version7")]
-    partial class Version7
+    [Migration("20260524035314_Version_Fix_1")]
+    partial class Version_Fix_1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -231,6 +231,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("weeks_to_open");
 
+                    b.Property<string>("WorkingDays")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("working_days");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ResponsibleUserId");
@@ -262,19 +267,16 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("booking_source");
 
                     b.Property<string>("ContactEmail")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("contact_email");
 
                     b.Property<string>("ContactName")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("contact_name");
 
                     b.Property<string>("ContactPhone")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
                         .HasColumnName("contact_phone");
@@ -319,7 +321,6 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("updated_at");
 
                     b.Property<string>("VehicleDescription")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)")
                         .HasColumnName("vehicle_description");
@@ -548,6 +549,62 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.HasIndex(new[] { "UserId" }, "FK_CUSTOMER_USER");
 
                     b.ToTable("customer", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.EmailSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("EnableSsl")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Host")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<string>("SenderEmail")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponsibleUserIdNavigationId");
+
+                    b.ToTable("EmailSettings");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.IdentificationType", b =>
@@ -844,6 +901,112 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.ToTable("login", (string)null);
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.MechanicPaymentSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<int>("MechanicId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("mechanic_id");
+
+                    b.Property<string>("PaymentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("payment_type");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponsibleUserId");
+
+                    b.HasIndex(new[] { "MechanicId" }, "FK_PAYMENT_SETTINGS_MECHANIC");
+
+                    b.ToTable("mechanic_payment_settings", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.MechanicPaymentSettlement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("end_date");
+
+                    b.Property<ulong>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<int>("MechanicId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("mechanic_id");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<int>("ServicesCount")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("services_count");
+
+                    b.Property<DateTime>("SettlementDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("settlement_date");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("start_date");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("total_amount");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResponsibleUserId");
+
+                    b.HasIndex(new[] { "MechanicId" }, "FK_SETTLEMENT_MECHANIC");
+
+                    b.ToTable("mechanic_payment_settlement", (string)null);
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.Module", b =>
                 {
                     b.Property<int>("Id")
@@ -918,6 +1081,62 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.HasIndex(new[] { "ResponsibleUserId" }, "FK_OPERATION_USER");
 
                     b.ToTable("operation", (string)null);
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.PasswordResetToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime")
+                        .HasColumnName("expiration_date");
+
+                    b.Property<ulong>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit(1)")
+                        .HasDefaultValue(1ul)
+                        .HasColumnName("is_active");
+
+                    b.Property<ulong>("IsUsed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit(1)")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("is_used");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("responsible_user_id");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("token");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "ResponsibleUserId" }, "FK_PASSWORD_RESET_TOKEN_RESP_USER");
+
+                    b.HasIndex(new[] { "UserId" }, "FK_PASSWORD_RESET_TOKEN_USER");
+
+                    b.ToTable("password_reset_token", (string)null);
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.PaymentMethod", b =>
@@ -1360,6 +1579,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("int(11)")
                         .HasColumnName("service_type_id");
 
+                    b.Property<string>("TimeUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("time_unit");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
@@ -1409,6 +1633,11 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int>("ServiceCatalogId")
                         .HasColumnType("int(11)")
                         .HasColumnName("service_catalog_id");
+
+                    b.Property<string>("TimeUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("time_unit");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
@@ -1589,6 +1818,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("middle_name");
+
+                    b.Property<ulong>("MustChangePassword")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit(1)")
+                        .HasDefaultValue(0ul)
+                        .HasColumnName("must_change_password");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -2067,6 +2302,9 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("description");
 
+                    b.Property<int>("EstimatedMinutes")
+                        .HasColumnType("int");
+
                     b.Property<ulong>("IsActive")
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_active");
@@ -2075,9 +2313,21 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("bit(1)")
                         .HasColumnName("is_approved");
 
+                    b.Property<ulong>("IsPaidToMechanic")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_paid_to_mechanic");
+
                     b.Property<int>("MechanicId")
                         .HasColumnType("int(11)")
                         .HasColumnName("mechanic_id");
+
+                    b.Property<int?>("MechanicPaymentSettlementId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("mechanic_payment_settlement_id");
+
+                    b.Property<DateTime?>("PaidToMechanicAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("paid_to_mechanic_at");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)")
@@ -2086,6 +2336,10 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int?>("ResponsibleUserId")
                         .HasColumnType("int(11)")
                         .HasColumnName("responsible_user_id");
+
+                    b.Property<string>("TimeUnit")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
@@ -2100,6 +2354,8 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnName("work_order_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MechanicPaymentSettlementId");
 
                     b.HasIndex(new[] { "MechanicId" }, "FK_SERVICE_MECHANIC");
 
@@ -2319,6 +2575,17 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("UserIdNavigation");
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.EmailSettings", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.IdentificationType", b =>
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
@@ -2419,6 +2686,44 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("ResponsibleUserIdNavigation");
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.MechanicPaymentSettings", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.User", "MechanicNavigation")
+                        .WithMany()
+                        .HasForeignKey("MechanicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PAYMENT_SETTINGS_MECHANIC");
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_PAYMENT_SETTINGS_RESPONSIBLE_USER");
+
+                    b.Navigation("MechanicNavigation");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.MechanicPaymentSettlement", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.User", "MechanicNavigation")
+                        .WithMany()
+                        .HasForeignKey("MechanicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SETTLEMENT_MECHANIC");
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_SETTLEMENT_RESPONSIBLE_USER");
+
+                    b.Navigation("MechanicNavigation");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.Module", b =>
                 {
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
@@ -2437,6 +2742,24 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasConstraintName("FK_OPERACIONES_USUARIO");
 
                     b.Navigation("ResponsibleUserIdNavigation");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.PasswordResetToken", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserId")
+                        .HasConstraintName("FK_PASSWORD_RESET_TOKEN_RESP_USER");
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_PASSWORD_RESET_TOKEN_USER");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.PaymentMethod", b =>
@@ -2846,6 +3169,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_SERVICE_MECHANIC");
 
+                    b.HasOne("ApiTaller.Domain.Models.MechanicPaymentSettlement", "MechanicPaymentSettlementNavigation")
+                        .WithMany("Services")
+                        .HasForeignKey("MechanicPaymentSettlementId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_SERVICE_SETTLEMENT");
+
                     b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId")
@@ -2859,6 +3188,8 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasConstraintName("FK_SERVICE_WORK_ORDER");
 
                     b.Navigation("MechanicNavigation");
+
+                    b.Navigation("MechanicPaymentSettlementNavigation");
 
                     b.Navigation("ResponsibleUserIdNavigation");
 
@@ -2883,6 +3214,11 @@ namespace ApiTaller.Infrastructure.Migrations
             modelBuilder.Entity("ApiTaller.Domain.Models.InventoryReception", b =>
                 {
                     b.Navigation("Details");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.MechanicPaymentSettlement", b =>
+                {
+                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>

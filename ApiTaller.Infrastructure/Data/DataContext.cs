@@ -57,6 +57,10 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<Appointment> Appointment { get; set; }
         public DbSet<AgendaDayConfig> AgendaDayConfig { get; set; }
 
+        // Módulo Contabilidad (Fase 13)
+        public DbSet<MechanicPaymentSettings> MechanicPaymentSettings { get; set; }
+        public DbSet<MechanicPaymentSettlement> MechanicPaymentSettlement { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

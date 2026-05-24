@@ -30,46 +30,24 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                string userName = "Sistema";
-                int userId = 0;
-                if (int.TryParse(_currentUserService.UserId, out userId))
-                {
-                    create.ResponsibleUserId = userId;
-                    var user = await _context.User.FindAsync(userId);
-                    if (user != null) userName = user.FullName;
-                }
-
+                int.TryParse(_currentUserService.UserId, out int userId);
 
                 create.CreatedAt = DateTime.Now;
                 create.IsActive = true;
-
                 if (userId != 0)
                 {
+                    create.ResponsibleUserId = userId;
                     foreach (var p in create.Parts) p.ResponsibleUserId = userId;
                     foreach (var s in create.Services) s.ResponsibleUserId = userId;
                     foreach (var e in create.Evidences) e.ResponsibleUserId = userId;
                 }
 
                 await _context.WorkOrder.AddAsync(create, cancellation);
-                // Primer SaveChanges: genera el Id de la orden
-                var saved = await _context.SaveChangesAsync(cancellation) > 0;
-                if (!saved) return false;
-
-                // Segundo paso: registrar historial con el Id ya generado
-                await RegisterHistoryEntryAsync(
-                    create.Id,
-                    create.Status,
-                    $"Orden de trabajo creada con estado inicial: {create.Status}",
-                    userId != 0 ? userId : null,
-                    userName,
-                    cancellation);
-                await _context.SaveChangesAsync(cancellation);
-
-                return true;
+                return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating work order");
+                _logger.LogError(ex, "Error al crear la orden de trabajo");
                 throw;
             }
         }
@@ -142,7 +120,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting all work orders");
+                _logger.LogError(ex, "Error al obtener todas las órdenes de trabajo");
                 return new List<WorkOrderDto>();
             }
         }
@@ -218,8 +196,36 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error getting work order by id {id}");
+                _logger.LogError(ex, "Error al obtener la orden de trabajo con ID {Id}", id);
                 return null;
+            }
+        }
+
+        public async Task<bool> IsBilledAsync(int workOrderId, CancellationToken cancellation)
+        {
+            try
+            {
+                return await _context.Sale.AnyAsync(s => s.WorkOrderId == workOrderId && s.IsActive, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al verificar si la orden {Id} está facturada", workOrderId);
+                return false;
+            }
+        }
+
+        public async Task<bool> HasPartsOrServicesAsync(int workOrderId, CancellationToken cancellation)
+        {
+            try
+            {
+                bool hasParts = await _context.WorkOrderPart.AnyAsync(p => p.WorkOrderId == workOrderId && p.IsActive, cancellation);
+                if (hasParts) return true;
+                return await _context.WorkOrderService.AnyAsync(s => s.WorkOrderId == workOrderId && s.IsActive, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al verificar repuestos/servicios de la orden {Id}", workOrderId);
+                return false;
             }
         }
 
@@ -235,83 +241,20 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
 
                 if (existingOrder == null) return false;
 
-                // Validar que no se modifique una orden de trabajo que ya ha sido entregada o facturada
-                bool isBilledBeforeUpdate = await _context.Sale.AnyAsync(s => s.WorkOrderId == update.Id && s.IsActive, cancellation);
-                bool isDeliveredBeforeUpdate = existingOrder.Status.Equals("Entregado", StringComparison.OrdinalIgnoreCase);
-
-                if (isBilledBeforeUpdate || isDeliveredBeforeUpdate)
-                {
-                    if (existingOrder.EstimatedDeliveryDate != update.EstimatedDeliveryDate ||
-                        existingOrder.Observations != update.Observations ||
-                        existingOrder.Mileage != update.Mileage ||
-                        existingOrder.FuelLevel != update.FuelLevel ||
-                        existingOrder.CustomerId != update.CustomerId ||
-                        existingOrder.VehicleId != update.VehicleId ||
-                        existingOrder.EntryDate != update.EntryDate ||
-                        existingOrder.DownPayment != update.DownPayment)
-                    {
-                        throw new InvalidOperationException("No se pueden modificar los datos de una orden de trabajo que ya ha sido entregada o facturada.");
-                    }
-                }
-
-                // Validar que no se inactive una orden facturada, terminada o entregada
-                if (!update.IsActive && existingOrder.IsActive)
-                {
-                    bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == update.Id && s.IsActive, cancellation);
-                    if (isBilled)
-                    {
-                        throw new InvalidOperationException("No se puede inactivar una orden de trabajo que ya ha sido facturada.");
-                    }
-
-                    if (existingOrder.Status.Equals("Terminado", StringComparison.OrdinalIgnoreCase) || 
-                        existingOrder.Status.Equals("Entregado", StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new InvalidOperationException("No se puede inactivar una orden de trabajo que ya ha sido terminada o entregada.");
-                    }
-                }
-
-                // Validar que no se cambie el estado si ya está facturada
-                if (existingOrder.Status != update.Status)
-                {
-                    bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == update.Id && s.IsActive, cancellation);
-                    if (isBilled)
-                    {
-                        throw new InvalidOperationException("No se puede cambiar el estado de una orden de trabajo que ya ha sido facturada.");
-                    }
-                }
-
-                // Validar que no se pase a En Aprobación o Aprobado sin repuestos ni servicios
-                if (update.Status.Equals("En Aprobación", StringComparison.OrdinalIgnoreCase) || update.Status.Equals("Aprobado", StringComparison.OrdinalIgnoreCase))
-                {
-                    if ((update.Parts == null || update.Parts.Count == 0) && (update.Services == null || update.Services.Count == 0))
-                    {
-                        throw new InvalidOperationException("No es posible pasar a aprobación o aprobado una orden de trabajo que no posee repuestos ni servicios registrados.");
-                    }
-                }
-
-                // Actualizar cabecera
                 _context.Entry(existingOrder).CurrentValues.SetValues(update);
                 existingOrder.UpdatedAt = DateTime.Now;
                 if (int.TryParse(_currentUserService.UserId, out int userId))
-                {
                     existingOrder.ResponsibleUserId = userId;
-                }
 
-                int partsAdded = 0, partsRemoved = 0, partsUpdated = 0;
-                int servicesAdded = 0, servicesRemoved = 0, servicesUpdated = 0;
-                int evidencesAdded = 0, evidencesRemoved = 0;
+                // ─── Sincronizar Repuestos ───────────────────────────────────────────────
+                var inventoryMovements = new List<(int ProductId, int Quantity, string Type, string Obs)>();
 
-                // Sincronizar Repuestos (Parts) con Inventario
                 foreach (var existingPart in existingOrder.Parts.ToList())
                 {
                     if (!update.Parts.Any(p => p.Id == existingPart.Id))
                     {
-                        partsRemoved++;
-                        // Si era un repuesto del taller, devolver al inventario
                         if (!existingPart.IsProvidedByCustomer && existingPart.ProductId.HasValue)
-                        {
-                            await RegisterInventoryMovement(existingPart.ProductId.Value, existingPart.Quantity, "Entrada", $"Cancelación de repuesto en WO #{existingOrder.Id}", existingOrder.Id, cancellation);
-                        }
+                            inventoryMovements.Add((existingPart.ProductId.Value, existingPart.Quantity, "Entrada", $"Cancelación de repuesto en WO #{existingOrder.Id}"));
                         _context.WorkOrderPart.Remove(existingPart);
                     }
                 }
@@ -321,69 +264,55 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     var existingPart = existingOrder.Parts.FirstOrDefault(p => p.Id == part.Id && p.Id != 0);
                     if (existingPart != null)
                     {
-                        // Solo marcar como actualizado si hubo cambios reales
-                        if (existingPart.Quantity != part.Quantity || 
-                            existingPart.UnitPrice != part.UnitPrice || 
+                        if (existingPart.Quantity != part.Quantity ||
+                            existingPart.UnitPrice != part.UnitPrice ||
                             existingPart.IsApproved != part.IsApproved ||
                             existingPart.PartName != part.PartName)
                         {
-                            partsUpdated++;
-                            // Si cambió la cantidad y es del taller, ajustar inventario
                             if (!existingPart.IsProvidedByCustomer && existingPart.ProductId.HasValue && existingPart.Quantity != part.Quantity)
                             {
                                 int diff = part.Quantity - existingPart.Quantity;
-                                string type = diff > 0 ? "Salida" : "Entrada";
-                                await RegisterInventoryMovement(existingPart.ProductId.Value, Math.Abs(diff), type, $"Ajuste de cantidad en WO #{existingOrder.Id}", existingOrder.Id, cancellation);
+                                string movType = diff > 0 ? "Salida" : "Entrada";
+                                inventoryMovements.Add((existingPart.ProductId.Value, Math.Abs(diff), movType, $"Ajuste de cantidad en WO #{existingOrder.Id}"));
                             }
-
                             _context.Entry(existingPart).CurrentValues.SetValues(part);
                             existingPart.UpdatedAt = DateTime.Now;
                         }
                     }
                     else
                     {
-                        partsAdded++;
                         part.WorkOrderId = existingOrder.Id;
                         part.CreatedAt = DateTime.Now;
                         if (userId != 0) part.ResponsibleUserId = userId;
                         existingOrder.Parts.Add(part);
-
-                        // Si es repuesto del taller, descontar
                         if (!part.IsProvidedByCustomer && part.ProductId.HasValue)
-                        {
-                            await RegisterInventoryMovement(part.ProductId.Value, part.Quantity, "Salida", $"Adición de repuesto en WO #{existingOrder.Id}", existingOrder.Id, cancellation);
-                        }
+                            inventoryMovements.Add((part.ProductId.Value, part.Quantity, "Salida", $"Adición de repuesto en WO #{existingOrder.Id}"));
                     }
                 }
 
-                // Sincronizar Servicios (Services)
+                // ─── Sincronizar Servicios ───────────────────────────────────────────────
                 foreach (var existingService in existingOrder.Services.ToList())
                 {
                     if (!update.Services.Any(s => s.Id == existingService.Id))
-                    {
-                        servicesRemoved++;
                         _context.WorkOrderService.Remove(existingService);
-                    }
                 }
+
                 foreach (var service in update.Services)
                 {
                     var existingService = existingOrder.Services.FirstOrDefault(s => s.Id == service.Id && s.Id != 0);
                     if (existingService != null)
                     {
-                        // Solo marcar como actualizado si hubo cambios reales
-                        if (existingService.Price != service.Price || 
+                        if (existingService.Price != service.Price ||
                             existingService.IsApproved != service.IsApproved ||
                             existingService.Description != service.Description ||
                             existingService.MechanicId != service.MechanicId)
                         {
-                            servicesUpdated++;
                             _context.Entry(existingService).CurrentValues.SetValues(service);
                             existingService.UpdatedAt = DateTime.Now;
                         }
                     }
                     else
                     {
-                        servicesAdded++;
                         service.WorkOrderId = existingOrder.Id;
                         service.CreatedAt = DateTime.Now;
                         if (userId != 0) service.ResponsibleUserId = userId;
@@ -391,20 +320,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                 }
 
-                // Sincronizar Evidencias con detalle por tipo
-                var addedByType = new Dictionary<string, int>();
-                var removedByType = new Dictionary<string, int>();
-
+                // ─── Sincronizar Evidencias ──────────────────────────────────────────────
                 foreach (var existingEvidence in existingOrder.Evidences.ToList())
                 {
                     if (!update.Evidences.Any(e => e.Id == existingEvidence.Id))
-                    {
-                        var type = existingEvidence.EvidenceType ?? "General";
-                        if (!removedByType.ContainsKey(type)) removedByType[type] = 0;
-                        removedByType[type]++;
                         _context.WorkOrderEvidence.Remove(existingEvidence);
-                    }
                 }
+
                 foreach (var evidence in update.Evidences)
                 {
                     var existingEvidence = existingOrder.Evidences.FirstOrDefault(e => e.Id == evidence.Id && e.Id != 0);
@@ -420,10 +342,6 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                     else
                     {
-                        var type = evidence.EvidenceType ?? "General";
-                        if (!addedByType.ContainsKey(type)) addedByType[type] = 0;
-                        addedByType[type]++;
-
                         evidence.WorkOrderId = existingOrder.Id;
                         evidence.CreatedAt = DateTime.Now;
                         if (userId != 0) evidence.ResponsibleUserId = userId;
@@ -431,187 +349,96 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                 }
 
-                // Registrar historial de actualización
-                int histUserId = 0;
-                string histUserName = "Sistema";
-                if (int.TryParse(_currentUserService.UserId, out histUserId))
-                {
-                    var histUser = await _context.User.FindAsync(histUserId);
-                    if (histUser != null) histUserName = histUser.FullName;
-                }
-
-                var msgBuilder = new System.Text.StringBuilder("Actualización de la orden:");
-                if (partsAdded > 0) msgBuilder.Append($"\n- Se agregaron {partsAdded} repuestos.");
-                if (partsRemoved > 0) msgBuilder.Append($"\n- Se eliminaron {partsRemoved} repuestos.");
-                if (partsUpdated > 0) msgBuilder.Append($"\n- Se actualizaron {partsUpdated} repuestos.");
-                if (servicesAdded > 0) msgBuilder.Append($"\n- Se agregaron {servicesAdded} servicios.");
-                if (servicesRemoved > 0) msgBuilder.Append($"\n- Se eliminaron {servicesRemoved} servicios.");
-                if (servicesUpdated > 0) msgBuilder.Append($"\n- Se actualizaron {servicesUpdated} servicios.");
-
-                // Detalle de evidencias por tipo
-                foreach (var kvp in addedByType) msgBuilder.Append($"\n- Se agregaron {kvp.Value} evidencias de {kvp.Key}.");
-                foreach (var kvp in removedByType) msgBuilder.Append($"\n- Se eliminaron {kvp.Value} evidencias de {kvp.Key}.");
-
-                if (partsAdded == 0 && partsRemoved == 0 && partsUpdated == 0 && 
-                    servicesAdded == 0 && servicesRemoved == 0 && servicesUpdated == 0 && 
-                    addedByType.Count == 0 && removedByType.Count == 0)
-                {
-                    msgBuilder.Append("\n- Información general actualizada.");
-                }
-
-                await RegisterHistoryEntryAsync(
-                    existingOrder.Id,
-                    existingOrder.Status,
-                    msgBuilder.ToString(),
-                    histUserId != 0 ? histUserId : null,
-                    histUserName,
-                    cancellation);
+                // ─── Aplicar movimientos de inventario ───────────────────────────────────
+                foreach (var (productId, quantity, type, obs) in inventoryMovements)
+                    await ApplyInventoryMovementAsync(productId, quantity, type, obs, existingOrder.Id, cancellation);
 
                 return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating work order with children");
+                _logger.LogError(ex, "Error al actualizar la orden de trabajo {Id}", update.Id);
                 throw;
             }
         }
 
-        public async Task<bool> ChangeStatusAsync(int id, string status, CancellationToken cancellation)
+        public async Task<bool> ChangeStatusAsync(int id, string status, string oldStatus, string actionBy, int? responsibleUserId, CancellationToken cancellation)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellation);
             try
             {
                 var workOrder = await _context.WorkOrder.FindAsync(new object[] { id }, cancellation);
                 if (workOrder == null) return false;
 
-                var oldStatus = workOrder.Status;
-                if (oldStatus == status) return true;
-
-                // VALIDACIÓN DE NEGOCIO: Evitar cambiar el estado si la orden ya ha sido facturada
-                bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == id && s.IsActive, cancellation);
-                if (isBilled)
-                {
-                    throw new InvalidOperationException("No se puede cambiar el estado de una orden de trabajo que ya ha sido facturada.");
-                }
-
-                // VALIDACIÓN DE NEGOCIO: Evitar pasar a En Aprobación o Aprobado sin repuestos ni servicios
-                if (status.Equals("En Aprobación", StringComparison.OrdinalIgnoreCase) || status.Equals("Aprobado", StringComparison.OrdinalIgnoreCase))
-                {
-                    bool hasParts = await _context.WorkOrderPart.AnyAsync(p => p.WorkOrderId == id && p.IsActive, cancellation);
-                    bool hasServices = await _context.WorkOrderService.AnyAsync(s => s.WorkOrderId == id && s.IsActive, cancellation);
-                    if (!hasParts && !hasServices)
-                    {
-                        throw new InvalidOperationException("No es posible pasar a aprobación o aprobado una orden de trabajo que no posee repuestos ni servicios registrados.");
-                    }
-                }
-
                 workOrder.Status = status;
                 workOrder.UpdatedAt = DateTime.Now;
+                if (responsibleUserId.HasValue)
+                    workOrder.ResponsibleUserId = responsibleUserId.Value;
 
-                string userName = "Sistema";
-                int userId = 0;
-                if (int.TryParse(_currentUserService.UserId, out userId))
+                await _context.WorkOrderHistory.AddAsync(new WorkOrderHistory
                 {
-                    workOrder.ResponsibleUserId = userId;
-                    var user = await _context.User.FindAsync(userId);
-                    if (user != null) userName = user.FullName;
-                }
+                    WorkOrderId = id,
+                    Status = status,
+                    Observations = $"Cambio de estado: {oldStatus} → {status}",
+                    ActionBy = actionBy,
+                    ResponsibleUserId = responsibleUserId,
+                    CreatedAt = DateTime.Now,
+                    IsActive = true
+                }, cancellation);
 
-                // Registrar historial usando helper centralizado
-                await RegisterHistoryEntryAsync(
-                    id,
-                    status,
-                    $"Cambio de estado: {oldStatus} → {status}",
-                    userId != 0 ? userId : null,
-                    userName,
-                    cancellation);
-
-                var result = await _context.SaveChangesAsync(cancellation) > 0;
-                await transaction.CommitAsync(cancellation);
-                return result;
+                return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(cancellation);
-                _logger.LogError(ex, "Error changing work order status with history");
+                _logger.LogError(ex, "Error al cambiar el estado de la orden {Id}", id);
                 throw;
+            }
+        }
+
+        public async Task AddHistoryEntryAsync(int workOrderId, string status, string observations, int? responsibleUserId, string actionBy, CancellationToken cancellation)
+        {
+            try
+            {
+                await _context.WorkOrderHistory.AddAsync(new WorkOrderHistory
+                {
+                    WorkOrderId = workOrderId,
+                    Status = status,
+                    Observations = observations,
+                    ActionBy = actionBy,
+                    ResponsibleUserId = responsibleUserId,
+                    CreatedAt = DateTime.Now,
+                    IsActive = true
+                }, cancellation);
+                await _context.SaveChangesAsync(cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al registrar historial en la orden {Id}", workOrderId);
             }
         }
 
         public async Task<IEnumerable<WorkOrderHistoryDto>> GetHistoryAsync(int workOrderId, CancellationToken cancellation)
         {
-            return await _context.WorkOrderHistory
-                .Where(h => h.WorkOrderId == workOrderId)
-                .OrderByDescending(h => h.CreatedAt)
-                .Select(h => new WorkOrderHistoryDto
-                {
-                    Id = h.Id,
-                    WorkOrderId = h.WorkOrderId,
-                    Status = h.Status,
-                    Observations = h.Observations,
-                    ActionBy = h.ActionBy,
-                    CreatedAt = h.CreatedAt
-                })
-                .ToListAsync(cancellation);
-        }
-
-        // ─── Helper centralizado: registra una entrada de historial ──────────────
-        private async Task RegisterHistoryEntryAsync(
-            int workOrderId,
-            string status,
-            string observations,
-            int? responsibleUserId,
-            string actionBy,
-            CancellationToken cancellation)
-        {
-            await _context.WorkOrderHistory.AddAsync(new WorkOrderHistory
+            try
             {
-                WorkOrderId = workOrderId,
-                Status = status,
-                Observations = observations,
-                ActionBy = actionBy,
-                ResponsibleUserId = responsibleUserId,
-                CreatedAt = DateTime.Now,
-                IsActive = true
-            }, cancellation);
-        }
-
-        private async Task RegisterInventoryMovement(int productId, int quantity, string type, string obs, int referenceId, CancellationToken cancellation)
-        {
-            var inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == productId, cancellation);
-            if (inventory == null)
-            {
-                inventory = new Domain.Models.Inventory
-                {
-                    ProductId = productId,
-                    StockQuantity = 0,
-                    MinStock = 0,
-                    CreatedAt = DateTime.Now,
-                    IsActive = true
-                };
-                if (int.TryParse(_currentUserService.UserId, out int uid)) inventory.ResponsibleUserId = uid;
-                await _context.Inventory.AddAsync(inventory, cancellation);
+                return await _context.WorkOrderHistory
+                    .Where(h => h.WorkOrderId == workOrderId)
+                    .OrderByDescending(h => h.CreatedAt)
+                    .Select(h => new WorkOrderHistoryDto
+                    {
+                        Id = h.Id,
+                        WorkOrderId = h.WorkOrderId,
+                        Status = h.Status,
+                        Observations = h.Observations,
+                        ActionBy = h.ActionBy,
+                        CreatedAt = h.CreatedAt
+                    })
+                    .ToListAsync(cancellation);
             }
-
-            if (type == "Entrada") inventory.StockQuantity += quantity;
-            else if (type == "Salida") inventory.StockQuantity -= quantity;
-
-            inventory.LastUpdate = DateTime.Now;
-            inventory.UpdatedAt = DateTime.Now;
-
-            var movement = new InventoryHistory
+            catch (Exception ex)
             {
-                ProductId = productId,
-                MovementType = type,
-                Quantity = quantity,
-                Observations = obs,
-                ReferenceId = referenceId,
-                CreatedAt = DateTime.Now,
-                IsActive = true
-            };
-            if (int.TryParse(_currentUserService.UserId, out int userId)) movement.ResponsibleUserId = userId;
-
-            await _context.InventoryHistory.AddAsync(movement, cancellation);
+                _logger.LogError(ex, "Error al obtener el historial de la orden {Id}", workOrderId);
+                return new List<WorkOrderHistoryDto>();
+            }
         }
 
         public async Task<WorkOrderEvidence> AddEvidenceAsync(WorkOrderEvidence evidence, CancellationToken cancellation)
@@ -621,9 +448,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 evidence.CreatedAt = DateTime.Now;
                 evidence.IsActive = true;
                 if (int.TryParse(_currentUserService.UserId, out int userId))
-                {
                     evidence.ResponsibleUserId = userId;
-                }
 
                 await _context.WorkOrderEvidence.AddAsync(evidence, cancellation);
                 await _context.SaveChangesAsync(cancellation);
@@ -631,7 +456,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al agregar la evidencia individual");
+                _logger.LogError(ex, "Error al agregar evidencia a la orden de trabajo");
                 throw;
             }
         }
@@ -648,8 +473,53 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al eliminar la evidencia individual con id {id}");
+                _logger.LogError(ex, "Error al eliminar la evidencia {Id}", id);
                 throw;
+            }
+        }
+
+        // ─── Privado: aplica movimiento de inventario dentro del contexto ────────────
+        private async Task ApplyInventoryMovementAsync(int productId, int quantity, string type, string obs, int referenceId, CancellationToken cancellation)
+        {
+            try
+            {
+                var inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == productId, cancellation);
+                if (inventory == null)
+                {
+                    inventory = new Domain.Models.Inventory
+                    {
+                        ProductId = productId,
+                        StockQuantity = 0,
+                        MinStock = 0,
+                        CreatedAt = DateTime.Now,
+                        IsActive = true
+                    };
+                    if (int.TryParse(_currentUserService.UserId, out int uid)) inventory.ResponsibleUserId = uid;
+                    await _context.Inventory.AddAsync(inventory, cancellation);
+                }
+
+                if (type == "Entrada") inventory.StockQuantity += quantity;
+                else if (type == "Salida") inventory.StockQuantity -= quantity;
+
+                inventory.LastUpdate = DateTime.Now;
+                inventory.UpdatedAt = DateTime.Now;
+
+                var movement = new InventoryHistory
+                {
+                    ProductId = productId,
+                    MovementType = type,
+                    Quantity = quantity,
+                    Observations = obs,
+                    ReferenceId = referenceId,
+                    CreatedAt = DateTime.Now,
+                    IsActive = true
+                };
+                if (int.TryParse(_currentUserService.UserId, out int userId)) movement.ResponsibleUserId = userId;
+                await _context.InventoryHistory.AddAsync(movement, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al registrar movimiento de inventario para producto {ProductId}", productId);
             }
         }
     }

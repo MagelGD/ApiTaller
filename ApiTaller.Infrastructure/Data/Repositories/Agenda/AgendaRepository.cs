@@ -39,7 +39,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     DailySlots = settings.DailySlots,
                     BusinessHoursStart = settings.BusinessHoursStart.ToString(@"hh\:mm"),
                     BusinessHoursEnd = settings.BusinessHoursEnd.ToString(@"hh\:mm"),
-                    StartDate = settings.StartDate
+                    StartDate = settings.StartDate,
+                    WorkingDays = settings.WorkingDays
                 };
             }
             catch (Exception ex)
@@ -70,6 +71,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                 settings.BusinessHoursStart = TimeSpan.Parse(dto.BusinessHoursStart);
                 settings.BusinessHoursEnd = TimeSpan.Parse(dto.BusinessHoursEnd);
                 settings.StartDate = dto.StartDate.Date;
+                settings.WorkingDays = dto.WorkingDays;
                 settings.UpdatedAt = DateTime.Now;
                 settings.ResponsibleUserId = userId;
 
@@ -122,6 +124,22 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             }
         }
 
+        public async Task<bool> HasActiveAppointmentForVehicleAsync(int vehicleId, CancellationToken ct)
+        {
+            try
+            {
+                return await _context.Appointment.AnyAsync(a =>
+                    a.VehicleId == vehicleId &&
+                    a.IsActive &&
+                    (a.Status == "Agendada" || a.Status == "Pendiente"), ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al verificar cita activa para vehículo {VehicleId}", vehicleId);
+                return false;
+            }
+        }
+
         public async Task<IEnumerable<string>> GetAvailableDatesAsync(CancellationToken ct)
         {
             try
@@ -138,7 +156,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     .ToDictionaryAsync(c => c.Date.Date, c => c, ct);
 
                 var appointmentsCountByDate = await _context.Appointment
-                    .Where(a => a.IsActive && a.AppointmentDate >= startDate && a.AppointmentDate <= endDate 
+                    .Where(a => a.IsActive && a.AppointmentDate >= startDate && a.AppointmentDate <= endDate
                            && (a.Status == "Agendada" || a.Status == "Pendiente"))
                     .GroupBy(a => a.AppointmentDate)
                     .Select(g => new { Date = g.Key, Count = g.Count() })
@@ -149,11 +167,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     .Select(b => b.BlockDate.Date)
                     .ToListAsync(ct);
 
-                var availableDates = new List<string>();
+                var workingDays = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday };
+                if (!string.IsNullOrEmpty(settings.WorkingDays))
+                {
+                    workingDays = settings.WorkingDays.Split(',')
+                        .Select(s => int.TryParse(s, out var d) ? (DayOfWeek)d : DayOfWeek.Sunday)
+                        .ToList();
+                }
 
+                var availableDates = new List<string>();
                 for (var date = startDate; date <= endDate; date = date.AddDays(1))
                 {
-                    if (date.DayOfWeek == DayOfWeek.Sunday) continue;
+                    if (!workingDays.Contains(date.DayOfWeek)) continue;
                     if (blockedDates.Contains(date.Date)) continue;
 
                     dailyConfigs.TryGetValue(date.Date, out var dayConfig);
@@ -163,9 +188,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     var slots = dayConfig?.CustomSlots ?? settings.DailySlots;
 
                     if (count < slots)
-                    {
                         availableDates.Add(date.ToString("yyyy-MM-dd"));
-                    }
                 }
 
                 return availableDates;
@@ -181,26 +204,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                // VALIDACIÓN: No permitir si ya tiene una cita activa
-                var hasActive = await _context.Appointment.AnyAsync(a => 
-                    a.VehicleId == dto.VehicleId && 
-                    a.IsActive && 
-                    (a.Status == "Agendada" || a.Status == "Pendiente"), ct);
+                var customer = await _context.Customer.FirstOrDefaultAsync(c => c.UserId == userId, ct);
 
-                if (hasActive)
-                {
-                    _logger.LogWarning("El vehículo {VehicleId} ya tiene una cita activa.", dto.VehicleId);
-                    return false;
-                }
-
-                // Obtener el CustomerId real a partir del UserId del token
-                var customer = await _context.Customer
-                    .FirstOrDefaultAsync(c => c.UserId == userId, ct);
-                
                 var appointment = new Appointment
                 {
                     AppointmentDate = dto.AppointmentDate.Date,
-                    CustomerId = customer?.Id, // Vínculo vital para el portal del cliente
+                    CustomerId = customer?.Id,
                     VehicleId = dto.VehicleId,
                     ServiceTypeId = dto.ServiceTypeId,
                     Status = "Agendada",
@@ -209,7 +218,6 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     ResponsibleUserId = userId,
                     BookingSource = "Portal",
                     CustomerNotes = dto.CustomerNotes ?? "",
-                    // Inicializamos campos de contacto vacíos para evitar error de NOT NULL en DB
                     ContactName = "",
                     ContactPhone = "",
                     ContactEmail = "",
@@ -261,17 +269,6 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                // VALIDACIÓN: No permitir si ya tiene una cita activa (a menos que sea forzado, pero aquí aplicamos la regla base)
-                if (dto.VehicleId.HasValue)
-                {
-                    var hasActive = await _context.Appointment.AnyAsync(a => 
-                        a.VehicleId == dto.VehicleId && 
-                        a.IsActive && 
-                        (a.Status == "Agendada" || a.Status == "Pendiente"), ct);
-
-                    if (hasActive) return false;
-                }
-
                 int.TryParse(_currentUser.UserId, out int userId);
                 var appointment = new Appointment
                 {
@@ -334,7 +331,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener citas diarias");
+                _logger.LogError(ex, "Error al obtener citas del día {Date}", date.Date);
                 return new List<AppointmentSummaryDto>();
             }
         }
@@ -357,7 +354,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al confirmar pre-registro");
+                _logger.LogError(ex, "Error al confirmar pre-registro de cita {Id}", dto.AppointmentId);
                 return false;
             }
         }
@@ -372,13 +369,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
 
                 if (appointment == null || appointment.VehicleId == null) return null;
 
-                // Crear la nueva Orden de Trabajo basándose en la cita
                 var workOrder = new WorkOrder
                 {
                     VehicleId = appointment.VehicleId.Value,
                     CustomerId = appointment.VehicleNavigation.CustomerId,
                     EntryDate = DateTime.Now,
-                    Status = "Recepción", // Estado inicial estándar para habilitar edición
+                    Status = "Recepción",
                     Observations = appointment.CustomerNotes,
                     Mileage = 0,
                     FuelLevel = "N/A",
@@ -391,7 +387,6 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                 _context.WorkOrder.Add(workOrder);
                 await _context.SaveChangesAsync(ct);
 
-                // Actualizar la cita vinculándola a la orden y cambiando su estado
                 appointment.Status = "Recibida";
                 appointment.WorkOrderId = workOrder.Id;
                 appointment.UpdatedAt = DateTime.Now;
@@ -402,7 +397,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al convertir cita a orden de trabajo");
+                _logger.LogError(ex, "Error al convertir cita {Id} a orden de trabajo", appointmentId);
                 return null;
             }
         }
@@ -412,14 +407,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             try
             {
                 var settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
-                
-                // Si no hay nada, devolvemos lista vacía
+
                 if (settings == null && weeks == null) return new List<AgendaDayConfigDto>();
 
                 var baseStartDate = start?.Date ?? settings?.StartDate.Date ?? DateTime.Today;
                 var baseWeeks = weeks ?? settings?.WeeksToOpen ?? 2;
 
-                // Forzar que el rango siempre empiece al menos hoy para evitar confusión en la matriz
                 var startDate = baseStartDate;
                 var endDate = baseStartDate.AddDays((baseWeeks * 7) - 1);
 
@@ -427,27 +420,41 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                     .Where(c => c.Date >= startDate && c.Date <= endDate && c.IsActive)
                     .ToDictionaryAsync(c => c.Date.Date, c => c, ct);
 
+                var blockedDates = await _context.AgendaBlock
+                    .Where(b => b.IsActive && b.BlockDate >= startDate && b.BlockDate <= endDate)
+                    .ToDictionaryAsync(b => b.BlockDate.Date, b => b.Reason, ct);
+
                 var appointmentsCount = await _context.Appointment
-                    .Where(a => a.IsActive && a.AppointmentDate >= startDate && a.AppointmentDate <= endDate 
+                    .Where(a => a.IsActive && a.AppointmentDate >= startDate && a.AppointmentDate <= endDate
                            && (a.Status == "Agendada" || a.Status == "Pendiente"))
                     .GroupBy(a => a.AppointmentDate)
                     .Select(g => new { Date = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(g => g.Date, g => g.Count, ct);
 
+                var workingDays = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday };
+                if (settings != null && !string.IsNullOrEmpty(settings.WorkingDays))
+                {
+                    workingDays = settings.WorkingDays.Split(',')
+                        .Select(s => int.TryParse(s, out var d) ? (DayOfWeek)d : DayOfWeek.Sunday)
+                        .ToList();
+                }
+
                 var result = new List<AgendaDayConfigDto>();
                 for (var date = startDate; date <= endDate; date = date.AddDays(1))
                 {
-                    if (date.DayOfWeek == DayOfWeek.Sunday) continue;
+                    if (!workingDays.Contains(date.DayOfWeek)) continue;
 
                     dailyConfigs.TryGetValue(date.Date, out var config);
                     appointmentsCount.TryGetValue(date.Date, out var count);
+                    blockedDates.TryGetValue(date.Date, out var blockReason);
+                    var isBlockedInExceptions = blockReason != null;
 
                     result.Add(new AgendaDayConfigDto
                     {
                         Date = date,
                         CustomSlots = config?.CustomSlots,
-                        IsBlocked = config?.IsBlocked ?? false,
-                        Reason = config?.Reason,
+                        IsBlocked = (config?.IsBlocked ?? false) || isBlockedInExceptions,
+                        Reason = config?.Reason ?? blockReason,
                         CurrentBookings = count
                     });
                 }
@@ -516,7 +523,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cancelar cita");
+                _logger.LogError(ex, "Error al cancelar cita {Id}", appointmentId);
                 return false;
             }
         }
@@ -537,7 +544,50 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al reprogramar cita");
+                _logger.LogError(ex, "Error al reprogramar cita {Id}", appointmentId);
+                return false;
+            }
+        }
+
+        public async Task<IEnumerable<AgendaBlockDto>> GetBlockedExceptionDatesAsync(CancellationToken ct)
+        {
+            try
+            {
+                return await _context.AgendaBlock
+                    .Where(b => b.IsActive && b.BlockDate >= DateTime.Today)
+                    .OrderBy(b => b.BlockDate)
+                    .Select(b => new AgendaBlockDto
+                    {
+                        Id = b.Id,
+                        BlockDate = b.BlockDate,
+                        Reason = b.Reason
+                    })
+                    .ToListAsync(ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener excepciones de bloqueo activas");
+                return new List<AgendaBlockDto>();
+            }
+        }
+
+        public async Task<bool> DeleteBlockedExceptionDateAsync(int id, CancellationToken ct)
+        {
+            try
+            {
+                var block = await _context.AgendaBlock.FirstOrDefaultAsync(b => b.Id == id, ct);
+                if (block == null) return false;
+
+                int.TryParse(_currentUser.UserId, out int userId);
+                block.IsActive = false;
+                block.UpdatedAt = DateTime.Now;
+                block.ResponsibleUserId = userId;
+
+                return await _context.SaveChangesAsync(ct) > 0;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al eliminar excepción de bloqueo {Id}", id);
                 return false;
             }
         }

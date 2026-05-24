@@ -14,5 +14,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Customers
         Task<GetCustomerDto?> ValidateExist(GetCustomerDto data, CancellationToken cancellation);
         Task<bool> CreateAsync(Customer create, CancellationToken cancellation);
         Task<bool> UpdateAsync(Customer update, CancellationToken cancellation);
+        Task<(bool HasActive, int WorkOrderId, string? Plate, string Status)?> GetActiveWorkOrderInfoAsync(int customerId, CancellationToken cancellation);
     }
 }
+

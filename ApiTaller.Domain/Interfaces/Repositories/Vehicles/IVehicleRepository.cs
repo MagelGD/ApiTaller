@@ -14,5 +14,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Vehicles
         Task<GetVehicleDto?> ValidateExist(string plate, CancellationToken cancellation);
         Task<bool> CreateAsync(Vehicle create, CancellationToken cancellation);
         Task<bool> UpdateAsync(Vehicle update, CancellationToken cancellation);
+        Task<(bool HasActive, int WorkOrderId, string Status)?> GetActiveWorkOrderInfoAsync(int vehicleId, CancellationToken cancellation);
     }
 }
+

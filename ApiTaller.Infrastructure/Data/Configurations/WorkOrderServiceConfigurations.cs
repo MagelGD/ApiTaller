@@ -46,6 +46,18 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_approved");
 
+            entity.Property(e => e.IsPaidToMechanic)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_paid_to_mechanic");
+
+            entity.Property(e => e.PaidToMechanicAt)
+                .HasColumnType("datetime")
+                .HasColumnName("paid_to_mechanic_at");
+
+            entity.Property(e => e.MechanicPaymentSettlementId)
+                .HasColumnType("int(11)")
+                .HasColumnName("mechanic_payment_settlement_id");
+
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
@@ -72,6 +84,11 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasForeignKey(d => d.ResponsibleUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SERVICE_RESPONSIBLE_USER");
+
+            entity.HasOne(d => d.MechanicPaymentSettlementNavigation).WithMany(p => p.Services)
+                .HasForeignKey(d => d.MechanicPaymentSettlementId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_SERVICE_SETTLEMENT");
         }
     }
 }

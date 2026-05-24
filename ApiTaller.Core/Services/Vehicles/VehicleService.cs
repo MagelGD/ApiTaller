@@ -39,27 +39,44 @@ namespace ApiTaller.Core.Services.Vehicles
                     IsActive = vehicle.IsActive,
                     CreatedAt = vehicle.CreatedAt ?? DateTime.Now
                 };
-                
+
                 bool isExist = await ValidateExist(vehicle.Plate, cancellationToken);
-                
+
                 if (saveData.Id == 0 && !isExist)
                 {
                     await _vehicleRepository.CreateAsync(saveData, cancellationToken);
                 }
                 else if (saveData.Id != 0)
                 {
+                    // REGLA DE NEGOCIO: No inactivar vehículo con órdenes de trabajo activas
+                    if (!saveData.IsActive)
+                    {
+                        var existingDto = await _vehicleRepository.GetByIdAsync(saveData.Id, cancellationToken);
+                        if (existingDto != null && existingDto.IsActive)
+                        {
+                            var activeWo = await _vehicleRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
+                            if (activeWo.HasValue)
+                            {
+                                throw new InvalidOperationException(
+                                    $"No es posible inactivar el vehículo porque tiene la orden de trabajo " +
+                                    $"#{activeWo.Value.WorkOrderId} activa en estado '{activeWo.Value.Status}'");
+                            }
+                        }
+                    }
+
                     await _vehicleRepository.UpdateAsync(saveData, cancellationToken);
                 }
-                
+
                 result = await _vehicleRepository.ValidateExist(vehicle.Plate, cancellationToken) ?? new GetVehicleDto();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al crear o editar el vehículo con placa {vehicle.Plate}");
+                _logger.LogError(ex, "Error al crear o editar el vehículo con placa {Plate}", vehicle.Plate);
                 throw;
             }
             return result;
         }
+
 
         public async Task<IEnumerable<GetVehicleDto>> GetAllActiveAsync(CancellationToken cancellation)
         {

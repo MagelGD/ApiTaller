@@ -9,5 +9,6 @@ namespace ApiTaller.Domain.Models
         public TimeSpan BusinessHoursStart { get; set; }
         public TimeSpan BusinessHoursEnd { get; set; }
         public DateTime StartDate { get; set; }
+        public string? WorkingDays { get; set; }
     }
 }

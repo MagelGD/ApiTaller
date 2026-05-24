@@ -256,6 +256,18 @@ INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_u
 INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
 ((SELECT id FROM module WHERE name = 'Centro de Control'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Dashboard Administrativo', 'dashboard.admin.view', 1, NOW(), NOW(), 1);
 
+-- 6.7 Crear Módulo Contabilidad (Fase 13)
+INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_user_id) VALUES 
+('Contabilidad', 1, NOW(), NOW(), 1);
+
+INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
+((SELECT id FROM module WHERE name = 'Contabilidad'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Contabilidad', 'Ver_Contabilidad', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Contabilidad'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Pagos Mecanicos', 'Ver_Pagos_Mecanicos', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Contabilidad'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Pagos Mecanicos', 'Guardar_Pagos_Mecanicos', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Contabilidad'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Control Ventas', 'Ver_Control_Ventas', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Contabilidad'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Liquidacion Mecanicos', 'Ver_Liquidacion_Mecanicos', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Contabilidad'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Liquidacion Mecanicos', 'Guardar_Liquidacion_Mecanicos', 1, NOW(), NOW(), 1);
+
 -- 7. ASIGNAR MÓDULOS AL ROL SUPERADMIN
 INSERT INTO user_role_module (user_role_id, module_role_id, is_active, created_at, updated_at, responsible_user_id)
 SELECT ur.id, m.id, 1, NOW(), NOW(), 1

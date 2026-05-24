@@ -66,7 +66,6 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
 
         public async Task<bool> UpdateStockAsync(InventoryHistory movement, CancellationToken cancellation)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellation);
             try
             {
                 var inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == movement.ProductId, cancellation);
@@ -104,12 +103,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                 await _context.InventoryHistory.AddAsync(movement, cancellation);
 
                 await _context.SaveChangesAsync(cancellation);
-                await transaction.CommitAsync(cancellation);
                 return true;
             }
             catch
             {
-                await transaction.RollbackAsync(cancellation);
                 return false;
             }
         }

@@ -94,6 +94,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Agenda.IAgendaService, ApiTaller.Core.Services.Agenda.AgendaService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Email.IEmailSettingsService, ApiTaller.Core.Services.Email.EmailSettingsService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.IDashboardService, ApiTaller.Core.Services.Dashboard.DashboardService>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Accounting.IAccountingService, ApiTaller.Core.Services.Accounting.AccountingService>();
             return services;
         }
     }

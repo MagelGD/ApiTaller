@@ -13,7 +13,10 @@ namespace ApiTaller.Domain.Interfaces.Repositories.WorkOrders
         Task<WorkOrderDto?> GetByIdAsync(int id, CancellationToken cancellation);
         Task<bool> CreateAsync(WorkOrder create, CancellationToken cancellation);
         Task<bool> UpdateAsync(WorkOrder update, CancellationToken cancellation);
-        Task<bool> ChangeStatusAsync(int id, string status, CancellationToken cancellation);
+        Task<bool> ChangeStatusAsync(int id, string status, string oldStatus, string actionBy, int? responsibleUserId, CancellationToken cancellation);
+        Task<bool> IsBilledAsync(int workOrderId, CancellationToken cancellation);
+        Task<bool> HasPartsOrServicesAsync(int workOrderId, CancellationToken cancellation);
+        Task AddHistoryEntryAsync(int workOrderId, string status, string observations, int? responsibleUserId, string actionBy, CancellationToken cancellation);
         Task<IEnumerable<WorkOrderHistoryDto>> GetHistoryAsync(int workOrderId, CancellationToken cancellation);
         Task<WorkOrderEvidence> AddEvidenceAsync(WorkOrderEvidence evidence, CancellationToken cancellation);
         Task<bool> DeleteEvidenceAsync(int id, CancellationToken cancellation);
