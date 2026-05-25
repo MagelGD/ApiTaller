@@ -59,6 +59,22 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasMaxLength(1000)
                 .HasColumnName("observations");
 
+            entity.Property(e => e.WorkshopName)
+                .HasMaxLength(255)
+                .HasColumnName("workshop_name");
+
+            entity.Property(e => e.WorkshopSlogan)
+                .HasMaxLength(500)
+                .HasColumnName("workshop_slogan");
+
+            entity.Property(e => e.LogoBase64)
+                .HasColumnType("longtext")
+                .HasColumnName("logo_base64");
+
+            entity.Property(e => e.LogoBrandsBase64)
+                .HasColumnType("longtext")
+                .HasColumnName("logo_brands_base64");
+
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

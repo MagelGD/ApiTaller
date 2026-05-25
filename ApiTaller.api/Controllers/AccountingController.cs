@@ -45,9 +45,10 @@ namespace ApiTaller.Api.Controllers
             [FromQuery] DateTime startDate, 
             [FromQuery] DateTime endDate, 
             [FromQuery] string status, 
+            [FromQuery] int? mechanicId,
             CancellationToken ct)
         {
-            var result = await _accountingService.GetSalesSummaryAsync(startDate, endDate, status, ct);
+            var result = await _accountingService.GetSalesSummaryAsync(startDate, endDate, status, mechanicId, ct);
             return Ok(result);
         }
 

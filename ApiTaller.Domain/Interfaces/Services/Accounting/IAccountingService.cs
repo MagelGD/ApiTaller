@@ -10,7 +10,7 @@ namespace ApiTaller.Domain.Interfaces.Services.Accounting
     {
         Task<IEnumerable<MechanicPaymentSettingsDto>> GetPaymentSettingsAsync(CancellationToken ct);
         Task<bool> SavePaymentSettingsAsync(MechanicPaymentSettingsDto dto, CancellationToken ct);
-        Task<SalesSummaryDto> GetSalesSummaryAsync(DateTime startDate, DateTime endDate, string status, CancellationToken ct);
+        Task<SalesSummaryDto> GetSalesSummaryAsync(DateTime startDate, DateTime endDate, string status, int? mechanicId, CancellationToken ct);
         Task<IEnumerable<PendingServiceDto>> GetPendingServicesAsync(int mechanicId, DateTime startDate, DateTime endDate, CancellationToken ct);
         Task<bool> SettleServicesAsync(int mechanicId, DateTime startDate, DateTime endDate, decimal totalAmount, List<int> serviceIds, int responsibleUserId, CancellationToken ct);
         Task<IEnumerable<MechanicSettlementDto>> GetSettlementHistoryAsync(int? mechanicId, CancellationToken ct);

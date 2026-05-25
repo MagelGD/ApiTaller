@@ -30,13 +30,19 @@ namespace ApiTaller.Domain.Dtos.Accounting
 
     public class WorkOrderPartRawDto
     {
+        public int? ProductId { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
+        public decimal BasePrice { get; set; }
+        public int StockQuantity { get; set; }
     }
 
     public class WorkOrderServiceRawDto
     {
         public decimal Price { get; set; }
+        public int? MechanicId { get; set; }
+        public string? DateCompleted { get; set; } // YYYY-MM-DD format for daily calculation
+        public DateTime CompletedAtDate { get; set; }
     }
 
     /// <summary>

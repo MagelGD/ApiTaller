@@ -74,6 +74,7 @@ namespace ApiTaller.Core.Services.WorkOrders
                     FuelLevel = dto.FuelLevel,
                     Observations = dto.Observations,
                     Status = dto.Status,
+                    DownPayment = dto.DownPayment,
                     IsActive = dto.IsActive,
                     CreatedAt = dto.CreatedAt,
                     UpdatedAt = DateTime.Now

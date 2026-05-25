@@ -29,6 +29,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 int.TryParse(_currentUserService.UserId, out int userId);
                 int? finalUserId = userId != 0 ? userId : null;
 
+                var settings = await _context.WorkshopSettings
+                    .Where(s => s.IsActive)
+                    .ToListAsync(cancellation);
+                var logo = settings.FirstOrDefault(s => s.SettingKey == "logo")?.SettingValue;
+                var logoBrands = settings.FirstOrDefault(s => s.SettingKey == "logo_brands")?.SettingValue;
+                var name = settings.FirstOrDefault(s => s.SettingKey == "workshop_name")?.SettingValue;
+                var slogan = settings.FirstOrDefault(s => s.SettingKey == "workshop_slogan")?.SettingValue;
+
                 var sale = new Sale
                 {
                     WorkOrderId = saleDto.WorkOrderId,
@@ -41,6 +49,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                     DownPayment = saleDto.DownPayment,
                     Balance = saleDto.Balance,
                     Observations = saleDto.Observations,
+                    WorkshopName = name,
+                    WorkshopSlogan = slogan,
+                    LogoBase64 = logo,
+                    LogoBrandsBase64 = logoBrands,
                     IsActive = true,
                     CreatedAt = DateTime.Now,
                     ResponsibleUserId = finalUserId
@@ -138,6 +150,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 DownPayment = sale.DownPayment,
                 Balance = sale.Balance,
                 Observations = sale.Observations,
+                WorkshopName = sale.WorkshopName,
+                WorkshopSlogan = sale.WorkshopSlogan,
+                LogoBase64 = sale.LogoBase64,
+                LogoBrandsBase64 = sale.LogoBrandsBase64,
                 Details = sale.Details?.Select(d => new SaleDetailDto
                 {
                     Id = d.Id,

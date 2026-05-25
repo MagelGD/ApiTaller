@@ -102,7 +102,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         /// <summary>
         /// Retorna órdenes de trabajo con sus partes y servicios para que el servicio calcule totales.
         /// </summary>
-        public async Task<IEnumerable<WorkOrderSalesRawDto>> GetWorkOrderSalesRawAsync(DateTime startDate, DateTime endDate, string status, CancellationToken ct)
+        public async Task<IEnumerable<WorkOrderSalesRawDto>> GetWorkOrderSalesRawAsync(DateTime startDate, DateTime endDate, string status, int? mechanicId, CancellationToken ct)
         {
             try
             {
@@ -110,14 +110,23 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
                 var end = endDate.Date.AddDays(1).AddTicks(-1);
 
                 var query = _context.WorkOrder
-                    .Include(w => w.Parts)
+                    .Include(w => w.Parts).ThenInclude(p => p.ProductNavigation)
                     .Include(w => w.Services)
                     .Where(w => w.IsActive && w.EntryDate >= start && w.EntryDate <= end);
+
+                if (mechanicId.HasValue && mechanicId.Value > 0)
+                {
+                    query = query.Where(w => w.Services.Any(s => s.IsActive && s.IsApproved && s.MechanicId == mechanicId.Value));
+                }
 
                 if (!string.IsNullOrEmpty(status) && status != "Todos")
                     query = query.Where(w => w.Status == status);
 
                 var orders = await query.ToListAsync(ct);
+
+                var inventoryMap = await _context.Inventory
+                    .Where(i => i.IsActive)
+                    .ToDictionaryAsync(i => i.ProductId, i => i.StockQuantity, ct);
 
                 return orders.Select(w => new WorkOrderSalesRawDto
                 {
@@ -126,13 +135,29 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
                     DownPayment = w.DownPayment,
                     Parts = w.Parts
                         .Where(p => p.IsActive && p.IsApproved && !p.IsProvidedByCustomer)
-                        .Select(p => new WorkOrderPartRawDto { Quantity = p.Quantity, UnitPrice = p.UnitPrice })
+                        .Select(p => {
+                            inventoryMap.TryGetValue(p.ProductId ?? 0, out int stock);
+                            return new WorkOrderPartRawDto
+                            {
+                                ProductId = p.ProductId,
+                                Quantity = p.Quantity,
+                                UnitPrice = p.UnitPrice,
+                                BasePrice = p.ProductNavigation?.Price ?? 0,
+                                StockQuantity = p.ProductId.HasValue ? stock : 0
+                            };
+                        })
                         .ToList(),
                     Services = w.Services
-                        .Where(s => s.IsActive && s.IsApproved)
-                        .Select(s => new WorkOrderServiceRawDto { Price = s.Price })
+                        .Where(s => s.IsActive && s.IsApproved && (!mechanicId.HasValue || mechanicId.Value <= 0 || s.MechanicId == mechanicId.Value))
+                        .Select(s => new WorkOrderServiceRawDto 
+                        { 
+                            Price = s.Price,
+                            MechanicId = s.MechanicId,
+                            CompletedAtDate = s.UpdatedAt ?? s.CreatedAt,
+                            DateCompleted = (s.UpdatedAt ?? s.CreatedAt).ToString("yyyy-MM-dd")
+                        })
                         .ToList()
-                });
+                }).ToList();
             }
             catch (Exception ex)
             {

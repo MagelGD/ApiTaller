@@ -63,9 +63,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     {
                         Id = w.Id,
                         VehicleId = w.VehicleId,
-                        VehiclePlate = w.VehicleNavigation.Plate,
+                        VehiclePlate = w.VehicleNavigation != null ? w.VehicleNavigation.Plate : null,
+                        VehicleBrand = w.VehicleNavigation != null && w.VehicleNavigation.BrandNavigation != null ? w.VehicleNavigation.BrandNavigation.Name : null,
+                        VehicleVersion = w.VehicleNavigation != null && w.VehicleNavigation.ModelNavigation != null ? w.VehicleNavigation.ModelNavigation.Models : null,
                         CustomerId = w.CustomerId,
-                        CustomerName = w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName,
+                        CustomerName = w.CustomerNavigation != null ? w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName : null,
                         EntryDate = w.EntryDate,
                         EstimatedDeliveryDate = w.EstimatedDeliveryDate,
                         Mileage = w.Mileage,
@@ -74,6 +76,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         Status = w.Status,
                         IsActive = w.IsActive,
                         IsBilled = _context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive),
+                        DownPayment = w.DownPayment,
                         CreatedAt = w.CreatedAt,
                         UpdatedAt = w.UpdatedAt,
                         Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
@@ -140,9 +143,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     {
                         Id = w.Id,
                         VehicleId = w.VehicleId,
-                        VehiclePlate = w.VehicleNavigation.Plate,
+                        VehiclePlate = w.VehicleNavigation != null ? w.VehicleNavigation.Plate : null,
+                        VehicleBrand = w.VehicleNavigation != null && w.VehicleNavigation.BrandNavigation != null ? w.VehicleNavigation.BrandNavigation.Name : null,
+                        VehicleVersion = w.VehicleNavigation != null && w.VehicleNavigation.ModelNavigation != null ? w.VehicleNavigation.ModelNavigation.Models : null,
                         CustomerId = w.CustomerId,
-                        CustomerName = w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName,
+                        CustomerName = w.CustomerNavigation != null ? w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName : null,
                         EntryDate = w.EntryDate,
                         EstimatedDeliveryDate = w.EstimatedDeliveryDate,
                         Mileage = w.Mileage,
@@ -151,6 +156,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         Status = w.Status,
                         IsActive = w.IsActive,
                         IsBilled = _context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive),
+                        DownPayment = w.DownPayment,
                         CreatedAt = w.CreatedAt,
                         UpdatedAt = w.UpdatedAt,
                         Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto

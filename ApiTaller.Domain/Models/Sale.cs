@@ -15,6 +15,10 @@ namespace ApiTaller.Domain.Models
         public decimal DownPayment { get; set; }
         public decimal Balance { get; set; }
         public string Observations { get; set; }
+        public string? WorkshopName { get; set; }
+        public string? WorkshopSlogan { get; set; }
+        public string? LogoBase64 { get; set; }
+        public string? LogoBrandsBase64 { get; set; }
 
         public virtual WorkOrder WorkOrder { get; set; }
         public virtual Customer Customer { get; set; }
