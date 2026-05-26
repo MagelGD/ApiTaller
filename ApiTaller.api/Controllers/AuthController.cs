@@ -131,7 +131,7 @@ namespace ApiTaller.api.Controllers
             }
         }
 
-        [Authorize]
+      
         [HttpGet("Prueba")]
         public async Task<IActionResult> GetPrueba(CancellationToken cancellation)
         {
