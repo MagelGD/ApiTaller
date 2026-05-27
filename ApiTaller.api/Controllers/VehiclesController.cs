@@ -24,11 +24,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetVehicles")]
-        public async Task<IActionResult> GetVehicles(CancellationToken cancellation)
+        public async Task<IActionResult> GetVehicles([FromQuery] string? vehicleType, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _vehicleService.GetAllAsync(cancellation));
+                return Ok(await _vehicleService.GetAllAsync(vehicleType, cancellation));
             }
             catch (Exception ex)
             {
@@ -38,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetVehiclesActive")]
-        public async Task<IActionResult> GetVehiclesActive(CancellationToken cancellation)
+        public async Task<IActionResult> GetVehiclesActive([FromQuery] string? vehicleType, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _vehicleService.GetAllActiveAsync(cancellation));
+                return Ok(await _vehicleService.GetAllActiveAsync(vehicleType, cancellation));
             }
             catch (Exception ex)
             {

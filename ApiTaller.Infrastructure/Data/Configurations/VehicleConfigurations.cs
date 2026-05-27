@@ -40,6 +40,11 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.Property(e => e.CylinderCapacity)
                 .HasMaxLength(50)
                 .HasColumnName("cylinder_capacity");
+            entity.Property(e => e.VehicleType)
+                .IsRequired()
+                .HasMaxLength(10)
+                .HasColumnName("vehicle_type")
+                .HasDefaultValue("moto");
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

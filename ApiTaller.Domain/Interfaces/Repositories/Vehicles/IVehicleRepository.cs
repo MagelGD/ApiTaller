@@ -8,8 +8,8 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Vehicles
 {
     public interface IVehicleRepository
     {
-        Task<IEnumerable<GetVehicleDto>> GetAllAsync(CancellationToken cancellation);
-        Task<IEnumerable<GetVehicleDto>> GetAllActiveAsync(CancellationToken cancellation);
+        Task<IEnumerable<GetVehicleDto>> GetAllAsync(string? vehicleType, CancellationToken cancellation);
+        Task<IEnumerable<GetVehicleDto>> GetAllActiveAsync(string? vehicleType, CancellationToken cancellation);
         Task<GetVehicleDto?> GetByIdAsync(int id, CancellationToken cancellation);
         Task<GetVehicleDto?> ValidateExist(string plate, CancellationToken cancellation);
         Task<bool> CreateAsync(Vehicle create, CancellationToken cancellation);

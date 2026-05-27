@@ -51,20 +51,22 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                 {
                     Id = x.Id,
                     Version = x.Version,
+                    VehicleType = x.VehicleType,
                     brandDto = new GetBrandDto()
                     {
                         Id = x.Brand.Id,
                         Name = x.Brand.Name,
+                        VehicleType = x.Brand.VehicleType,
                         IsActive = x.Brand.IsActive,
                         CreatedAt = x.Brand.CreatedAt
-
                     },
                     BrandModelsDto = new GetBrandModelsDto()
                     {
                         Id = x.Model.Id,
                         Models = x.Model.Models,
-                        IsActive= x.Model.IsActive,
-                        CreatedAt= x.Model.CreatedAt
+                        VehicleType = x.Model.VehicleType,
+                        IsActive = x.Model.IsActive,
+                        CreatedAt = x.Model.CreatedAt
                     },
                     IsActive = x.IsActive,
                     CreatedAt = x.CreatedAt,
@@ -73,7 +75,49 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "");
+                _logger.LogError(ex, "Error getting active versions");
+            }
+            return result;
+        }
+
+        public async Task<IEnumerable<GetBrandModelVersionDto>> GetAllActiveAsync(string? vehicleType, CancellationToken cancellation)
+        {
+            IEnumerable<GetBrandModelVersionDto> result = [];
+            try
+            {
+                var query = _Context.BrandModelVersion.Include(x => x.Model).Include(x => x.Brand).Where(x => x.IsActive);
+                if (!string.IsNullOrWhiteSpace(vehicleType))
+                    query = query.Where(x => x.VehicleType == vehicleType);
+
+                result = await query.Select(x => new GetBrandModelVersionDto
+                {
+                    Id = x.Id,
+                    Version = x.Version,
+                    VehicleType = x.VehicleType,
+                    brandDto = new GetBrandDto()
+                    {
+                        Id = x.Brand.Id,
+                        Name = x.Brand.Name,
+                        VehicleType = x.Brand.VehicleType,
+                        IsActive = x.Brand.IsActive,
+                        CreatedAt = x.Brand.CreatedAt
+                    },
+                    BrandModelsDto = new GetBrandModelsDto()
+                    {
+                        Id = x.Model.Id,
+                        Models = x.Model.Models,
+                        VehicleType = x.Model.VehicleType,
+                        IsActive = x.Model.IsActive,
+                        CreatedAt = x.Model.CreatedAt
+                    },
+                    IsActive = x.IsActive,
+                    CreatedAt = x.CreatedAt,
+                    UpdatedAt = x.UpdatedAt
+                }).ToListAsync(cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting active versions filtered by vehicleType");
             }
             return result;
         }
@@ -87,10 +131,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                 {
                     Id = x.Id,
                     Version = x.Version,
+                    VehicleType = x.VehicleType,
                     brandDto = new GetBrandDto()
                     {
                         Id = x.Brand.Id,
                         Name = x.Brand.Name,
+                        VehicleType = x.Brand.VehicleType,
                         IsActive = x.Brand.IsActive,
                         CreatedAt = x.Brand.CreatedAt
                     },
@@ -98,6 +144,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                     {
                         Id = x.Model.Id,
                         Models = x.Model.Models,
+                        VehicleType = x.Model.VehicleType,
                         IsActive = x.Model.IsActive,
                         CreatedAt = x.Model.CreatedAt
                     },
@@ -122,10 +169,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                 {
                     Id = x.Id,
                     Version = x.Version,
+                    VehicleType = x.VehicleType,
                     brandDto = new GetBrandDto()
                     {
                         Id = x.Brand.Id,
                         Name = x.Brand.Name,
+                        VehicleType = x.Brand.VehicleType,
                         IsActive = x.Brand.IsActive,
                         CreatedAt = x.Brand.CreatedAt
                     },
@@ -133,6 +182,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                     {
                         Id = x.Model.Id,
                         Models = x.Model.Models,
+                        VehicleType = x.Model.VehicleType,
                         IsActive = x.Model.IsActive,
                         CreatedAt = x.Model.CreatedAt
                     },
@@ -175,10 +225,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                 {
                     Id = x.Id,
                     Version = x.Version,
+                    VehicleType = x.VehicleType,
                     brandDto = new GetBrandDto()
                     {
                         Id = x.Brand.Id,
                         Name = x.Brand.Name,
+                        VehicleType = x.Brand.VehicleType,
                         IsActive = x.Brand.IsActive,
                         CreatedAt = x.Brand.CreatedAt
                     },
@@ -186,6 +238,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
                     {
                         Id = x.Model.Id,
                         Models = x.Model.Models,
+                        VehicleType = x.Model.VehicleType,
                         IsActive = x.Model.IsActive,
                         CreatedAt = x.Model.CreatedAt
                     },

@@ -52,11 +52,17 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
             }
         }
 
-        public async Task<IEnumerable<WorkOrderDto>> GetAllAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<WorkOrderDto>> GetAllAsync(string? vehicleType, CancellationToken cancellation)
         {
             try
             {
-                return await _context.WorkOrder
+                var query = _context.WorkOrder.AsQueryable();
+                if (!string.IsNullOrWhiteSpace(vehicleType))
+                {
+                    query = query.Where(w => w.VehicleNavigation.VehicleType == vehicleType);
+                }
+
+                return await query
                     .Include(w => w.CustomerNavigation)
                     .Include(w => w.VehicleNavigation)
                     .Select(w => new WorkOrderDto
@@ -66,6 +72,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         VehiclePlate = w.VehicleNavigation != null ? w.VehicleNavigation.Plate : null,
                         VehicleBrand = w.VehicleNavigation != null && w.VehicleNavigation.BrandNavigation != null ? w.VehicleNavigation.BrandNavigation.Name : null,
                         VehicleVersion = w.VehicleNavigation != null && w.VehicleNavigation.ModelNavigation != null ? w.VehicleNavigation.ModelNavigation.Models : null,
+                        VehicleType = w.VehicleNavigation != null ? w.VehicleNavigation.VehicleType : "moto",
+                        VehicleMotorization = w.VehicleNavigation != null ? w.VehicleNavigation.CylinderCapacity : null,
                         CustomerId = w.CustomerId,
                         CustomerName = w.CustomerNavigation != null ? w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName : null,
                         EntryDate = w.EntryDate,
@@ -146,6 +154,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                         VehiclePlate = w.VehicleNavigation != null ? w.VehicleNavigation.Plate : null,
                         VehicleBrand = w.VehicleNavigation != null && w.VehicleNavigation.BrandNavigation != null ? w.VehicleNavigation.BrandNavigation.Name : null,
                         VehicleVersion = w.VehicleNavigation != null && w.VehicleNavigation.ModelNavigation != null ? w.VehicleNavigation.ModelNavigation.Models : null,
+                        VehicleType = w.VehicleNavigation != null ? w.VehicleNavigation.VehicleType : "moto",
+                        VehicleMotorization = w.VehicleNavigation != null ? w.VehicleNavigation.CylinderCapacity : null,
                         CustomerId = w.CustomerId,
                         CustomerName = w.CustomerNavigation != null ? w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName : null,
                         EntryDate = w.EntryDate,

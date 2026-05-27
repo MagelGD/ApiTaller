@@ -36,6 +36,7 @@ namespace ApiTaller.Core.Services.Vehicles
                     VersionId = vehicle.VersionId,
                     Color = vehicle.Color,
                     CylinderCapacity = vehicle.CylinderCapacity,
+                    VehicleType = vehicle.VehicleType,
                     IsActive = vehicle.IsActive,
                     CreatedAt = vehicle.CreatedAt ?? DateTime.Now
                 };
@@ -78,12 +79,12 @@ namespace ApiTaller.Core.Services.Vehicles
         }
 
 
-        public async Task<IEnumerable<GetVehicleDto>> GetAllActiveAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetVehicleDto>> GetAllActiveAsync(string? vehicleType, CancellationToken cancellation)
         {
             IEnumerable<GetVehicleDto> result = [];
             try
             {
-                result = await _vehicleRepository.GetAllActiveAsync(cancellation);
+                result = await _vehicleRepository.GetAllActiveAsync(vehicleType, cancellation);
             }
             catch (Exception ex)
             {
@@ -92,12 +93,12 @@ namespace ApiTaller.Core.Services.Vehicles
             return result;
         }
 
-        public async Task<IEnumerable<GetVehicleDto>> GetAllAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetVehicleDto>> GetAllAsync(string? vehicleType, CancellationToken cancellation)
         {
             IEnumerable<GetVehicleDto> result = [];
             try
             {
-                result = await _vehicleRepository.GetAllAsync(cancellation);
+                result = await _vehicleRepository.GetAllAsync(vehicleType, cancellation);
             }
             catch (Exception ex)
             {

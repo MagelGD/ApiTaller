@@ -12,6 +12,8 @@ namespace ApiTaller.Domain.Models
         public int? VersionId { get; set; }
         public string Color { get; set; }
         public string CylinderCapacity { get; set; }
+        /// <summary>CAR-2: Tipo de vehículo. 'moto' | 'car'</summary>
+        public string VehicleType { get; set; } = "moto";
 
         public virtual Customer CustomerNavigation { get; set; }
         public virtual Brand BrandNavigation { get; set; }

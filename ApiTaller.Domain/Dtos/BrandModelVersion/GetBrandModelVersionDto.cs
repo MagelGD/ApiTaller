@@ -10,6 +10,8 @@ namespace ApiTaller.Domain.Dtos.BrandModelVersion
     {
         public int Id { get; set; }
         public string Version { get; set; }
+        /// <summary>CAR-1: Tipo de vehículo de esta referencia. 'moto' | 'car'</summary>
+        public string VehicleType { get; set; } = "moto";
         public GetBrandDto? brandDto { get; set; }
         public GetBrandModelsDto? BrandModelsDto { get; set; }
         public bool IsActive { get; set; }

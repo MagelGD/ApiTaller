@@ -38,11 +38,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetBrandsActive")]
-        public async Task<IActionResult> GetBrandsActive(CancellationToken cancellation)
+        public async Task<IActionResult> GetBrandsActive([FromQuery] string? vehicleType, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _brandService.GetAllBrandsActiveAsync(cancellation));
+                return Ok(await _brandService.GetAllBrandsActiveAsync(vehicleType, cancellation));
             }
             catch (Exception ex)
             {

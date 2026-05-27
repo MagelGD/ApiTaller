@@ -22,6 +22,8 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
         public string? VehiclePlate { get; set; }
         public string? VehicleBrand { get; set; }
         public string? VehicleVersion { get; set; }
+        public string? VehicleType { get; set; } = "moto";
+        public string? VehicleMotorization { get; set; }
         public bool IsBilled { get; set; }
         public decimal DownPayment { get; set; }
 

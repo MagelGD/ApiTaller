@@ -24,11 +24,11 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpGet("GetWorkOrders")]
-        public async Task<IActionResult> GetWorkOrders(CancellationToken cancellation)
+        public async Task<IActionResult> GetWorkOrders([FromQuery] string? vehicleType, CancellationToken cancellation)
         {
             try
             {
-                return Ok(await _workOrderService.GetAllAsync(cancellation));
+                return Ok(await _workOrderService.GetAllAsync(vehicleType, cancellation));
             }
             catch (Exception ex)
             {

@@ -46,13 +46,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
             return await _context.SaveChangesAsync(cancellation) > 0;
         }
 
-        public async Task<IEnumerable<GetVehicleDto>> GetAllActiveAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetVehicleDto>> GetAllActiveAsync(string? vehicleType, CancellationToken cancellation)
         {
             IEnumerable<GetVehicleDto> result = new List<GetVehicleDto>();
             try
             {
-                result = await _context.Vehicle
-                    .Where(v => v.IsActive)
+                var query = _context.Vehicle.Where(v => v.IsActive);
+                if (!string.IsNullOrWhiteSpace(vehicleType))
+                {
+                    query = query.Where(v => v.VehicleType == vehicleType);
+                }
+
+                result = await query
                     .Select(v => new GetVehicleDto
                     {
                         Id = v.Id,
@@ -63,6 +68,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
                         VersionId = v.VersionId,
                         Color = v.Color,
                         CylinderCapacity = v.CylinderCapacity,
+                        VehicleType = v.VehicleType,
                         IsActive = v.IsActive,
                         CreatedAt = v.CreatedAt,
                         UpdatedAt = v.UpdatedAt
@@ -76,12 +82,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
             return result;
         }
 
-        public async Task<IEnumerable<GetVehicleDto>> GetAllAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<GetVehicleDto>> GetAllAsync(string? vehicleType, CancellationToken cancellation)
         {
             IEnumerable<GetVehicleDto> result = new List<GetVehicleDto>();
             try
             {
-                result = await _context.Vehicle.Include(x=> x.BrandNavigation).Include(x=> x.ModelNavigation).Include(x=> x.VersionNavigation)
+                var query = _context.Vehicle.Include(x => x.BrandNavigation).Include(x => x.ModelNavigation).Include(x => x.VersionNavigation).AsQueryable();
+                if (!string.IsNullOrWhiteSpace(vehicleType))
+                {
+                    query = query.Where(v => v.VehicleType == vehicleType);
+                }
+
+                result = await query
                     .Select(v => new GetVehicleDto
                     {
                         Id = v.Id,
@@ -92,22 +104,26 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
                         VersionId = v.VersionId,
                         Color = v.Color,
                         CylinderCapacity = v.CylinderCapacity,
+                        VehicleType = v.VehicleType,
                         IsActive = v.IsActive,
                         CreatedAt = v.CreatedAt,
                         Brand = new GetBrandDto
                         {
                             Id = v.BrandNavigation.Id,
-                            Name = v.BrandNavigation.Name
+                            Name = v.BrandNavigation.Name,
+                            VehicleType = v.BrandNavigation.VehicleType
                         },
                         Model = new GetBrandModelsDto
                         {
                             Id = v.ModelNavigation.Id,
-                            Models = v.ModelNavigation.Models
+                            Models = v.ModelNavigation.Models,
+                            VehicleType = v.ModelNavigation.VehicleType
                         },
                         Reference = new GetBrandModelVersionDto
                         {
                             Id = v.VersionNavigation.Id,
-                            Version = v.VersionNavigation.Version
+                            Version = v.VersionNavigation.Version,
+                            VehicleType = v.VersionNavigation.VehicleType
                         },
                         UpdatedAt = v.UpdatedAt
                     })
@@ -137,6 +153,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
                         VersionId = v.VersionId,
                         Color = v.Color,
                         CylinderCapacity = v.CylinderCapacity,
+                        VehicleType = v.VehicleType,
                         IsActive = v.IsActive,
                         CreatedAt = v.CreatedAt,
                         UpdatedAt = v.UpdatedAt
@@ -207,6 +224,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
                         VersionId = v.VersionId,
                         Color = v.Color,
                         CylinderCapacity = v.CylinderCapacity,
+                        VehicleType = v.VehicleType,
                         IsActive = v.IsActive,
                         CreatedAt = v.CreatedAt,
                         UpdatedAt = v.UpdatedAt

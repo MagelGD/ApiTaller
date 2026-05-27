@@ -9,7 +9,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories.WorkOrders
 {
     public interface IWorkOrderRepository
     {
-        Task<IEnumerable<WorkOrderDto>> GetAllAsync(CancellationToken cancellation);
+        Task<IEnumerable<WorkOrderDto>> GetAllAsync(string? vehicleType, CancellationToken cancellation);
         Task<WorkOrderDto?> GetByIdAsync(int id, CancellationToken cancellation);
         Task<bool> CreateAsync(WorkOrder create, CancellationToken cancellation);
         Task<bool> UpdateAsync(WorkOrder update, CancellationToken cancellation);

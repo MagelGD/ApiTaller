@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Brand;
+using ApiTaller.Domain.Dtos.Brand;
 using ApiTaller.Domain.Dtos.BrandModels;
 using ApiTaller.Domain.Interfaces.Repositories.BrandModels;
 using ApiTaller.Domain.Interfaces.Services;
@@ -48,6 +48,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModels
                     {
                         Id = bm.Id,
                         Models = bm.Models,
+                        VehicleType = bm.VehicleType,
                         IsActive = bm.IsActive,
                         CreatedAt = bm.CreatedAt,
                         UpdatedAt = bm.UpdatedAt
@@ -57,6 +58,34 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModels
             catch (Exception ex)
             {
                 _Logger.LogError(ex, "Error getting all active brand models");
+            }
+            return result;
+        }
+
+        public async Task<IEnumerable<GetBrandModelsDto>> GetAllBrandModelsActiveAsync(string? vehicleType, CancellationToken cancellationToken)
+        {
+            IEnumerable<GetBrandModelsDto> result = [];
+            try
+            {
+                var query = _Context.BrandModels.Where(bm => bm.IsActive);
+                if (!string.IsNullOrWhiteSpace(vehicleType))
+                    query = query.Where(bm => bm.VehicleType == vehicleType);
+
+                result = await query
+                    .Select(bm => new GetBrandModelsDto
+                    {
+                        Id = bm.Id,
+                        Models = bm.Models,
+                        VehicleType = bm.VehicleType,
+                        IsActive = bm.IsActive,
+                        CreatedAt = bm.CreatedAt,
+                        UpdatedAt = bm.UpdatedAt
+                    })
+                    .ToListAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex, "Error getting active brand models filtered by vehicleType");
             }
             return result;
         }
@@ -71,6 +100,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModels
                     {
                         Id = bm.Id,
                         Models = bm.Models,
+                        VehicleType = bm.VehicleType,
                         IsActive = bm.IsActive,
                         CreatedAt = bm.CreatedAt,
                         UpdatedAt = bm.UpdatedAt
@@ -95,6 +125,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModels
                     {
                         Id = bm.Id,
                         Models = bm.Models,
+                        VehicleType = bm.VehicleType,
                         IsActive = bm.IsActive,
                         CreatedAt = bm.CreatedAt,
                         UpdatedAt = bm.UpdatedAt
@@ -136,6 +167,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModels
                     {
                         Id = b.Id,
                         Models = b.Models,
+                        VehicleType = b.VehicleType,
                         IsActive = b.IsActive,
                         CreatedAt = b.CreatedAt,
                         UpdatedAt = b.UpdatedAt

@@ -35,6 +35,20 @@ namespace ApiTaller.Core.Services.BrandModelVersions
             return result;
         }
 
+        public async Task<IEnumerable<GetBrandModelVersionDto>> GetAllActiveAsync(string? vehicleType, CancellationToken cancellation)
+        {
+            IEnumerable<GetBrandModelVersionDto> result = [];
+            try
+            {
+                result = await _brandModelVersionRepository.GetAllActiveAsync(vehicleType, cancellation);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener las versiones de modelos de marca activas filtradas por vehicleType.");
+            }
+            return result;
+        }
+
         public async Task<IEnumerable<GetBrandModelVersionDto>> GetAllAsync(CancellationToken cancellation)
         {
             IEnumerable<GetBrandModelVersionDto> result = [];
@@ -73,6 +87,7 @@ namespace ApiTaller.Core.Services.BrandModelVersions
                     Version = dto.Version,
                     BrandId = dto.brandDto.Id,
                     ModelId = dto.BrandModelsDto.Id,
+                    VehicleType = dto.VehicleType,
                     IsActive = dto.IsActive,
                     CreatedAt = dto.CreatedAt ?? DateTime.Now
                 };

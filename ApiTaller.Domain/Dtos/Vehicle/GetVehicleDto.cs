@@ -15,6 +15,8 @@ namespace ApiTaller.Domain.Dtos.Vehicle
         public int? VersionId { get; set; }
         public string Color { get; set; }
         public string CylinderCapacity { get; set; }
+        /// <summary>CAR-2: Tipo de vehículo. 'moto' | 'car'</summary>
+        public string VehicleType { get; set; } = "moto";
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

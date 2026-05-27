@@ -32,11 +32,11 @@ namespace ApiTaller.Core.Services.WorkOrders
             _logger = logger;
         }
 
-        public async Task<IEnumerable<WorkOrderDto>> GetAllAsync(CancellationToken cancellation)
+        public async Task<IEnumerable<WorkOrderDto>> GetAllAsync(string? vehicleType, CancellationToken cancellation)
         {
             try
             {
-                return await _workOrderRepository.GetAllAsync(cancellation);
+                return await _workOrderRepository.GetAllAsync(vehicleType, cancellation);
             }
             catch (Exception ex)
             {

@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.BrandModels;
+using ApiTaller.Domain.Dtos.BrandModels;
 using ApiTaller.Domain.Interfaces.Repositories.BrandModels;
 using ApiTaller.Domain.Interfaces.Services.BrandModels;
 using Microsoft.Extensions.Logging;
@@ -30,6 +30,20 @@ namespace ApiTaller.Core.Services.BrandModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, "");
+            }
+            return result;
+        }
+
+        public async Task<IEnumerable<GetBrandModelsDto>> GetAllBrandModelsActiveAsync(string? vehicleType, CancellationToken cancellationToken)
+        {
+            IEnumerable<GetBrandModelsDto> result = [];
+            try
+            {
+                result = await _brandRepository.GetAllBrandModelsActiveAsync(vehicleType, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving active models filtered by vehicleType");
             }
             return result;
         }
@@ -71,6 +85,7 @@ namespace ApiTaller.Core.Services.BrandModels
                 {
                     Id = brandModelDto.Id,
                     Models = brandModelDto.Models,
+                    VehicleType = brandModelDto.VehicleType,
                     IsActive = brandModelDto.IsActive,
                     CreatedAt = brandModelDto.CreatedAt
                 };

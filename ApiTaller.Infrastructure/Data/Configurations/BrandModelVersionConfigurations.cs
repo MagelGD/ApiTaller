@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -23,6 +23,11 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(255)
                 .HasColumnName("version");
+            entity.Property(e => e.VehicleType)
+                .IsRequired()
+                .HasMaxLength(10)
+                .HasColumnName("vehicle_type")
+                .HasDefaultValue("moto");
             entity.Property(e => e.IsActive)
                    .HasColumnType("bit(1)")
                    .HasColumnName("is_active");

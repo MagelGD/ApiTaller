@@ -142,6 +142,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 VehiclePlate = vehicle?.Plate,
                 VehicleColor = vehicle?.Color,
                 VehicleModel = vehicleDisplay,
+                VehicleType = vehicle?.VehicleType ?? "moto",
                 SaleDate = sale.SaleDate,
                 Subtotal = sale.Subtotal,
                 DiscountPercent = sale.DiscountPercent,

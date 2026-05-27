@@ -9,6 +9,7 @@ namespace ApiTaller.Domain.Interfaces.Services.BrandModelVersion
     {
         Task<IEnumerable<GetBrandModelVersionDto>> GetAllAsync(CancellationToken cancellation);
         Task<IEnumerable<GetBrandModelVersionDto>> GetAllActiveAsync(CancellationToken cancellation);
+        Task<IEnumerable<GetBrandModelVersionDto>> GetAllActiveAsync(string? vehicleType, CancellationToken cancellation);
         Task<GetBrandModelVersionDto?> GetByIdAsync(int id, CancellationToken cancellation);
         Task<GetBrandModelVersionDto> CreateOrEditAsync(GetBrandModelVersionDto dto, CancellationToken cancellation);
     }
