@@ -32,6 +32,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
         {
             try
             {
+                if (!string.IsNullOrEmpty(create.Plate))
+                {
+                    create.Plate = create.Plate.ToUpper().Trim();
+                }
                 if (int.TryParse(_currentUserService.UserId, out int userId))
                 {
                     create.ResponsibleUserId = userId;
@@ -154,6 +158,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
         {
             try
             {
+                if (!string.IsNullOrEmpty(update.Plate))
+                {
+                    update.Plate = update.Plate.ToUpper().Trim();
+                }
                 var existingVehicle = await _context.Vehicle.FindAsync(new object[] { update.Id }, cancellation);
                 if (existingVehicle == null) return false;
 
