@@ -1,0 +1,42 @@
+name: Compilar Dev y Enviar API a Produccion (MyASP.net)
+
+# 1. SE ACTIVA ÚNICAMENTE AL HACER PUSH A LA RAMA 'Dev'
+on:
+  push:
+    branches:
+      - Dev
+
+# 2. PERMISOS: Evitamos el error 403 que nos pasó con Angular
+permissions:
+  contents: write
+
+jobs:
+  build-and-push-api:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Descargar el código fuente (desde Dev)
+      uses: actions/checkout@v4
+
+    - name: 2. Configurar .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x' # <--- La versión exacta de tu imagen
+
+    - name: 3. Restaurar dependencias (Nuget Packages)
+      run: dotnet restore
+
+    - name: 4. Compilar la Solución en modo Producción
+      run: dotnet build --configuration Release --no-restore
+
+    - name: 5. Publicar el API (Generar archivos listos para IIS)
+      # Apuntamos específicamente a tu proyecto principal de la solución
+      run: dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
+
+    - name: 6. Subir compilado a la rama 'produccion-api'
+      # Toma SOLO los archivos listos para el servidor y los manda a la nueva rama
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: produccion-api # <--- MyASP.net debe clonar ESTA rama para tu backend
+        folder: ./publish-api
+        clean: true
