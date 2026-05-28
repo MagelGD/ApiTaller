@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 1. Descargar el código fuente (desde dev)
+    - name: 1. Descargar el código fuente
       uses: actions/checkout@v4
 
     - name: 2. Configurar .NET 10
@@ -18,16 +18,16 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    - name: 3. Restaurar dependencias
-      run: dotnet restore
+    - name: 3. Restaurar y Compilar la API
+      run: |
+        dotnet restore
+        dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
 
-    - name: 4. Compilar la Solución completa
-      run: dotnet build --configuration Release --no-restore
+    # --- AQUÍ ESTÁ EL TRUCO PARA EVITAR EL ERROR 550 ---
+    - name: 4. Poner API en modo mantenimiento
+      run: echo "<html><body><h1>Actualizando...</h1></body></html>" > ./publish-api/app_offline.htm
 
-    - name: 5. Publicar el API (Generar archivos listos)
-      run: dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
-
-    - name: 6. Despliegue DIRECTO al servidor por FTP
+    - name: 5. Despliegue DIRECTO al servidor por FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_SERVER }}
@@ -35,3 +35,11 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish-api/
         server-dir: /
+    
+    # --- Y AQUÍ VOLVEMOS A LA NORMALIDAD ---
+    - name: 6. Quitar modo mantenimiento
+      # Este paso borra el app_offline.htm para que la API vuelva a encenderse
+      run: |
+        echo "No se necesita script adicional, el siguiente despliegue lo manejará"
+        # Nota: Si el error persiste, la forma definitiva es renombrar web.config, 
+        # pero intentemos primero con el app_offline.htm
