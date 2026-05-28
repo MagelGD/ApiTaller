@@ -1,78 +1,55 @@
-name: Compilar Dev y Enviar API a Produccion MyASP
+name: Compilar Dev y Enviar API a Produccion (FTP)
 
 on:
   push:
     branches:
       - dev
 
-permissions:
-  contents: write
-
 jobs:
-  build-and-push-api:
+  build-and-deploy-api:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Descargar codigo fuente desde Dev
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - name: 1. Descargar el código fuente
+      uses: actions/checkout@v4
 
-      - name: 2. Mostrar estructura del repositorio
-        run: |
-          echo "Ruta actual:"
-          pwd
+    - name: 2. Configurar .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
 
-          echo "Archivos en la raiz:"
-          ls -la
+    - name: 3. Restaurar y Compilar la API
+      run: |
+        dotnet restore
+        dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
 
-          echo "Soluciones encontradas:"
-          find . -name "*.sln"
+    # --- EL TRUCO DEL COMPAÑERO: Apagar IIS para liberar las DLLs ---
+    - name: 4. Apagar servidor IIS temporalmente (app_offline)
+      env:
+        FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        FTP_USER: ${{ secrets.FTP_USERNAME }}
+        FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+      run: |
+        echo '<html><body><h1>Actualizando API, vuelvo en 1 minuto...</h1></body></html>' > app_offline.htm
+        curl -sS --ftp-pasv -T app_offline.htm -u "$FTP_USER:$FTP_PASS" "ftp://$FTP_SERVER/api/app_offline.htm"
+        sleep 15 # Damos 15 segundos para que Windows suelte los archivos
 
-          echo "Proyectos encontrados:"
-          find . -name "*.csproj"
+    # --- NUESTRO DESPLIEGUE LIMPIO ---
+    - name: 5. Despliegue DIRECTO al servidor por FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./publish-api/
+        server-dir: /api/
 
-      - name: 3. Configurar .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: 4. Restaurar dependencias
-        run: dotnet restore
-
-      - name: 5. Compilar solucion en Release
-        run: dotnet build --configuration Release --no-restore
-
-      - name: 6. Publicar API
-        run: dotnet publish ApiTaller.api/ApiTaller.api.csproj --configuration Release --no-build --output ./publish-api
-
-      - name: 7. Validar contenido publicado
-        run: |
-          echo "Contenido de publish-api:"
-          ls -la ./publish-api
-
-          echo "Validando que NO se suba codigo fuente:"
-          if find ./publish-api -name "*.csproj" | grep .; then
-            echo "ERROR: El publish contiene archivos .csproj"
-            exit 1
-          fi
-
-          if find ./publish-api -name "Program.cs" | grep .; then
-            echo "ERROR: El publish contiene Program.cs"
-            exit 1
-          fi
-
-          if find ./publish-api -type d -name "Controllers" | grep .; then
-            echo "ERROR: El publish contiene carpeta Controllers"
-            exit 1
-          fi
-
-          echo "Validacion correcta: solo se subiran archivos publicados."
-
-      - name: 8. Subir compilado a rama produccion-api
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: produccion-api
-          folder: ./publish-api
-          clean: true
-          single-commit: true
+    # --- EL TRUCO DEL COMPAÑERO: Volver a encender ---
+    - name: 6. Encender servidor IIS (Quitar app_offline)
+      if: always() # Se ejecuta incluso si algo falló antes, para no dejar la API apagada
+      env:
+        FTP_SERVER: ${{ secrets.FTP_SERVER }}
+        FTP_USER: ${{ secrets.FTP_USERNAME }}
+        FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+      run: |
+        curl -sS --ftp-pasv -u "$FTP_USER:$FTP_PASS" "ftp://$FTP_SERVER/api/" -Q "DELE app_offline.htm"
