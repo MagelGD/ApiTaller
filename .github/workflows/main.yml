@@ -1,42 +1,37 @@
-name: Compilar Dev y Enviar API a Produccion (MyASP.net)
+name: Compilar Dev y Enviar API a Produccion (FTP)
 
-# 1. SE ACTIVA ÚNICAMENTE AL HACER PUSH A LA RAMA 'Dev'
 on:
   push:
     branches:
       - dev
 
-# 2. PERMISOS: Evitamos el error 403 que nos pasó con Angular
-permissions:
-  contents: write
-
 jobs:
-  build-and-push-api:
+  build-and-deploy-api:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 1. Descargar el código fuente (desde Dev)
+    - name: 1. Descargar el código fuente (desde dev)
       uses: actions/checkout@v4
 
     - name: 2. Configurar .NET 10
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '10.0.x' # <--- La versión exacta de tu imagen
+        dotnet-version: '10.0.x'
 
-    - name: 3. Restaurar dependencias (Nuget Packages)
+    - name: 3. Restaurar dependencias
       run: dotnet restore
 
-    - name: 4. Compilar la Solución en modo Producción
+    - name: 4. Compilar la Solución completa
       run: dotnet build --configuration Release --no-restore
 
-    - name: 5. Publicar el API (Generar archivos listos para IIS)
-      # Apuntamos específicamente a tu proyecto principal de la solución
+    - name: 5. Publicar el API (Generar archivos listos)
       run: dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
 
-    - name: 6. Subir compilado a la rama 'produccion-api'
-      # Toma SOLO los archivos listos para el servidor y los manda a la nueva rama
-      uses: JamesIves/github-pages-deploy-action@v4
+    - name: 6. Despliegue DIRECTO al servidor por FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
-        branch: produccion-api # <--- MyASP.net debe clonar ESTA rama para tu backend
-        folder: ./publish-api
-        clean: true
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./publish-api/
+        server-dir: /
