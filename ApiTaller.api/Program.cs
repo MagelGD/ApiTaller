@@ -26,11 +26,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddMemoryCache();
 builder.Services.Configure<IpRateLimitOptions>(options =>
 {
+    options.EnableEndpointRateLimiting = true;
+    options.StackBlockedRequests = false;
+    options.RealIpHeader = "X-Forwarded-For"; // Soporte para proxies / balanceadores
+    options.ClientIdHeader = "X-ClientId";
+    options.HttpStatusCode = 429;
+    
     options.GeneralRules = new List<RateLimitRule>
     {
         new RateLimitRule
         {
-            Endpoint = "POST:/api/Auth/Login",
+            Endpoint = "*:/api/auth/login", // Siempre minúsculas para AspNetCoreRateLimit
             Limit    = 5,    // 5 intentos
             Period   = "5m"  // por IP cada 5 minutos
         }
