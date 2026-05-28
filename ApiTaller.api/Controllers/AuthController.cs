@@ -30,7 +30,12 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _authService.Login(auth, cancellation));
+                var result = await _authService.Login(auth, cancellation);
+                if (result == null)
+                {
+                    return Unauthorized(new { message = "Credenciales inválidas. Por favor, inténtalo de nuevo." });
+                }
+                return Ok(result);
             }
             catch (Exception ex)
             {
