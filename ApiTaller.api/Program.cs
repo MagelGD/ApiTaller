@@ -12,38 +12,39 @@ using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Infrastructure.Security;
 using ApiTaller.api.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
 using ApiTaller.api.Hubs;
-using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// Rate Limiting — protege el endpoint de login contra fuerza bruta
-builder.Services.AddMemoryCache();
-builder.Services.Configure<IpRateLimitOptions>(options =>
+// Rate Limiting nativo de ASP.NET Core — protege los endpoints de login contra fuerza bruta
+builder.Services.AddRateLimiter(options =>
 {
-    options.EnableEndpointRateLimiting = true;
-    options.StackBlockedRequests = false;
-    options.RealIpHeader = "X-Forwarded-For"; // Soporte para proxies / balanceadores
-    options.ClientIdHeader = "X-ClientId";
-    options.HttpStatusCode = 429;
-    
-    options.GeneralRules = new List<RateLimitRule>
+    // Política aplicada explícitamente con [EnableRateLimiting("LoginPolicy")] en los endpoints
+    options.AddFixedWindowLimiter("LoginPolicy", opt =>
     {
-        new RateLimitRule
-        {
-            Endpoint = "*:/api/auth/login", // Siempre minúsculas para AspNetCoreRateLimit
-            Limit    = 5,    // 5 intentos
-            Period   = "5m"  // por IP cada 5 minutos
-        }
+        opt.PermitLimit = 5;                              // Máximo 5 intentos
+        opt.Window = TimeSpan.FromMinutes(5);             // Por ventana de 5 minutos
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;                               // Rechazar de inmediato, sin cola
+    });
+
+    // Respuesta cuando el cliente supera el límite
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            "{\"message\": \"Demasiados intentos. Por favor, espera 5 minutos.\"}",
+            cancellationToken: token);
     };
 });
-builder.Services.AddInMemoryRateLimiting();
-builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 // Filtro global de permisos dinámicos — solo actúa si el endpoint tiene [RequirePermission("slug")]
 builder.Services.AddControllers(options =>
@@ -124,8 +125,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
-// Rate limiting aplicado antes de autenticación
-app.UseIpRateLimiting();
+// Rate limiting nativo aplicado antes de autenticación
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

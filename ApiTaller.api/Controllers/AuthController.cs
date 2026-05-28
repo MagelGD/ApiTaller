@@ -2,6 +2,7 @@ using ApiTaller.Domain.Dtos.Login;
 using ApiTaller.Domain.Interfaces.Services.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
@@ -23,6 +24,7 @@ namespace ApiTaller.api.Controllers
         }
 
         [AllowAnonymous]
+        [EnableRateLimiting("LoginPolicy")]
         [HttpPost("Login")]
         public async Task<IActionResult> Login(AuthDto auth, CancellationToken cancellation)
         {
@@ -38,6 +40,7 @@ namespace ApiTaller.api.Controllers
         }
 
         [AllowAnonymous]
+        [EnableRateLimiting("LoginPolicy")]
         [HttpPost("login-mobile")]
         public async Task<IActionResult> LoginMobile([FromBody] ApiTaller.Domain.Dtos.Auth.LoginMobileDto credentials, CancellationToken cancellation)
         {
