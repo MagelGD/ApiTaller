@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 1. Descargar el código fuente
+    - name: 1. Descargar el código fuente (desde dev)
       uses: actions/checkout@v4
 
     - name: 2. Configurar .NET 10
@@ -18,24 +18,16 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    - name: 3. Restaurar y Compilar la API
-      run: |
-        dotnet restore
-        dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
+    - name: 3. Restaurar dependencias
+      run: dotnet restore
 
-    # --- EL TRUCO DEL COMPAÑERO: Apagar IIS para liberar las DLLs ---
-    - name: 4. Apagar servidor IIS temporalmente (app_offline)
-      env:
-        FTP_SERVER: ${{ secrets.FTP_SERVER }}
-        FTP_USER: ${{ secrets.FTP_USERNAME }}
-        FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-      run: |
-        echo '<html><body><h1>Actualizando API, vuelvo en 1 minuto...</h1></body></html>' > app_offline.htm
-        curl -sS --ftp-pasv -T app_offline.htm -u "$FTP_USER:$FTP_PASS" "ftp://$FTP_SERVER/api/app_offline.htm"
-        sleep 15 # Damos 15 segundos para que Windows suelte los archivos
+    - name: 4. Compilar la Solución completa
+      run: dotnet build --configuration Release --no-restore
 
-    # --- NUESTRO DESPLIEGUE LIMPIO ---
-    - name: 5. Despliegue DIRECTO al servidor por FTP
+    - name: 5. Publicar el API (Generar archivos listos)
+      run: dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
+
+    - name: 6. Despliegue DIRECTO al servidor por FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_SERVER }}
@@ -43,13 +35,3 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./publish-api/
         server-dir: /api/
-
-    # --- EL TRUCO DEL COMPAÑERO: Volver a encender ---
-    - name: 6. Encender servidor IIS (Quitar app_offline)
-      if: always() # Se ejecuta incluso si algo falló antes, para no dejar la API apagada
-      env:
-        FTP_SERVER: ${{ secrets.FTP_SERVER }}
-        FTP_USER: ${{ secrets.FTP_USERNAME }}
-        FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-      run: |
-        curl -sS --ftp-pasv -u "$FTP_USER:$FTP_PASS" "ftp://$FTP_SERVER/api/" -Q "DELE app_offline.htm"
