@@ -1,12 +1,10 @@
-name: Compilar Dev y Enviar API a Produccion (MyASP.net)
+name: Compilar Dev y Enviar API a Produccion MyASP
 
-# 1. SE ACTIVA ÚNICAMENTE AL HACER PUSH A LA RAMA 'Dev'
 on:
   push:
     branches:
       - dev
 
-# 2. PERMISOS: Evitamos el error 403 que nos pasó con Angular
 permissions:
   contents: write
 
@@ -15,28 +13,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 1. Descargar el código fuente (desde Dev)
-      uses: actions/checkout@v4
+      - name: 1. Descargar codigo fuente desde Dev
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: 2. Configurar .NET 10
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x' # <--- La versión exacta de tu imagen
+      - name: 2. Mostrar estructura del repositorio
+        run: |
+          echo "Ruta actual:"
+          pwd
 
-    - name: 3. Restaurar dependencias (Nuget Packages)
-      run: dotnet restore
+          echo "Archivos en la raiz:"
+          ls -la
 
-    - name: 4. Compilar la Solución en modo Producción
-      run: dotnet build --configuration Release --no-restore
+          echo "Soluciones encontradas:"
+          find . -name "*.sln"
 
-    - name: 5. Publicar el API (Generar archivos listos para IIS)
-      # Apuntamos específicamente a tu proyecto principal de la solución
-      run: dotnet publish ApiTaller.api/ApiTaller.api.csproj -c Release -o ./publish-api
+          echo "Proyectos encontrados:"
+          find . -name "*.csproj"
 
-    - name: 6. Subir compilado a la rama 'produccion-api'
-      # Toma SOLO los archivos listos para el servidor y los manda a la nueva rama
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        branch: produccion-api # <--- MyASP.net debe clonar ESTA rama para tu backend
-        folder: ./publish-api
-        clean: true
+      - name: 3. Configurar .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: 4. Restaurar dependencias
+        run: dotnet restore
+
+      - name: 5. Compilar solucion en Release
+        run: dotnet build --configuration Release --no-restore
+
+      - name: 6. Publicar API
+        run: dotnet publish ApiTaller.api/ApiTaller.api.csproj --configuration Release --no-build --output ./publish-api
+
+      - name: 7. Validar contenido publicado
+        run: |
+          echo "Contenido de publish-api:"
+          ls -la ./publish-api
+
+          echo "Validando que NO se suba codigo fuente:"
+          if find ./publish-api -name "*.csproj" | grep .; then
+            echo "ERROR: El publish contiene archivos .csproj"
+            exit 1
+          fi
+
+          if find ./publish-api -name "Program.cs" | grep .; then
+            echo "ERROR: El publish contiene Program.cs"
+            exit 1
+          fi
+
+          if find ./publish-api -type d -name "Controllers" | grep .; then
+            echo "ERROR: El publish contiene carpeta Controllers"
+            exit 1
+          fi
+
+          echo "Validacion correcta: solo se subiran archivos publicados."
+
+      - name: 8. Subir compilado a rama produccion-api
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: produccion-api
+          folder: ./publish-api
+          clean: true
+          single-commit: true
