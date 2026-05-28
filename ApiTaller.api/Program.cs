@@ -10,17 +10,40 @@ using ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Infrastructure.Security;
+using ApiTaller.api.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ApiTaller.api.Hubs;
+using AspNetCoreRateLimit;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+// Rate Limiting — protege el endpoint de login contra fuerza bruta
+builder.Services.AddMemoryCache();
+builder.Services.Configure<IpRateLimitOptions>(options =>
+{
+    options.GeneralRules = new List<RateLimitRule>
+    {
+        new RateLimitRule
+        {
+            Endpoint = "POST:/api/Auth/Login",
+            Limit    = 5,    // 5 intentos
+            Period   = "5m"  // por IP cada 5 minutos
+        }
+    };
+});
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+// Filtro global de permisos dinámicos — solo actúa si el endpoint tiene [RequirePermission("slug")]
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<PermissionFilter>();
+});
 builder.Services.AddSignalR();
 builder.Services.AddOpenApi();
 #region Cors
@@ -94,6 +117,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
+
+// Rate limiting aplicado antes de autenticación
+app.UseIpRateLimiting();
 
 app.UseAuthentication();
 app.UseAuthorization();
