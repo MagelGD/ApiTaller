@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Product;
+using ApiTaller.Domain.Dtos.Product;
 using ApiTaller.Domain.Interfaces.Repositories.Products;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Models;
@@ -44,7 +44,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
             try
             {
                 result = await _context.Product
-                    .Where(p => p.IsActive)
+                    .Where(p => p.IsActive && p.ProductTypeIdNavigation.IsActive)
                     .Select(p => new GetProductDto
                     {
                         Id = p.Id,
