@@ -9,6 +9,8 @@ namespace ApiTaller.Domain.Dtos.CustomerPortal
         public string VehiclePlate { get; set; }
         public string VehicleBrand { get; set; }
         public string VehicleVersion { get; set; }
+        public string VehicleType { get; set; } = "moto";
+        public string VehicleMotorization { get; set; } = "";
         public DateTime EntryDate { get; set; }
         public DateTime? EstimatedDeliveryDate { get; set; }
         public int Mileage { get; set; }

@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- Bloquear temporalmente las relaciones de llaves foráneas
 SET FOREIGN_KEY_CHECKS = 0;
@@ -84,7 +84,8 @@ INSERT IGNORE INTO module (name, is_active, created_at, update_at, responsible_u
 ('Inventario', 1, NOW(), NOW(), 1),
 ('Logo del Taller', 1, NOW(), NOW(), 1),
 ('Portal Cliente', 1, NOW(), NOW(), 1),
-('Envío Correo', 1, NOW(), NOW(), 1);
+('Envío Correo', 1, NOW(), NOW(), 1),
+('Modo Vehicular', 1, NOW(), NOW(), 1);
 
 -- 6. Crear Acciones
 INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, created_at, updated_at, responsible_user_id) VALUES
@@ -234,6 +235,10 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 ((SELECT id FROM module WHERE name = 'Envío Correo'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Configuración Correo', 'config.email.view', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Envío Correo'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Configuración Correo', 'config.email.save', 1, NOW(), NOW(), 1),
 
+-- MÓDULO: MODO VEHICULAR
+((SELECT id FROM module WHERE name = 'Modo Vehicular'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Configuración Modo Vehicular', 'config.vehicle_mode.view', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Modo Vehicular'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Configuración Modo Vehicular', 'config.vehicle_mode.save', 1, NOW(), NOW(), 1),
+
 
 -- MÓDULO: PORTAL CLIENTE
 ((SELECT id FROM module WHERE name = 'Portal Cliente'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Portal Cliente', 'Ver_Portal_Cliente', 1, NOW(), NOW(), 1),
@@ -296,7 +301,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 1: CARGA MASIVA DE MARCAS (brand)
@@ -334,7 +339,7 @@ INSERT IGNORE INTO brand (id, name, is_active, created_at, updated_at, responsib
 (29, 'NIU (Eléctricas)', 1, NOW(), NOW(), 1),
 (30, 'Super Soco (Eléctricas)', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 2: CARGA DE MODELOS - AÑOS (brandmodels)
@@ -371,7 +376,7 @@ INSERT IGNORE INTO brandmodels (id, models, is_active, created_at, updated_at, R
 (28, '2027', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 3: CARGA MASIVA DE REFERENCIAS (brandmodelversion)
@@ -551,7 +556,7 @@ INSERT IGNORE INTO brandmodelversion (BrandId, ModelId, version, is_active, crea
 (14, 26, 'R1300 GS', 1, NOW(), NOW(), 1), (14, 27, 'R1300 GS', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 3 (PARTE 2): CONTINUACIÓN DE CARGA MASIVA DE REFERENCIAS
@@ -665,7 +670,7 @@ INSERT IGNORE INTO brandmodelversion (BrandId, ModelId, version, is_active, crea
 (20, 26, 'Blackline 250', 1, NOW(), NOW(), 1), (20, 27, 'Blackline 250', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 3 (PARTE 3 FINAL): CONTINUACIÓN Y CIERRE DE REFERENCIAS
@@ -755,7 +760,7 @@ INSERT IGNORE INTO brandmodelversion (BrandId, ModelId, version, is_active, crea
 (29, 25, 'NQi Sport', 1, NOW(), NOW(), 1), (29, 26, 'NQi Sport', 1, NOW(), NOW(), 1), (29, 27, 'NQi Sport', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA DE MÉTODOS DE PAGO - COMPATIBLES CON ANGULAR MATERIAL
@@ -770,7 +775,7 @@ INSERT IGNORE INTO payment_method (name, icon, is_active, created_at, updated_at
 ('Tarjeta de Crédito', 'credit_card', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 1: CARGA DE TIPOS DE PRODUCTOS (product_type)
@@ -805,7 +810,7 @@ INSERT IGNORE INTO product_type (id, type, is_active, created_at, updated_at, re
 
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 1: ACEITES DE MOTOR
@@ -835,7 +840,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (1, 'Aceite Liqui Moly Motorbike 2T Street Semi Sintético 1L', 45000, 60000, 'LM-2T-STR-SS', '2T', 'Aceite semisintético para motores de 2 tiempos, baja emisión de humos', 1, NOW(), NOW(), 1),
 (1, 'Aceite Liqui Moly Motorbike 2T Synth Offroad Race 1L', 75000, 98000, 'LM-2T-OFF-FS', '2T', 'Aceite 100% sintético para competición 2T (Enduro/Motocross)', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 1: ACEITES DE MOTOR
@@ -870,7 +875,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (1, 'Aceite Motul 710 2T Full Sintético 1L', 65000, 85000, 'MT-710-2T', '2T', 'Aceite 100% sintético con Ester para motores 2T de alto rendimiento', 1, NOW(), NOW(), 1),
 (1, 'Aceite Motul 800 2T Factory Line Off Road 1L', 95000, 125000, 'MT-800-2T-OFF', '2T', 'Aceite 100% sintético ESTER Core para motocross/enduro (solo premezcla)', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 1: ACEITES DE MOTOR
@@ -915,7 +920,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (1, 'Aceite Mobil Super Moto Scooter 10W-30 1L', 25000, 35000, 'MB-SCO-10W30', '10W-30 MB', 'Aceite exclusivo para scooters automáticas que reduce la fricción', 1, NOW(), NOW(), 1),
 (1, 'Aceite Mobil Super Moto 2T Mineral 1L', 17000, 24000, 'MB-SM-2T', '2T', 'Aceite con tecnología mineral pre-diluida para 2 tiempos', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 1: ACEITES DE MOTOR
@@ -959,7 +964,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 2: LÍQUIDOS DE FRENO Y EMBRAGUE
@@ -1027,7 +1032,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 3: REFRIGERANTES Y ANTICONGELANTES
@@ -1080,7 +1085,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (3, 'Refrigerante Freezetone Rojo 1 Galón (3.78L)', 25000, 38000, 'FREEZ-ROJO-GAL', 'Galón', 'Formato económico en galón para purgas completas de radiador', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 4: LLANTAS DELANTERAS
@@ -1136,7 +1141,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (4, 'Llanta Corsa Platinum S123 90/90-17 (Delantera)', 105000, 140000, 'COR-S123-909017', '90/90-17', 'Compuesto blando urbano para excelente frenado', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 5: LLANTAS TRASERAS
@@ -1192,7 +1197,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (5, 'Llanta Corsa Platinum S123 130/70-17 (Trasera)', 160000, 210000, 'COR-S123-1307017', '130/70-17', 'Compuesto blando urbano para excelente evacuación de agua', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 6: NEUMÁTICOS Y VÁLVULAS
@@ -1241,7 +1246,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (6, 'Tapa Válvula de Aluminio CNC de Lujo (Par)', 5000, 12000, 'VAL-TAP-CNC', 'Tapas CNC', 'Tapas metálicas de lujo con o-ring interno para proteger el gusanillo', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍAS 7 Y 8: PASTILLAS Y BANDAS DE FRENO
@@ -1298,7 +1303,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (8, 'Bandas de Freno Qualid Universales 130mm', 10000, 16000, 'QLD-BAN-130', '130mm Estándar', 'La opción más accesible para recambio rápido', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍAS 9, 10 y 11: SISTEMA DE FILTRACIÓN
@@ -1359,7 +1364,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (11, 'Filtro de Gasolina Universal con Imán', 5000, 10000, 'GEN-GAS-IMAN', 'Universal I', 'Filtro plástico con núcleo magnético para retener partículas metálicas', 1, NOW(), NOW(), 1),
 (11, 'Filtro de Gasolina Universal Lavable (Vidrio/Aluminio)', 15000, 25000, 'GEN-GAS-LAV', 'Lavable', 'Filtro de combustible desarmable de lujo y alto flujo', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 12: KIT DE ARRASTRE
@@ -1406,7 +1411,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (12, 'Plato Trasero JT Sprockets 45T (Paso 520)', 85000, 115000, 'JT-45T-520', '45T 520', 'Acero alto carbono C49, durabilidad extrema para exigencia en ruta', 1, NOW(), NOW(), 1),
 (12, 'Plato Trasero JT Sprockets 42T (Paso 428)', 70000, 95000, 'JT-42T-428', '42T 428', 'Acero templado, ideal para combinar con cadenas premium como DID', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍAS 13 Y 14: BATERÍAS Y BUJÍAS
@@ -1454,7 +1459,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (14, 'Capuchón de Bujía NGK Resistivo (Rojo)', 25000, 35000, 'NGK-CAP-R', 'Resistivo', 'Aislante de silicona de alta calidad, resistente al agua y salto de chispa', 1, NOW(), NOW(), 1),
 (14, 'Capuchón de Bujía Genérico Negro', 5000, 10000, 'GEN-CAP-B', 'Estándar', 'Capuchón económico para recambio rápido', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍAS 15, 16 Y 17
@@ -1511,7 +1516,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (17, 'Cunas de Dirección Revo de Rodillos (AKT NKD / Honda CB)', 28000, 45000, 'REV-CUN-ROD', 'Rodillos', 'Kit de cunas cónicas de rodillos, mayor durabilidad que los balines', 1, NOW(), NOW(), 1),
 (17, 'Cunas de Dirección Promoto (Bajaj Pulsar NS 200)', 35000, 50000, 'PRO-CUN-NS200', 'Estándar', 'Kit completo de pistas para dirección', 1, NOW(), NOW(), 1);
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍAS 18, 19 Y 20
@@ -1569,7 +1574,7 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (20, 'Protector de Exosto / Mofle Honda Wave 110', 22000, 35000, 'HON-PRO-WAV', 'Genérico', 'Tapa antiquemaduras para el tubo de escape', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍAS 22, 23, 24 Y 25
@@ -1620,7 +1625,21 @@ INSERT IGNORE INTO product (product_type_id, product_name, price, sale_price, co
 (25, 'Chaveta / Pin de Seguridad Universal (Paquete x10)', 2000, 6000, 'VAR-CHA-UNI', 'Pines', 'Chavetas metálicas para pedales de freno y ejes', 1, NOW(), NOW(), 1);
 
 
-USE tallermoto;
+USE TallerMotoCar;
+
+-- ==============================================================================
+-- CARGA DE TIPOS DE SERVICIO
+-- ==============================================================================
+
+INSERT IGNORE INTO service_type (name, is_active, created_at, updated_at, responsible_user_id) VALUES
+('Mantenimiento Preventivo', 1, NOW(), NOW(), 1),
+('Mantenimiento Correctivo', 1, NOW(), NOW(), 1),
+('Garantía', 1, NOW(), NOW(), 1),
+('Revisión General / Viaje', 1, NOW(), NOW(), 1),
+('Modificaciones / Personalización', 1, NOW(), NOW(), 1),
+('Lavado y Detallado', 1, NOW(), NOW(), 1),
+('Diagnóstico Escáner', 1, NOW(), NOW(), 1);
+
 
 -- ==============================================================================
 -- CARGA DE CATÁLOGO DE SERVICIOS (service_catalog)

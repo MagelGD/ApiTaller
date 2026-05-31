@@ -57,11 +57,11 @@ namespace ApiTaller.Core.Services.Accounting
             }
         }
 
-        public async Task<SalesSummaryDto> GetSalesSummaryAsync(DateTime startDate, DateTime endDate, string status, int? mechanicId, CancellationToken ct)
+        public async Task<SalesSummaryDto> GetSalesSummaryAsync(DateTime startDate, DateTime endDate, string status, int? mechanicId, string? vehicleType, CancellationToken ct)
         {
             try
             {
-                var rawOrders = await _accountingRepository.GetWorkOrderSalesRawAsync(startDate, endDate, status, mechanicId, ct);
+                var rawOrders = await _accountingRepository.GetWorkOrderSalesRawAsync(startDate, endDate, status, mechanicId, vehicleType, ct);
                 var paymentSettingsList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
                 var settingsMap = paymentSettingsList.ToDictionary(s => s.MechanicId, s => s);
 
@@ -76,10 +76,16 @@ namespace ApiTaller.Core.Services.Accounting
                 decimal externalQuotesSales = 0;
                 decimal partsCost = 0;
 
+                decimal motoSales = 0;
+                decimal carSales = 0;
+
                 foreach (var order in rawOrders)
                 {
                     totalDownPayments += order.DownPayment;
                     ordersCount++;
+
+                    decimal orderPartsVal = 0;
+                    decimal orderServicesVal = 0;
 
                     // Repuestos
                     foreach (var part in order.Parts)
@@ -99,6 +105,7 @@ namespace ApiTaller.Core.Services.Accounting
                             inStockPartsSales += partTotalVal;
                             totalParts += partTotalVal;
                             partsCost += part.Quantity * part.BasePrice;
+                            orderPartsVal += partTotalVal;
                         }
                         else
                         {
@@ -107,6 +114,7 @@ namespace ApiTaller.Core.Services.Accounting
                             outOfStockPartsSales += partTotalVal;
                             totalParts += partTotalVal;
                             partsCost += part.Quantity * part.BasePrice;
+                            orderPartsVal += partTotalVal;
                         }
                     }
 
@@ -114,6 +122,16 @@ namespace ApiTaller.Core.Services.Accounting
                     foreach (var service in order.Services)
                     {
                         totalServices += service.Price;
+                        orderServicesVal += service.Price;
+                    }
+
+                    if (order.VehicleType == "car")
+                    {
+                        carSales += orderPartsVal + orderServicesVal;
+                    }
+                    else
+                    {
+                        motoSales += orderPartsVal + orderServicesVal;
                     }
                 }
 
@@ -165,7 +183,9 @@ namespace ApiTaller.Core.Services.Accounting
                     PartsCost = partsCost,
                     PartsNetProfit = partsNetProfit,
                     MechanicPayout = mechanicPayout,
-                    LaborNetProfit = laborNetProfit
+                    LaborNetProfit = laborNetProfit,
+                    MotoSales = motoSales,
+                    CarSales = carSales
                 };
             }
             catch (Exception ex)

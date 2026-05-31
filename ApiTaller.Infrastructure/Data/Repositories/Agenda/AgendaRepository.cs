@@ -325,7 +325,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
                         ContactEmail = a.ContactEmail,
                         VehicleDescription = a.VehicleNavigation != null ? $"{a.VehicleNavigation.BrandNavigation.Name} {a.VehicleNavigation.ModelNavigation.Models}" : a.VehicleDescription,
                         CustomerNotes = a.CustomerNotes,
-                        WorkOrderId = a.WorkOrderId
+                        WorkOrderId = a.WorkOrderId,
+                        VehicleType = a.VehicleNavigation != null ? a.VehicleNavigation.VehicleType : "moto"
                     })
                     .ToListAsync(ct);
             }

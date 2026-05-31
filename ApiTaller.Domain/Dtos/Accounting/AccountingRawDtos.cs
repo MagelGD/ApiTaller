@@ -24,6 +24,7 @@ namespace ApiTaller.Domain.Dtos.Accounting
         public int WorkOrderId { get; set; }
         public string Status { get; set; } = string.Empty;
         public decimal DownPayment { get; set; }
+        public string VehicleType { get; set; } = "moto";
         public List<WorkOrderPartRawDto> Parts { get; set; } = new();
         public List<WorkOrderServiceRawDto> Services { get; set; } = new();
     }

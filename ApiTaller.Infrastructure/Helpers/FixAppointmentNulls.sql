@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- Permitir nulos en los campos de contacto de la cita, ya que son opcionales para clientes registrados
 ALTER TABLE appointment MODIFY COLUMN contact_name VARCHAR(255) NULL;

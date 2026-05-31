@@ -21,13 +21,22 @@ namespace ApiTaller.Application.Services.Dashboard
             var operatingAvailability = await _dashboardRepository.GetOperatingAvailabilityPercentAsync(ct);
             var recentActivities = await _dashboardRepository.GetRecentActivityAsync(6, ct);
 
+            var activeMotoOrders = await _dashboardRepository.GetActiveWorkOrdersCountByTypeAsync("moto", ct);
+            var activeCarOrders = await _dashboardRepository.GetActiveWorkOrdersCountByTypeAsync("car", ct);
+            var totalMotoVehicles = await _dashboardRepository.GetTotalVehiclesCountByTypeAsync("moto", ct);
+            var totalCarVehicles = await _dashboardRepository.GetTotalVehiclesCountByTypeAsync("car", ct);
+
             return new AdminDashboardStatsDto
             {
                 ActiveWorkOrdersCount = activeOrders,
                 TotalCustomersCount = totalCustomers,
                 TotalVehiclesCount = totalVehicles,
                 OperatingAvailabilityPercent = operatingAvailability,
-                RecentActivities = recentActivities.ToList()
+                RecentActivities = recentActivities.ToList(),
+                ActiveMotoWorkOrdersCount = activeMotoOrders,
+                ActiveCarWorkOrdersCount = activeCarOrders,
+                TotalMotoVehiclesCount = totalMotoVehicles,
+                TotalCarVehiclesCount = totalCarVehicles
             };
         }
     }

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiTaller.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Version_Fix_1 : Migration
+    public partial class Version1_TallerMotoCar : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,7 +48,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     reason = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
@@ -70,7 +70,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     reason = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
@@ -94,7 +94,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     working_days = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
@@ -131,7 +131,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     vehicle_description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
@@ -148,6 +148,8 @@ namespace ApiTaller.Infrastructure.Migrations
                     id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
@@ -167,6 +169,8 @@ namespace ApiTaller.Infrastructure.Migrations
                     id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     models = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
@@ -188,6 +192,8 @@ namespace ApiTaller.Infrastructure.Migrations
                     BrandId = table.Column<int>(type: "int(11)", nullable: false),
                     ModelId = table.Column<int>(type: "int(11)", nullable: false),
                     version = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
@@ -619,6 +625,14 @@ namespace ApiTaller.Infrastructure.Migrations
                     balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     observations = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_slogan = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    logo_base64 = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    logo_brands_base64 = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -718,6 +732,8 @@ namespace ApiTaller.Infrastructure.Migrations
                     default_price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     default_minutes = table.Column<int>(type: "int(11)", nullable: false),
                     time_unit = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "both")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
@@ -894,6 +910,8 @@ namespace ApiTaller.Infrastructure.Migrations
                     color = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     cylinder_capacity = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),

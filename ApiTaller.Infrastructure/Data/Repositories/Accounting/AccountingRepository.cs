@@ -102,7 +102,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         /// <summary>
         /// Retorna órdenes de trabajo con sus partes y servicios para que el servicio calcule totales.
         /// </summary>
-        public async Task<IEnumerable<WorkOrderSalesRawDto>> GetWorkOrderSalesRawAsync(DateTime startDate, DateTime endDate, string status, int? mechanicId, CancellationToken ct)
+        public async Task<IEnumerable<WorkOrderSalesRawDto>> GetWorkOrderSalesRawAsync(DateTime startDate, DateTime endDate, string status, int? mechanicId, string? vehicleType, CancellationToken ct)
         {
             try
             {
@@ -112,6 +112,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
                 var query = _context.WorkOrder
                     .Include(w => w.Parts).ThenInclude(p => p.ProductNavigation)
                     .Include(w => w.Services)
+                    .Include(w => w.VehicleNavigation)
                     .Where(w => w.IsActive && w.EntryDate >= start && w.EntryDate <= end);
 
                 if (mechanicId.HasValue && mechanicId.Value > 0)
@@ -121,6 +122,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
 
                 if (!string.IsNullOrEmpty(status) && status != "Todos")
                     query = query.Where(w => w.Status == status);
+
+                if (!string.IsNullOrEmpty(vehicleType) && vehicleType != "all" && vehicleType != "Todos")
+                {
+                    query = query.Where(w => w.VehicleNavigation.VehicleType == vehicleType);
+                }
 
                 var orders = await query.ToListAsync(ct);
 
@@ -133,6 +139,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
                     WorkOrderId = w.Id,
                     Status = w.Status,
                     DownPayment = w.DownPayment,
+                    VehicleType = w.VehicleNavigation?.VehicleType ?? "moto",
                     Parts = w.Parts
                         .Where(p => p.IsActive && p.IsApproved && !p.IsProvidedByCustomer)
                         .Select(p => {

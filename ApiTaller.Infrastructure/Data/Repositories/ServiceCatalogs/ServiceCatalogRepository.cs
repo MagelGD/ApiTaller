@@ -61,6 +61,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
                         DefaultPrice = sc.DefaultPrice,
                         DefaultMinutes = sc.DefaultMinutes,
                         TimeUnit = sc.TimeUnit,
+                        VehicleType = sc.VehicleType ?? "both",
                         IsActive = sc.IsActive,
                         CreatedAt = sc.CreatedAt,
                         UpdatedAt = sc.UpdatedAt,
@@ -93,6 +94,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
                         DefaultPrice = sc.DefaultPrice,
                         DefaultMinutes = sc.DefaultMinutes,
                         TimeUnit = sc.TimeUnit,
+                        VehicleType = sc.VehicleType ?? "both",
                         IsActive = sc.IsActive,
                         CreatedAt = sc.CreatedAt,
                         UpdatedAt = sc.UpdatedAt,
@@ -125,6 +127,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
                         DefaultPrice = sc.DefaultPrice,
                         DefaultMinutes = sc.DefaultMinutes,
                         TimeUnit = sc.TimeUnit,
+                        VehicleType = sc.VehicleType ?? "both",
                         IsActive = sc.IsActive,
                         CreatedAt = sc.CreatedAt,
                         UpdatedAt = sc.UpdatedAt
@@ -171,6 +174,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServiceCatalogs
                         DefaultPrice = sc.DefaultPrice,
                         DefaultMinutes = sc.DefaultMinutes,
                         TimeUnit = sc.TimeUnit,
+                        VehicleType = sc.VehicleType ?? "both",
                         IsActive = sc.IsActive,
                         CreatedAt = sc.CreatedAt,
                         UpdatedAt = sc.UpdatedAt

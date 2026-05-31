@@ -14,5 +14,6 @@ namespace ApiTaller.Domain.Dtos.Portal
         public int TotalOrders { get; set; }
         public string? LastOrderStatus { get; set; }
         public DateTime? LastOrderDate { get; set; }
+        public string VehicleType { get; set; } = "moto";
     }
 }

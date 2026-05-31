@@ -21,5 +21,6 @@ namespace ApiTaller.Domain.Dtos.Agenda
         public string VehicleDescription { get; set; }
         public string CustomerNotes { get; set; }
         public int? WorkOrderId { get; set; }
+        public string VehicleType { get; set; } = "moto";
     }
 }

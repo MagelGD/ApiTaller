@@ -11,6 +11,7 @@ public partial class ServiceCatalog : GeneralEntity
     public decimal DefaultPrice { get; set; }
     public int DefaultMinutes { get; set; }
     public string? TimeUnit { get; set; }
+    public string VehicleType { get; set; } = "both";
 
     public virtual ServiceType ServiceTypeIdNavigation { get; set; }
 }

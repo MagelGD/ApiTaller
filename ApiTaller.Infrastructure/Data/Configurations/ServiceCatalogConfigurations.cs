@@ -42,6 +42,11 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasMaxLength(20)
                 .HasColumnName("time_unit");
 
+            entity.Property(e => e.VehicleType)
+                .HasMaxLength(10)
+                .HasColumnName("vehicle_type")
+                .HasDefaultValue("both");
+
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

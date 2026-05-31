@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 2: CARGA DE MODELOS - AÑOS (brandmodels)

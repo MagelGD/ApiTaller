@@ -15,6 +15,8 @@ namespace ApiTaller.Domain.Dtos.Portal
         public string FuelLevel { get; set; }
         public string? Observations { get; set; }
         public string Status { get; set; }
+        public string VehicleType { get; set; } = "moto";
+        public string VehicleMotorization { get; set; } = "";
 
         public List<PortalEvidenceDto> Evidences { get; set; } = new();
         public List<PortalPartDto> Parts { get; set; } = new();

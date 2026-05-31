@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260525164335_Version_Fix_2")]
-    partial class Version_Fix_2
+    [Migration("20260531040740_Version1_TallerMotoCar")]
+    partial class Version1_TallerMotoCar
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -379,6 +379,14 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("moto")
+                        .HasColumnName("vehicle_type");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ResponsibleUserId" }, "FK_BRAND_USER");
@@ -416,6 +424,14 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("moto")
+                        .HasColumnName("vehicle_type");
 
                     b.Property<string>("Version")
                         .IsRequired()
@@ -463,6 +479,14 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("moto")
+                        .HasColumnName("vehicle_type");
 
                     b.HasKey("Id");
 
@@ -1606,6 +1630,14 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("both")
+                        .HasColumnName("vehicle_type");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ServiceTypeId" }, "FK_SERVICE_CATALOG_SERVICE_TYPE");
@@ -2019,6 +2051,14 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("moto")
+                        .HasColumnName("vehicle_type");
 
                     b.Property<int?>("VersionId")
                         .HasColumnType("int(11)")

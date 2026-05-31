@@ -13,5 +13,6 @@ namespace ApiTaller.Domain.Dtos.Portal
         public string Status { get; set; }
         public decimal GrandTotal { get; set; }
         public bool HasPendingApproval { get; set; }
+        public string VehicleType { get; set; } = "moto";
     }
 }

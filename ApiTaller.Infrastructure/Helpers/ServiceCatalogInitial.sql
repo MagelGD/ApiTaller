@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA DE CATÁLOGO DE SERVICIOS (service_catalog)

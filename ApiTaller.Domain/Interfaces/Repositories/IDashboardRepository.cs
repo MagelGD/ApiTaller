@@ -9,5 +9,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories
         Task<int> GetTotalVehiclesCountAsync(CancellationToken ct);
         Task<decimal> GetOperatingAvailabilityPercentAsync(CancellationToken ct);
         Task<IEnumerable<DashboardActivityDto>> GetRecentActivityAsync(int limit, CancellationToken ct);
+        Task<int> GetActiveWorkOrdersCountByTypeAsync(string vehicleType, CancellationToken ct);
+        Task<int> GetTotalVehiclesCountByTypeAsync(string vehicleType, CancellationToken ct);
     }
 }

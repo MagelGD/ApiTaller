@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 1: CARGA DE TIPOS DE PRODUCTOS (product_type)

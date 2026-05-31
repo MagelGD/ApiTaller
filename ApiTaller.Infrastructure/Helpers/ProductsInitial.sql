@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA MASIVA DE PRODUCTOS - CATEGORÍA 1: ACEITES DE MOTOR

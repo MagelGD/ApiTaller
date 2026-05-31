@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- CARGA DE MÉTODOS DE PAGO - COMPATIBLES CON ANGULAR MATERIAL

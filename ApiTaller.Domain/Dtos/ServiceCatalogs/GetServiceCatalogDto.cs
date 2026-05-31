@@ -12,6 +12,7 @@ namespace ApiTaller.Domain.Dtos.ServiceCatalogs
         public decimal DefaultPrice { get; set; }
         public int DefaultMinutes { get; set; }
         public string? TimeUnit { get; set; }
+        public string VehicleType { get; set; } = "both";
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

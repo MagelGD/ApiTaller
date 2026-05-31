@@ -11,6 +11,7 @@ namespace ApiTaller.Domain.Dtos.CustomerPortal
         public string Version { get; set; }
         public string Color { get; set; }
         public string CylinderCapacity { get; set; }
+        public string VehicleType { get; set; } = "moto";
         public int TotalOrders { get; set; }
         public string? LastOrderStatus { get; set; }
         public DateTime? LastOrderDate { get; set; }

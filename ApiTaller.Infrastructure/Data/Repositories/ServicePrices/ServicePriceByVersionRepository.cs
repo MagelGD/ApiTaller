@@ -71,7 +71,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
                         ServiceCatalog = new GetServiceCatalogDto   
                         {
                             Id = sp.ServiceCatalogIdNavigation.Id,
-                            Name = sp.ServiceCatalogIdNavigation.Name
+                            Name = sp.ServiceCatalogIdNavigation.Name,
+                            VehicleType = sp.ServiceCatalogIdNavigation.VehicleType ?? "both"
                         },
                         BrandModelVersion = new GetBrandModelVersionDto
                         {
@@ -120,7 +121,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
                         ServiceCatalog = new GetServiceCatalogDto
                         {
                             Id = sp.ServiceCatalogIdNavigation.Id,
-                            Name = sp.ServiceCatalogIdNavigation.Name
+                            Name = sp.ServiceCatalogIdNavigation.Name,
+                            VehicleType = sp.ServiceCatalogIdNavigation.VehicleType ?? "both"
                         },
                         BrandModelVersion = new GetBrandModelVersionDto
                         {
@@ -223,6 +225,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
             {
                 return await _context.ServicePriceByVersion
                     .Where(sp => sp.IsActive && sp.BrandModelVersionId == versionId)
+                    .Where(sp => sp.ServiceCatalogIdNavigation.VehicleType == "both" || 
+                                 sp.ServiceCatalogIdNavigation.VehicleType == sp.BrandModelVersionIdNavigation.VehicleType)
                     .Include(sp => sp.ServiceCatalogIdNavigation)
                     .Select(sp => new GetServicePriceByVersionDto
                     {
@@ -239,7 +243,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.ServicePrices
                         {
                             Id = sp.ServiceCatalogIdNavigation.Id,
                             Name = sp.ServiceCatalogIdNavigation.Name,
-                            ServiceTypeId = sp.ServiceCatalogIdNavigation.ServiceTypeId
+                            ServiceTypeId = sp.ServiceCatalogIdNavigation.ServiceTypeId,
+                            VehicleType = sp.ServiceCatalogIdNavigation.VehicleType ?? "both"
                         }
                     }).ToListAsync(cancellation);
             }

@@ -19,5 +19,7 @@ namespace ApiTaller.Domain.Dtos.Accounting
         public decimal PartsNetProfit { get; set; } // Ganancia neta en repuestos (Venta - Costo)
         public decimal MechanicPayout { get; set; } // Pago / Comisiones estimadas a mecánicos
         public decimal LaborNetProfit { get; set; } // Ganancia neta de mano de obra (Servicios - Comisión)
+        public decimal MotoSales { get; set; }
+        public decimal CarSales { get; set; }
     }
 }

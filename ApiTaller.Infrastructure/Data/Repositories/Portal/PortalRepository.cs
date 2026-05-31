@@ -73,7 +73,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Portal
                         EstimatedDeliveryDate = o.EstimatedDeliveryDate,
                         Status = o.Status,
                         GrandTotal = totalParts + totalServices,
-                        HasPendingApproval = hasPending && (o.Status == "Cotización" || o.Status == "Esperando Aprobación")
+                        HasPendingApproval = hasPending && (o.Status == "Cotización" || o.Status == "Esperando Aprobación"),
+                        VehicleType = o.VehicleNavigation?.VehicleType ?? "moto"
                     };
                 }).ToList();
             }
@@ -117,7 +118,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Portal
                         CylinderCapacity = v.CylinderCapacity,
                         TotalOrders = orders.Count,
                         LastOrderStatus = orders.FirstOrDefault()?.Status,
-                        LastOrderDate = orders.FirstOrDefault()?.EntryDate
+                        LastOrderDate = orders.FirstOrDefault()?.EntryDate,
+                        VehicleType = v.VehicleType
                     });
                 }
                 return result;
@@ -181,6 +183,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Portal
                     FuelLevel = order.FuelLevel,
                     Observations = order.Observations,
                     Status = order.Status,
+                    VehicleType = order.VehicleNavigation?.VehicleType ?? "moto",
+                    VehicleMotorization = order.VehicleNavigation?.CylinderCapacity ?? "",
                     Evidences = evidences,
                     Parts = activeParts.Select(p => new PortalPartDto
                     {

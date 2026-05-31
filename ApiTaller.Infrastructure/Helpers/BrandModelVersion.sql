@@ -1,4 +1,4 @@
-USE tallermoto;
+USE TallerMotoCar;
 
 -- ==============================================================================
 -- SCRIPT 3: CARGA MASIVA DE REFERENCIAS (brandmodelversion)

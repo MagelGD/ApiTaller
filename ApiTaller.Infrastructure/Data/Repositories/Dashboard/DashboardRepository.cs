@@ -81,5 +81,22 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Dashboard
 
             return activities;
         }
+
+        public async Task<int> GetActiveWorkOrdersCountByTypeAsync(string vehicleType, CancellationToken ct)
+        {
+            return await _context.WorkOrder
+                .AsNoTracking()
+                .Include(x => x.VehicleNavigation)
+                .Where(x => x.IsActive && x.Status != "Entregado" && x.Status != "Cancelado" && x.VehicleNavigation != null && x.VehicleNavigation.VehicleType == vehicleType)
+                .CountAsync(ct);
+        }
+
+        public async Task<int> GetTotalVehiclesCountByTypeAsync(string vehicleType, CancellationToken ct)
+        {
+            return await _context.Vehicle
+                .AsNoTracking()
+                .Where(x => x.IsActive && x.VehicleType == vehicleType)
+                .CountAsync(ct);
+        }
     }
 }
