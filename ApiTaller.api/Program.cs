@@ -10,17 +10,55 @@ using ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations;
 using ApiTaller.Infrastructure.Data.Repositories.Users;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Infrastructure.Security;
+using ApiTaller.api.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
 using ApiTaller.api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+// Rate Limiting por NOMBRE DE USUARIO — protege el login contra fuerza bruta
+// sin afectar a otros usuarios. Cada username tiene su propio contador de 5 intentos.
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("LoginPolicy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            // Clave de partición: el username en minúsculas.
+            // Si no viene en el header (primera solicitud), usa la IP como fallback.
+            partitionKey: httpContext.Request.Headers["X-Username"].FirstOrDefault()?.ToLowerInvariant()
+                          ?? httpContext.Connection.RemoteIpAddress?.ToString()
+                          ?? "anonymous",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,                           // Máximo 5 intentos por usuario
+                Window = TimeSpan.FromMinutes(5),          // Ventana de 5 minutos
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0                             // Rechazar de inmediato, sin cola
+            }));
+
+    // Respuesta cuando el cliente supera el límite
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.Headers["Retry-After"] = "300";
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            "{\"message\": \"Demasiados intentos. Por favor, espera 5 minutos.\"}",
+            cancellationToken: token);
+    };
+});
+
+// Filtro global de permisos dinámicos — solo actúa si el endpoint tiene [RequirePermission("slug")]
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<PermissionFilter>();
+});
 builder.Services.AddSignalR();
 builder.Services.AddOpenApi();
 #region Cors
@@ -95,6 +133,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
+
+// Rate limiting nativo aplicado antes de autenticación
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

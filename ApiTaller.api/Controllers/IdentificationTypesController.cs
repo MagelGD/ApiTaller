@@ -29,7 +29,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _service.GetAllActiveAsync(cancellation));
+                return Ok(await _service.GetAllAsync(cancellation));
             }
             catch (Exception ex)
             {

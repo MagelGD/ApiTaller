@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.ProductType;
+using ApiTaller.Domain.Dtos.ProductType;
 using ApiTaller.Domain.Interfaces.Repositories.ProductTypes;
 using ApiTaller.Domain.Interfaces.Services.ProductTypes;
 using ApiTaller.Domain.Models;
@@ -70,16 +70,22 @@ namespace ApiTaller.Core.Services.ProductTypes
                     CreatedAt = productType.CreatedAt ?? DateTime.Now,
                     UpdatedAt = DateTime.UtcNow
                 };
-                bool exists = await ValidateExist(productType.Type, cancellationToken);
-                if (saveData.Id == 0 && !exists)
+
+                if (saveData.Id != 0)
                 {
-                    _ = await _repository.CreateAsync(saveData, cancellationToken);
-                    result = await _repository.ValidateExist(productType.Type, cancellationToken) ?? new GetProductTypeDto();
-                }
-                else if (saveData.Id != 0 && !exists)
-                {
+                    // Editar o cambiar estado: siempre actualizar cuando hay Id
                     _ = await _repository.UpdateAsync(saveData, cancellationToken);
                     result = await _repository.GetByIdAsync(saveData.Id, cancellationToken) ?? new GetProductTypeDto();
+                }
+                else
+                {
+                    // Crear nuevo: validar que no exista otro con el mismo nombre
+                    bool exists = await ValidateExist(productType.Type, cancellationToken);
+                    if (!exists)
+                    {
+                        _ = await _repository.CreateAsync(saveData, cancellationToken);
+                        result = await _repository.ValidateExist(productType.Type, cancellationToken) ?? new GetProductTypeDto();
+                    }
                 }
             }
             catch (Exception ex)
