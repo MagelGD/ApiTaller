@@ -13,6 +13,8 @@ namespace ApiTaller.Domain.Models
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string Address { get; set; }
+        /// <summary>SAAS-1: ID del taller al que pertenece este cliente</summary>
+        public int WorkshopId { get; set; }
 
         public virtual User UserIdNavigation { get; set; }
         public virtual IdentificationType IdentificationTypeNavigation { get; set; }

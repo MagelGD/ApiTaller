@@ -20,10 +20,15 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 entity.HasIndex(e => e.UserRoleId, "FK_USER_USER_ROLE");
 
                 entity.HasIndex(e => e.IdentificationTypeId, "FK_USER_TYPE_IDENTIFICATION");
+                entity.HasIndex(e => e.WorkshopId, "FK_USER_WORKSHOP");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int(11)")
                     .HasColumnName("id");
+                // SAAS-1: ID del taller (nullable)
+                entity.Property(e => e.WorkshopId)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("workshop_id");
                 entity.Property(e => e.Email)
                     .IsRequired()
                     .HasMaxLength(255)

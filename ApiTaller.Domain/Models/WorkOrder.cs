@@ -14,6 +14,8 @@ namespace ApiTaller.Domain.Models
         public string Observations { get; set; }
         public string Status { get; set; }
         public decimal DownPayment { get; set; }
+        /// <summary>SAAS-1: ID del taller al que pertenece esta OT</summary>
+        public int WorkshopId { get; set; }
 
         public virtual Vehicle VehicleNavigation { get; set; }
         public virtual Customer CustomerNavigation { get; set; }

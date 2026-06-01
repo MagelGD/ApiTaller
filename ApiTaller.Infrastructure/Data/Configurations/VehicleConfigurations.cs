@@ -45,6 +45,14 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasMaxLength(10)
                 .HasColumnName("vehicle_type")
                 .HasDefaultValue("moto");
+            // SAAS-1 + CAR sub-type: sedan | suv | bus | truck (null para motos)
+            entity.Property(e => e.VehicleSubType)
+                .HasMaxLength(20)
+                .HasColumnName("vehicle_sub_type");
+            // SAAS-1: ID del taller
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .HasColumnName("workshop_id");
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

@@ -85,6 +85,7 @@ namespace ApiTaller.Core.Services.Auth
             {
                 var user = await _context.User
                     .Include(u => u.UserRoleIdNavigation)
+                    .Include(u => u.WorkshopNavigation)
                     .FirstOrDefaultAsync(u => u.Email.ToLower() == credentials.Email.ToLower() && u.IsActive, ct);
 
                 if (user == null || !BCrypt.Net.BCrypt.Verify(credentials.Password, user.Password))

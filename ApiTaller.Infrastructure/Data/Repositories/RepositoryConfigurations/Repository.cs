@@ -62,6 +62,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
     {
         public static IServiceCollection AddRespositories(this IServiceCollection services)
         {
+            // SAAS-0: Repository del Tenant
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Workshop.IWorkshopRepository, ApiTaller.Infrastructure.Data.Repositories.Workshop.WorkshopRepository>();
+
             services.TryAddScoped<ILoginRepository, LoginRepository>();
             services.TryAddScoped<IUserRepository, UserRepository>();
             services.TryAddScoped<IUserRoleRepository, UserRoleRepository>();

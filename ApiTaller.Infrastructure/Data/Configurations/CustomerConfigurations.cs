@@ -53,6 +53,10 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.Property(e => e.ResponsibleUserId)
                 .HasColumnType("int(11)")
                 .HasColumnName("responsible_user_id");
+            // SAAS-1: ID del taller
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .HasColumnName("workshop_id");
 
             entity.HasOne(d => d.UserIdNavigation).WithMany()
                 .HasForeignKey(d => d.UserId)

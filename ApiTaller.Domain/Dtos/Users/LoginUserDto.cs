@@ -1,4 +1,4 @@
-﻿namespace ApiTaller.Domain.Dtos.Users
+namespace ApiTaller.Domain.Dtos.Users
 {
     public class LoginUserDto
     {
@@ -9,5 +9,8 @@
         public string? Token { get; set; }
         public int? IdUserRole { get; set; }
         public int? ExpireToken { get; set;  }
+        // SAAS-1: ID del taller y tipo
+        public int? WorkshopId { get; set; }
+        public string? WorkshopType { get; set; }
     }
 }

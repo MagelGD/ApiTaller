@@ -21,7 +21,9 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
                 new(JwtRegisteredClaimNames.Sub, user.UserName.ToString()),
                 new(ClaimTypes.Role, user.IdUserRole.ToString()),
                 new(ClaimTypes.Sid, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Jti, jti)
+                new(JwtRegisteredClaimNames.Jti, jti),
+                new("workshop_id", user.WorkshopId?.ToString() ?? "0"),
+                new("workshop_type", user.WorkshopType ?? "moto")
             ];
             JwtSecurityToken token = new(
                 issuer: options.Issuer,
@@ -46,7 +48,9 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
                 new Claim(ClaimTypes.Role, user.UserRoleId.ToString()),
                 new Claim(ClaimTypes.Sid, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, jti),
-                new Claim("mustChangePassword", user.MustChangePassword.ToString().ToLower())
+                new Claim("mustChangePassword", user.MustChangePassword.ToString().ToLower()),
+                new Claim("workshop_id", user.WorkshopId?.ToString() ?? "0"),
+                new Claim("workshop_type", user.WorkshopNavigation?.WorkshopType ?? "moto")
             };
             if (customerId.HasValue)
             {

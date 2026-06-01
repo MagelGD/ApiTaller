@@ -13,6 +13,8 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 
             entity.HasIndex(e => e.SettingKey, "UQ_WORKSHOP_SETTINGS_KEY").IsUnique();
             entity.HasIndex(e => e.ResponsibleUserId, "FK_WORKSHOP_SETTINGS_USER");
+            // SAAS-1: Ahora el índice único es por (workshop_id, setting_key) — cada taller tiene su propio scope
+            entity.HasIndex(new[] { "WorkshopId", "SettingKey" }, "UQ_WORKSHOP_SETTINGS_TENANT_KEY").IsUnique();
 
             entity.Property(e => e.Id)
                 .HasColumnType("int(11)")
@@ -51,6 +53,11 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasForeignKey(d => d.ResponsibleUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_WORKSHOP_SETTINGS_USER");
+
+            // SAAS-1: La relación al Workshop padre se configura en WorkshopConfigurations
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .HasColumnName("workshop_id");
         }
     }
 }

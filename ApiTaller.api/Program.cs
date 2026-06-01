@@ -55,6 +55,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 // HttpContext accessor and current user service for per-request user info (claims)
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<ITenantContext, TenantContext>(); // SAAS-1: TenantContext para Global Query Filters
 #region Inject JwtOptions
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Auth"));
 var jwtOptions = builder.Configuration

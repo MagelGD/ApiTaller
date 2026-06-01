@@ -9,5 +9,7 @@ namespace ApiTaller.Domain.Models
         public string Models { get; set; }
         /// <summary>CAR-1: Tipo de vehículo de este modelo. 'moto' | 'car'</summary>
         public string VehicleType { get; set; } = "moto";
+        /// <summary>SAAS-1: ID del taller al que pertenece este modelo</summary>
+        public int WorkshopId { get; set; }
     }
 }

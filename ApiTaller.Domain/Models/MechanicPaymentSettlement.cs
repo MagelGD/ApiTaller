@@ -11,6 +11,8 @@ namespace ApiTaller.Domain.Models
         public int ServicesCount { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        /// <summary>SAAS-1: ID del taller al que pertenece esta liquidación</summary>
+        public int WorkshopId { get; set; }
 
         public virtual User MechanicNavigation { get; set; }
         public virtual ICollection<WorkOrderService> Services { get; set; }

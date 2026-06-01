@@ -330,6 +330,9 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("int(11)")
                         .HasColumnName("work_order_id");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -384,6 +387,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasDefaultValue("moto")
                         .HasColumnName("vehicle_type");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ResponsibleUserId" }, "FK_BRAND_USER");
@@ -436,6 +443,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("version");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "BrandId" }, "FK_BRANDMODELVERSION_BRAND");
@@ -484,6 +495,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(10)")
                         .HasDefaultValue("moto")
                         .HasColumnName("vehicle_type");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
 
                     b.HasKey("Id");
 
@@ -560,6 +575,10 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int(11)")
                         .HasColumnName("user_id");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
 
                     b.HasKey("Id");
 
@@ -707,6 +726,9 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ProductId" }, "FK_inventory_product");
@@ -832,6 +854,9 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -961,6 +986,9 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("value");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ResponsibleUserId");
@@ -1018,6 +1046,9 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1197,6 +1228,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ResponsibleUserId" }, "FK_PAYMENT_METHOD_USER");
@@ -1265,6 +1300,18 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("both")
+                        .HasColumnName("vehicle_type");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ProducTypeId" }, "FK_PRODUCT_TYPE_PRODUCT");
@@ -1304,6 +1351,10 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
 
                     b.HasKey("Id");
 
@@ -1430,6 +1481,9 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int?>("WorkOrderId")
                         .HasColumnType("int(11)")
                         .HasColumnName("work_order_id");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
 
                     b.Property<string>("WorkshopName")
                         .HasMaxLength(255)
@@ -1635,6 +1689,10 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasDefaultValue("both")
                         .HasColumnName("vehicle_type");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ServiceTypeId" }, "FK_SERVICE_CATALOG_SERVICE_TYPE");
@@ -1690,6 +1748,9 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "BrandModelVersionId" }, "FK_SERVICE_PRICE_BRAND_MODEL_VERSION");
@@ -1720,8 +1781,8 @@ namespace ApiTaller.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("name");
 
                     b.Property<int?>("ResponsibleUserId")
@@ -1731,6 +1792,10 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
 
                     b.HasKey("Id");
 
@@ -1793,6 +1858,9 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1903,11 +1971,17 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("username");
 
+                    b.Property<int?>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "IdentificationTypeId" }, "FK_USER_TYPE_IDENTIFICATION");
 
                     b.HasIndex(new[] { "UserRoleId" }, "FK_USER_USER_ROLE");
+
+                    b.HasIndex(new[] { "WorkshopId" }, "FK_USER_WORKSHOP");
 
                     b.ToTable("user", (string)null);
                 });
@@ -1943,7 +2017,13 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("update_at");
 
+                    b.Property<int?>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WorkshopId");
 
                     b.HasIndex(new[] { "ResponsibleUserId" }, "FK_ROLE_USER");
 
@@ -2049,6 +2129,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<string>("VehicleSubType")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("vehicle_sub_type");
+
                     b.Property<string>("VehicleType")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -2060,6 +2145,10 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int?>("VersionId")
                         .HasColumnType("int(11)")
                         .HasColumnName("version_id");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
 
                     b.HasKey("Id");
 
@@ -2141,6 +2230,10 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Property<int>("VehicleId")
                         .HasColumnType("int(11)")
                         .HasColumnName("vehicle_id");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
 
                     b.HasKey("Id");
 
@@ -2421,6 +2514,90 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.ToTable("work_order_service", (string)null);
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.Workshop", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int(11)")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("address");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(150)
+                        .HasColumnType("varchar(150)")
+                        .HasColumnName("city");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("created_at");
+
+                    b.Property<ulong>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit(1)")
+                        .HasDefaultValue(1ul)
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("OwnerEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("owner_email");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("Plan")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasDefaultValue("basic")
+                        .HasColumnName("plan");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("slug");
+
+                    b.Property<DateTime?>("TrialEndsAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("trial_ends_at");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime")
+                        .HasColumnName("updated_at");
+
+                    b.Property<string>("WorkshopType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValue("moto")
+                        .HasColumnName("workshop_type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "Slug" }, "UQ_WORKSHOP_SLUG")
+                        .IsUnique();
+
+                    b.ToTable("workshop", (string)null);
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.WorkshopSettings", b =>
                 {
                     b.Property<int>("Id")
@@ -2462,11 +2639,18 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "ResponsibleUserId" }, "FK_WORKSHOP_SETTINGS_USER");
 
                     b.HasIndex(new[] { "SettingKey" }, "UQ_WORKSHOP_SETTINGS_KEY")
+                        .IsUnique();
+
+                    b.HasIndex(new[] { "WorkshopId", "SettingKey" }, "UQ_WORKSHOP_SETTINGS_TENANT_KEY")
                         .IsUnique();
 
                     b.ToTable("workshop_settings", (string)null);
@@ -3044,9 +3228,17 @@ namespace ApiTaller.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_USER_USER_ROLE");
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany("Users")
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_USER_WORKSHOP");
+
                     b.Navigation("IdentificationTypeIdNavigation");
 
                     b.Navigation("UserRoleIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.UserRole", b =>
@@ -3056,7 +3248,14 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasForeignKey("ResponsibleUserId")
                         .HasConstraintName("FK_ROLE_USER");
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("WorkshopId")
+                        .HasConstraintName("FK_USERROLE_WORKSHOP");
+
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.UserRoleModule", b =>
@@ -3258,7 +3457,16 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasForeignKey("ResponsibleUserId")
                         .HasConstraintName("FK_WORKSHOP_SETTINGS_USER");
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany("Settings")
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_WORKSHOP_SETTINGS_WORKSHOP");
+
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Customer", b =>
@@ -3290,6 +3498,15 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("Parts");
 
                     b.Navigation("Services");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.Workshop", b =>
+                {
+                    b.Navigation("Settings");
+
+                    b.Navigation("UserRoles");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

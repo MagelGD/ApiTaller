@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Collections.Generic;
@@ -33,6 +33,12 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
                 .HasColumnName("updated_at");
+
+            // SAAS-1: ID del taller
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .HasColumnName("workshop_id");
+
             entity.Property(e => e.ResponsibleUserId)
                 .HasColumnType("int(11)")
                 .HasColumnName("responsible_user_id");

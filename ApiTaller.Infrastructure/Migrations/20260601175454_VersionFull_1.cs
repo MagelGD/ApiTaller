@@ -7,12 +7,45 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiTaller.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Version1_TallerMotoCar : Migration
+    public partial class VersionFull_1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "workshop",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int(11)", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    slug = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    owner_email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    phone = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    address = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    city = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    plan = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false, defaultValue: "basic")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    is_active = table.Column<ulong>(type: "bit(1)", nullable: false, defaultValue: 1ul),
+                    trial_ends_at = table.Column<DateTime>(type: "datetime", nullable: true),
+                    created_at = table.Column<DateTime>(type: "datetime", nullable: false),
+                    updated_at = table.Column<DateTime>(type: "datetime", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_workshop", x => x.id);
+                })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -130,6 +163,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     vehicle_description = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -151,6 +185,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -172,6 +207,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -195,6 +231,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -236,6 +273,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     address = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -306,6 +344,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     stock_quantity = table.Column<int>(type: "int(11)", nullable: false),
                     min_stock = table.Column<int>(type: "int(11)", nullable: false),
                     last_update = table.Column<DateTime>(type: "datetime", nullable: false),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -357,6 +396,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     observations = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     total_amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -422,6 +462,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     payment_type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     value = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -445,6 +486,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     services_count = table.Column<int>(type: "int(11)", nullable: false),
                     start_date = table.Column<DateTime>(type: "datetime", nullable: false),
                     end_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -526,6 +568,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     icon = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -554,6 +597,9 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     description = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "both")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -573,6 +619,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     type = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -633,6 +680,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     logo_brands_base64 = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -735,6 +783,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "both")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -758,6 +807,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     estimated_minutes = table.Column<int>(type: "int(11)", nullable: false),
                     time_unit = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -785,8 +835,9 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                    name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -814,6 +865,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     email = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -831,6 +883,7 @@ namespace ApiTaller.Infrastructure.Migrations
                 {
                     id = table.Column<int>(type: "int(11)", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: true),
                     user_role_id = table.Column<int>(type: "int(11)", nullable: false),
                     identification_type_id = table.Column<int>(type: "int(11)", nullable: false),
                     identification_number = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
@@ -868,6 +921,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         column: x => x.identification_type_id,
                         principalTable: "identification_type",
                         principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_USER_WORKSHOP",
+                        column: x => x.workshop_id,
+                        principalTable: "workshop",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -879,6 +938,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     role = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: true),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     update_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -891,6 +951,11 @@ namespace ApiTaller.Infrastructure.Migrations
                         name: "FK_ROLE_USER",
                         column: x => x.responsible_user_id,
                         principalTable: "user",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_USERROLE_WORKSHOP",
+                        column: x => x.workshop_id,
+                        principalTable: "workshop",
                         principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -913,6 +978,9 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     vehicle_type = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false, defaultValue: "moto")
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    vehicle_sub_type = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -961,6 +1029,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     description = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -974,6 +1043,12 @@ namespace ApiTaller.Infrastructure.Migrations
                         column: x => x.responsible_user_id,
                         principalTable: "user",
                         principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_WORKSHOP_SETTINGS_WORKSHOP",
+                        column: x => x.workshop_id,
+                        principalTable: "workshop",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -1029,6 +1104,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     status = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     down_payment = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -1552,6 +1628,11 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "user_role_id");
 
             migrationBuilder.CreateIndex(
+                name: "FK_USER_WORKSHOP",
+                table: "user",
+                column: "workshop_id");
+
+            migrationBuilder.CreateIndex(
                 name: "FK_ROLE_MODULE_MODULE",
                 table: "user_role_module",
                 column: "module_role_id");
@@ -1570,6 +1651,11 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "FK_ROLE_USER",
                 table: "userrole",
                 column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_userrole_workshop_id",
+                table: "userrole",
+                column: "workshop_id");
 
             migrationBuilder.CreateIndex(
                 name: "FK_VEHICLE_BRAND",
@@ -1667,6 +1753,12 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "mechanic_payment_settlement_id");
 
             migrationBuilder.CreateIndex(
+                name: "UQ_WORKSHOP_SLUG",
+                table: "workshop",
+                column: "slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "FK_WORKSHOP_SETTINGS_USER",
                 table: "workshop_settings",
                 column: "responsible_user_id");
@@ -1675,6 +1767,12 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "UQ_WORKSHOP_SETTINGS_KEY",
                 table: "workshop_settings",
                 column: "setting_key",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "UQ_WORKSHOP_SETTINGS_TENANT_KEY",
+                table: "workshop_settings",
+                columns: new[] { "workshop_id", "setting_key" },
                 unique: true);
 
             migrationBuilder.AddForeignKey(
@@ -2188,6 +2286,9 @@ namespace ApiTaller.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "userrole");
+
+            migrationBuilder.DropTable(
+                name: "workshop");
         }
     }
 }

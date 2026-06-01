@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Models;
+using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -20,6 +20,16 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.Property(e => e.Id)
                 .HasColumnType("int(11)")
                 .HasColumnName("id");
+            entity.Property(e => e.Type)
+                .IsRequired()
+                .HasMaxLength(255)
+                .HasColumnName("type");
+
+            // SAAS-1: ID del taller
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .HasColumnName("workshop_id");
+
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

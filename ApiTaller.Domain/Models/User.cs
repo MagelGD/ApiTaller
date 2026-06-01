@@ -6,6 +6,8 @@ namespace ApiTaller.Domain.Models;
 public partial class User
 {
     public int Id { get; set; }
+    /// <summary>SAAS-1: ID del taller al que pertenece este usuario. NULL = Super Admin de la plataforma.</summary>
+    public int? WorkshopId { get; set; }
     public int UserRoleId { get; set; }
     public int IdentificationTypeId { get; set; }
     public string IdentificationNumber { get; set; }
@@ -26,6 +28,7 @@ public partial class User
     public DateTime? UpdatedAt { get; set; }
     public virtual UserRole UserRoleIdNavigation { get; set; }
     public virtual IdentificationType IdentificationTypeIdNavigation { get; set; }
+    public virtual Workshop? WorkshopNavigation { get; set; }
 
 
 

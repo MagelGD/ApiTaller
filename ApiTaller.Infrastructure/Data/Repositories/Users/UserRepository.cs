@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Common.Constants;
+using ApiTaller.Domain.Common.Constants;
 using ApiTaller.Domain.Dtos.IdentificationTypes;
 using ApiTaller.Domain.Dtos.UserRole;
 using ApiTaller.Domain.Dtos.Users;
@@ -43,7 +43,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Users
         {
             try
             {
-                LoginUserDto? Query = await _context.User.Select(x => new LoginUserDto
+                LoginUserDto? Query = await _context.User.Include(x => x.WorkshopNavigation).Select(x => new LoginUserDto
                 {
                     Id = x.Id,
                     UserName = x.Username,
@@ -51,6 +51,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Users
                     Fullname = x.FullName,
                     Token = x.Token,
                     IdUserRole = x.UserRoleId,
+                    WorkshopId = x.WorkshopId,
+                    WorkshopType = x.WorkshopNavigation != null ? x.WorkshopNavigation.WorkshopType : "moto"
                 }).FirstOrDefaultAsync(x => x.UserName == username, cancellation);
                 return Query;
             }

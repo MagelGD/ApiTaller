@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Models;
+using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -59,7 +59,17 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(255)
                 .HasColumnName("reference");
+            // CAR-11: Tipo de vehículo del producto: 'moto' | 'car' | 'both'
+            entity.Property(e => e.VehicleType)
+                .IsRequired()
+                .HasMaxLength(10)
+                .HasColumnName("vehicle_type")
+                .HasDefaultValue("both");
             
+            // SAAS-1: ID del taller
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .HasColumnName("workshop_id");
 
             entity.HasOne(d => d.ProductTypeIdNavigation).WithMany()
                 .HasForeignKey(d => d.ProducTypeId)

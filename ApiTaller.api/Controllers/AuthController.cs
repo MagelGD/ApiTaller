@@ -28,7 +28,12 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                return Ok(await _authService.Login(auth, cancellation));
+                var result = await _authService.Login(auth, cancellation);
+                if (result == null)
+                {
+                    return Unauthorized(new { message = "Credenciales incorrectas" });
+                }
+                return Ok(result);
             }
             catch (Exception ex)
             {

@@ -12,6 +12,13 @@ public partial class Product : GeneralEntity
     public string Code { get; set; }
     public string Reference { get; set; }
     public string Description { get; set; }
+    /// <summary>
+    /// CAR-11: Tipo de vehículo al que aplica este producto.
+    /// 'moto' | 'car' | 'both'
+    /// </summary>
+    public string VehicleType { get; set; } = "both";
+    /// <summary>SAAS-1: ID del taller al que pertenece este producto</summary>
+    public int WorkshopId { get; set; }
    
     public virtual ProductType ProductTypeIdNavigation { get; set; }
 

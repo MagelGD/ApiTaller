@@ -12,6 +12,8 @@ public partial class ServiceCatalog : GeneralEntity
     public int DefaultMinutes { get; set; }
     public string? TimeUnit { get; set; }
     public string VehicleType { get; set; } = "both";
+    /// <summary>SAAS-1: ID del taller al que pertenece este catálogo de servicio</summary>
+    public int WorkshopId { get; set; }
 
     public virtual ServiceType ServiceTypeIdNavigation { get; set; }
 }

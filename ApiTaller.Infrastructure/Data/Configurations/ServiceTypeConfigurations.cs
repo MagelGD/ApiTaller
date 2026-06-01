@@ -18,8 +18,13 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnName("id");
 
             entity.Property(e => e.Name)
-                .HasMaxLength(50)
+                .HasMaxLength(255)
                 .HasColumnName("name");
+
+            // SAAS-1: ID del taller
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .HasColumnName("workshop_id");
 
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")

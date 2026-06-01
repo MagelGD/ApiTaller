@@ -29,6 +29,8 @@ namespace ApiTaller.Domain.Models
         public string? ContactPhone { get; set; }
         public string? ContactEmail { get; set; }
         public string? VehicleDescription { get; set; }
+        /// <summary>SAAS-1: ID del taller al que pertenece esta cita</summary>
+        public int WorkshopId { get; set; }
 
         // Navegación
         public virtual Customer CustomerNavigation { get; set; }

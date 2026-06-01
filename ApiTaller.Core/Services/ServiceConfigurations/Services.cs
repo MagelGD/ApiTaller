@@ -62,6 +62,10 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
     {
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
+            // SAAS-0: Service del Tenant
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Workshop.IWorkshopService, ApiTaller.Core.Services.Workshop.WorkshopService>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.IWorkshopOnboardingService, ApiTaller.Core.Services.Workshop.WorkshopOnboardingService>();
+
             services.TryAddScoped<ILoginService, Login.LoginService>();
             services.TryAddScoped<IUserService, UserService>();
             services.TryAddScoped<IAuthService, AuthService>();

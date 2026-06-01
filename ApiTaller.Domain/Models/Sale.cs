@@ -19,6 +19,8 @@ namespace ApiTaller.Domain.Models
         public string? WorkshopSlogan { get; set; }
         public string? LogoBase64 { get; set; }
         public string? LogoBrandsBase64 { get; set; }
+        /// <summary>SAAS-1: ID del taller al que pertenece esta venta</summary>
+        public int WorkshopId { get; set; }
 
         public virtual WorkOrder WorkOrder { get; set; }
         public virtual Customer Customer { get; set; }
