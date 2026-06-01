@@ -32,7 +32,6 @@ TRUNCATE TABLE operation;
 ALTER TABLE operation ADD UNIQUE INDEX IF NOT EXISTS idx_unique_operation (name);
 ALTER TABLE module ADD UNIQUE INDEX IF NOT EXISTS idx_unique_module (name);
 ALTER TABLE action ADD UNIQUE INDEX IF NOT EXISTS idx_unique_slug (slug);
-ALTER TABLE userrole ADD UNIQUE INDEX IF NOT EXISTS idx_unique_role (role);
 
 -- ==============================================================================
 -- PASO 2: INSERCIÓN DE DATOS (TU SCRIPT)

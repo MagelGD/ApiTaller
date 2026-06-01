@@ -143,4 +143,5 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<PermissionsHub>("/hubs/permissions");
 app.MapHub<WorkOrderHub>("/hubs/work-orders");
+
 app.Run();

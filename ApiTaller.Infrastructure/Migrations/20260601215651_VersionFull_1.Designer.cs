@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260601175454_VersionFull_1")]
+    [Migration("20260601215651_VersionFull_1")]
     partial class VersionFull_1
     {
         /// <inheritdoc />
