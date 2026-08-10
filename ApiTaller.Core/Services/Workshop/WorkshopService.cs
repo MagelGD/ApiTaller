@@ -37,7 +37,7 @@ namespace ApiTaller.Core.Services.Workshop
                 }
 
                 // 3. Crear Entidad
-                var workshop = new Domain.Models.Workshop
+                Domain.Models.Workshop workshop = new Domain.Models.Workshop
                 {
                     Name = dto.Name,
                     Slug = slug,
@@ -53,7 +53,7 @@ namespace ApiTaller.Core.Services.Workshop
                 };
 
                 // 4. Crear el usuario Administrador del Taller
-                var adminUser = new User
+                User adminUser = new User
                 {
                     Username = dto.AdminUsername,
                     Password = BCrypt.Net.BCrypt.HashPassword(dto.AdminPassword),
@@ -76,7 +76,7 @@ namespace ApiTaller.Core.Services.Workshop
                 workshop.Settings.Add(new ApiTaller.Domain.Models.WorkshopSettings { SettingKey = "timezone", SettingValue = "America/Bogota", Description = "Zona horaria" });
 
                 // 6. Guardar todo en la base de datos (se guarda el workshop y en cascada el usuario admin y los settings)
-                var savedWorkshop = await _workshopRepository.CreateAsync(workshop, ct);
+                Domain.Models.Workshop savedWorkshop = await _workshopRepository.CreateAsync(workshop, ct);
 
                 return new RegisterWorkshopResponseDto
                 {
@@ -98,7 +98,7 @@ namespace ApiTaller.Core.Services.Workshop
 
         public async Task<WorkshopDto?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            var workshop = await _workshopRepository.GetByIdAsync(id, ct);
+            WorkshopDto? workshop = await _workshopRepository.GetByIdAsync(id, ct);
             if (workshop == null) return null;
 
             return new WorkshopDto
@@ -126,7 +126,7 @@ namespace ApiTaller.Core.Services.Workshop
 
         public async Task<bool> UpdateWorkshopAsync(int id, UpdateWorkshopDto dto, CancellationToken ct = default)
         {
-            var workshop = await _workshopRepository.GetByIdAsync(id, ct);
+            WorkshopDto? workshop = await _workshopRepository.GetByIdAsync(id, ct);
             if (workshop == null) return false;
 
             if (!string.IsNullOrEmpty(dto.Name)) workshop.Name = dto.Name;
@@ -137,7 +137,7 @@ namespace ApiTaller.Core.Services.Workshop
             // Lógica especial para cambio de tipo
             if (!string.IsNullOrEmpty(dto.WorkshopType) && dto.WorkshopType != workshop.WorkshopType)
             {
-                var validation = await _workshopRepository.ValidateTypeChangeAsync(id, dto.WorkshopType, ct);
+                TypeChangeValidationDto validation = await _workshopRepository.ValidateTypeChangeAsync(id, dto.WorkshopType, ct);
                 if (!validation.CanChange)
                 {
                     throw new InvalidOperationException(validation.Reason);
@@ -151,7 +151,7 @@ namespace ApiTaller.Core.Services.Workshop
 
         public async Task<bool> ToggleStatusAsync(int id, bool isActive, CancellationToken ct = default)
         {
-            var workshop = await _workshopRepository.GetByIdAsync(id, ct);
+            WorkshopDto? workshop = await _workshopRepository.GetByIdAsync(id, ct);
             if (workshop == null) return false;
 
             workshop.IsActive = isActive;

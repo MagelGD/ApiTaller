@@ -139,7 +139,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Customers
         {
             try
             {
-                var existingCustomer = await _context.Customer.FindAsync(new object[] { update.Id }, cancellation);
+                Domain.Models.Customer? existingCustomer = await _context.Customer.FindAsync(new object[] { update.Id }, cancellation);
                 if (existingCustomer == null) return false;
 
                 if (int.TryParse(_currentUserService.UserId, out int userId))
@@ -193,7 +193,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Customers
         {
             try
             {
-                var wo = await _context.WorkOrder
+                Domain.Models.WorkOrder? wo = await _context.WorkOrder
                     .Include(w => w.VehicleNavigation)
                     .Where(w => w.CustomerId == customerId && w.IsActive &&
                                 (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))

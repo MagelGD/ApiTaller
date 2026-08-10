@@ -10,15 +10,15 @@ namespace ApiTaller.Domain.Models
         public DateTime EntryDate { get; set; }
         public DateTime? EstimatedDeliveryDate { get; set; }
         public int Mileage { get; set; }
-        public string FuelLevel { get; set; }
-        public string Observations { get; set; }
-        public string Status { get; set; }
+        public string FuelLevel { get; set; } = null!;
+        public string Observations { get; set; } = null!;
+        public string Status { get; set; } = null!;
         public decimal DownPayment { get; set; }
         /// <summary>SAAS-1: ID del taller al que pertenece esta OT</summary>
         public int WorkshopId { get; set; }
 
-        public virtual Vehicle VehicleNavigation { get; set; }
-        public virtual Customer CustomerNavigation { get; set; }
+        public virtual Vehicle VehicleNavigation { get; set; } = null!;
+        public virtual Customer CustomerNavigation { get; set; } = null!;
         public virtual ICollection<WorkOrderEvidence> Evidences { get; set; }
         public virtual ICollection<WorkOrderPart> Parts { get; set; }
         public virtual ICollection<WorkOrderService> Services { get; set; }

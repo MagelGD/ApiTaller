@@ -41,14 +41,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.EmailSettings
                 // y EF Core configure correctamente la propiedad de sombra no nula 'ResponsibleUserIdNavigationId'
                 if (settings.ResponsibleUserId.HasValue)
                 {
-                    var user = await _context.User.FindAsync(new object[] { settings.ResponsibleUserId.Value }, cancellation);
+                    Domain.Models.User? user = await _context.User.FindAsync(new object[] { settings.ResponsibleUserId.Value }, cancellation);
                     if (user != null)
                     {
                         settings.ResponsibleUserIdNavigation = user;
                     }
                 }
 
-                var existing = await _context.EmailSettings.FirstOrDefaultAsync(cancellation);
+                Domain.Models.EmailSettings? existing = await _context.EmailSettings.FirstOrDefaultAsync(cancellation);
 
                 if (existing == null)
                 {

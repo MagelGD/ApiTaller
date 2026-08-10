@@ -12,7 +12,7 @@ namespace ApiTaller.Domain.Models
         /// <summary>SAAS-1: ID del taller al que pertenece este inventario</summary>
         public int WorkshopId { get; set; }
 
-        public virtual Product ProductNavigation { get; set; }
+        public virtual Product ProductNavigation { get; set; } = null!;
 
         public Inventory()
         {

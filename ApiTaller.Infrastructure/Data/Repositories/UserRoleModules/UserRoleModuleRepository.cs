@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Dtos.Module;
+using ApiTaller.Domain.Dtos.Module;
 using ApiTaller.Domain.Dtos.UserRole;
 using ApiTaller.Domain.Dtos.UserRoleModule;
 using ApiTaller.Domain.Interfaces.Repositories.UserRoleModules;
@@ -139,7 +139,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
         {
             try
             {
-                if(int.TryParse(_currentUser?.UserId, out var uid))
+                if(int.TryParse(_currentUser?.UserId, out int uid))
                 {
                     userRoleModule.ResponsibleUserId = uid;
                 }
@@ -158,7 +158,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.UserRoleModules
         {
             try
             {
-                if(int.TryParse(_currentUser?.UserId, out var uid))
+                if(int.TryParse(_currentUser?.UserId, out int uid))
                 {
                     userRoleModule.ResponsibleUserId = uid;
                 }

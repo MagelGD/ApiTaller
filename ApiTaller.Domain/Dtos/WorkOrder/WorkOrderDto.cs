@@ -11,9 +11,9 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
         public DateTime EntryDate { get; set; }
         public DateTime? EstimatedDeliveryDate { get; set; }
         public int Mileage { get; set; }
-        public string FuelLevel { get; set; }
-        public string Observations { get; set; }
-        public string Status { get; set; }
+        public string FuelLevel { get; set; } = null!;
+        public string Observations { get; set; } = null!;
+        public string Status { get; set; } = null!;
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

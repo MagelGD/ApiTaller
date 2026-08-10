@@ -60,10 +60,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                 await _context.InventoryReception.AddAsync(reception, cancellation);
 
                 // Procesar cada detalle y actualizar inventario
-                foreach (var detail in reception.Details)
+                foreach (InventoryReceptionDetail detail in reception.Details)
                 {
 
-                    var inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == detail.ProductId, cancellation);
+                    Domain.Models.Inventory? inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == detail.ProductId, cancellation);
                     if (inventory == null)
                     {
                         inventory = new Domain.Models.Inventory
@@ -83,7 +83,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                     inventory.UpdatedAt = DateTime.Now;
 
                     // Actualizar Maestro de Productos
-                    var product = await _context.Product.FirstOrDefaultAsync(p => p.Id == detail.ProductId, cancellation);
+                    Domain.Models.Product? product = await _context.Product.FirstOrDefaultAsync(p => p.Id == detail.ProductId, cancellation);
                     if (product != null)
                     {
                         product.Price = detail.UnitCost;
@@ -93,7 +93,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                     }
 
                     // Registrar Historial
-                    var history = new InventoryHistory
+                    InventoryHistory history = new InventoryHistory
                     {
                         ProductId = detail.ProductId,
                         MovementType = "Entrada",
@@ -110,7 +110,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                     await _context.InventoryHistory.AddAsync(history, cancellation);
                 }
 
-                var result = await _context.SaveChangesAsync(cancellation) > 0;
+                bool result = await _context.SaveChangesAsync(cancellation) > 0;
                 
                 // Actualizar ReferenceId en historial con el ID de la recepción generada
                 // Esto es opcional dependiendo de si necesitas la relación exacta en el historial

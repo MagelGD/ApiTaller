@@ -12,6 +12,6 @@ public partial class ServicePriceByVersion : GeneralEntity
     /// <summary>SAAS-1: ID del taller al que pertenece esta precio de servicio</summary>
     public int WorkshopId { get; set; }
 
-    public virtual ServiceCatalog ServiceCatalogIdNavigation { get; set; }
-    public virtual BrandModelVersion BrandModelVersionIdNavigation { get; set; }
+    public virtual ServiceCatalog ServiceCatalogIdNavigation { get; set; } = null!;
+    public virtual BrandModelVersion BrandModelVersionIdNavigation { get; set; } = null!;
 }

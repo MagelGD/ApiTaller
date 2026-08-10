@@ -8,8 +8,8 @@ namespace ApiTaller.Domain.Models
     {
         public int RoleId { get; set; }
         public int ActionId { get; set; }
-        public virtual Action ActionIdNavigation { get; set; }
-        public virtual UserRole RoleIdNavigation { get; set; }
+        public virtual Action ActionIdNavigation { get; set; } = null!;
+        public virtual UserRole RoleIdNavigation { get; set; } = null!;
 
     }
 }

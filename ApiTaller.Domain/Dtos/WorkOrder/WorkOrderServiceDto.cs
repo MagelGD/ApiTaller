@@ -6,7 +6,7 @@ namespace ApiTaller.Domain.Dtos.WorkOrder
     {
         public int Id { get; set; }
         public int WorkOrderId { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = null!;
         public int MechanicId { get; set; }
         public decimal Price { get; set; }
         public int EstimatedMinutes { get; set; }

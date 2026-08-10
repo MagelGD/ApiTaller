@@ -6,7 +6,7 @@ namespace ApiTaller.Domain.Models
 {
     public class Brand : GeneralEntity
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
         /// <summary>CAR-1: Tipo de vehículo al que pertenece esta marca. 'moto' | 'car'</summary>
         public string VehicleType { get; set; } = "moto";
         /// <summary>SAAS-1: ID del taller al que pertenece esta marca</summary>

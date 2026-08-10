@@ -6,12 +6,12 @@ namespace ApiTaller.Domain.Models
     public class Vehicle : GeneralEntity
     {
         public int CustomerId { get; set; }
-        public string Plate { get; set; }
+        public string Plate { get; set; } = null!;
         public int BrandId { get; set; }
         public int ModelId { get; set; }
         public int? VersionId { get; set; }
-        public string Color { get; set; }
-        public string CylinderCapacity { get; set; }
+        public string Color { get; set; } = null!;
+        public string CylinderCapacity { get; set; } = null!;
         /// <summary>CAR-2: Tipo de vehículo. 'moto' | 'car'</summary>
         public string VehicleType { get; set; } = "moto";
         /// <summary>
@@ -24,9 +24,9 @@ namespace ApiTaller.Domain.Models
         public int WorkshopId { get; set; }
 
 
-        public virtual Customer CustomerNavigation { get; set; }
-        public virtual Brand BrandNavigation { get; set; }
-        public virtual BrandModels ModelNavigation { get; set; }
-        public virtual BrandModelVersion VersionNavigation { get; set; }
+        public virtual Customer CustomerNavigation { get; set; } = null!;
+        public virtual Brand BrandNavigation { get; set; } = null!;
+        public virtual BrandModels ModelNavigation { get; set; } = null!;
+        public virtual BrandModelVersion VersionNavigation { get; set; } = null!;
     }
 }

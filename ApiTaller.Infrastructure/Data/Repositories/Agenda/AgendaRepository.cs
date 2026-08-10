@@ -29,7 +29,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
+                AgendaSettings? settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
                 if (settings == null) return null;
 
                 return new AgendaSettingsDto
@@ -54,7 +54,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
+                AgendaSettings? settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
                 int.TryParse(_currentUser.UserId, out int userId);
 
                 if (settings == null)
@@ -89,7 +89,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             try
             {
                 int.TryParse(_currentUser.UserId, out int userId);
-                var block = new AgendaBlock
+                AgendaBlock block = new AgendaBlock
                 {
                     BlockDate = dto.BlockDate.Date,
                     Reason = dto.Reason,
@@ -144,48 +144,48 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
+                AgendaSettings? settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
                 if (settings == null) return new List<string>();
 
-                var today = DateTime.Today;
-                var startDate = settings.StartDate.Date > today ? settings.StartDate.Date : today;
-                var endDate = startDate.AddDays((settings.WeeksToOpen * 7) - 1);
+                DateTime today = DateTime.Today;
+                DateTime startDate = settings.StartDate.Date > today ? settings.StartDate.Date : today;
+                DateTime endDate = startDate.AddDays((settings.WeeksToOpen * 7) - 1);
 
-                var dailyConfigs = await _context.AgendaDayConfig
+                Dictionary<DateTime, AgendaDayConfig> dailyConfigs = await _context.AgendaDayConfig
                     .Where(c => c.Date >= startDate && c.Date <= endDate && c.IsActive)
                     .ToDictionaryAsync(c => c.Date.Date, c => c, ct);
 
-                var appointmentsCountByDate = await _context.Appointment
+                Dictionary<DateTime, int> appointmentsCountByDate = await _context.Appointment
                     .Where(a => a.IsActive && a.AppointmentDate >= startDate && a.AppointmentDate <= endDate
                            && (a.Status == "Agendada" || a.Status == "Pendiente"))
                     .GroupBy(a => a.AppointmentDate)
                     .Select(g => new { Date = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(g => g.Date, g => g.Count, ct);
 
-                var blockedDates = await _context.AgendaBlock
+                List<DateTime> blockedDates = await _context.AgendaBlock
                     .Where(b => b.IsActive && b.BlockDate >= startDate && b.BlockDate <= endDate)
                     .Select(b => b.BlockDate.Date)
                     .ToListAsync(ct);
 
-                var workingDays = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday };
+                List<DayOfWeek> workingDays = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday };
                 if (!string.IsNullOrEmpty(settings.WorkingDays))
                 {
                     workingDays = settings.WorkingDays.Split(',')
-                        .Select(s => int.TryParse(s, out var d) ? (DayOfWeek)d : DayOfWeek.Sunday)
+                        .Select(s => int.TryParse(s, out int d) ? (DayOfWeek)d : DayOfWeek.Sunday)
                         .ToList();
                 }
 
-                var availableDates = new List<string>();
-                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                List<string> availableDates = new List<string>();
+                for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
                 {
                     if (!workingDays.Contains(date.DayOfWeek)) continue;
                     if (blockedDates.Contains(date.Date)) continue;
 
-                    dailyConfigs.TryGetValue(date.Date, out var dayConfig);
+                    dailyConfigs.TryGetValue(date.Date, out AgendaDayConfig? dayConfig);
                     if (dayConfig != null && dayConfig.IsBlocked) continue;
 
-                    appointmentsCountByDate.TryGetValue(date.Date, out var count);
-                    var slots = dayConfig?.CustomSlots ?? settings.DailySlots;
+                    appointmentsCountByDate.TryGetValue(date.Date, out int count);
+                    int slots = dayConfig?.CustomSlots ?? settings.DailySlots;
 
                     if (count < slots)
                         availableDates.Add(date.ToString("yyyy-MM-dd"));
@@ -204,9 +204,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var customer = await _context.Customer.FirstOrDefaultAsync(c => c.UserId == userId, ct);
+                Domain.Models.Customer? customer = await _context.Customer.FirstOrDefaultAsync(c => c.UserId == userId, ct);
 
-                var appointment = new Appointment
+                Appointment appointment = new Appointment
                 {
                     AppointmentDate = dto.AppointmentDate.Date,
                     CustomerId = customer?.Id,
@@ -239,7 +239,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             try
             {
                 int.TryParse(_currentUser.UserId, out int userId);
-                var appointment = new Appointment
+                Appointment appointment = new Appointment
                 {
                     AppointmentDate = dto.AppointmentDate.Date,
                     ContactName = dto.ContactName,
@@ -270,7 +270,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
             try
             {
                 int.TryParse(_currentUser.UserId, out int userId);
-                var appointment = new Appointment
+                Appointment appointment = new Appointment
                 {
                     AppointmentDate = dto.AppointmentDate.Date,
                     CustomerId = dto.CustomerId,
@@ -341,7 +341,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var appointment = await _context.Appointment.FirstOrDefaultAsync(a => a.Id == dto.AppointmentId, ct);
+                Appointment? appointment = await _context.Appointment.FirstOrDefaultAsync(a => a.Id == dto.AppointmentId, ct);
                 if (appointment == null) return false;
 
                 int.TryParse(_currentUser.UserId, out int userId);
@@ -364,13 +364,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var appointment = await _context.Appointment
+                Appointment? appointment = await _context.Appointment
                     .Include(a => a.VehicleNavigation)
                     .FirstOrDefaultAsync(a => a.Id == appointmentId, ct);
 
                 if (appointment == null || appointment.VehicleId == null) return null;
 
-                var workOrder = new WorkOrder
+                WorkOrder workOrder = new WorkOrder
                 {
                     VehicleId = appointment.VehicleId.Value,
                     CustomerId = appointment.VehicleNavigation.CustomerId,
@@ -407,48 +407,48 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
+                AgendaSettings? settings = await _context.AgendaSettings.FirstOrDefaultAsync(ct);
 
                 if (settings == null && weeks == null) return new List<AgendaDayConfigDto>();
 
-                var baseStartDate = start?.Date ?? settings?.StartDate.Date ?? DateTime.Today;
-                var baseWeeks = weeks ?? settings?.WeeksToOpen ?? 2;
+                DateTime baseStartDate = start?.Date ?? settings?.StartDate.Date ?? DateTime.Today;
+                int baseWeeks = weeks ?? settings?.WeeksToOpen ?? 2;
 
-                var startDate = baseStartDate;
-                var endDate = baseStartDate.AddDays((baseWeeks * 7) - 1);
+                DateTime startDate = baseStartDate;
+                DateTime endDate = baseStartDate.AddDays((baseWeeks * 7) - 1);
 
-                var dailyConfigs = await _context.AgendaDayConfig
+                Dictionary<DateTime, AgendaDayConfig> dailyConfigs = await _context.AgendaDayConfig
                     .Where(c => c.Date >= startDate && c.Date <= endDate && c.IsActive)
                     .ToDictionaryAsync(c => c.Date.Date, c => c, ct);
 
-                var blockedDates = await _context.AgendaBlock
+                Dictionary<DateTime, string> blockedDates = await _context.AgendaBlock
                     .Where(b => b.IsActive && b.BlockDate >= startDate && b.BlockDate <= endDate)
                     .ToDictionaryAsync(b => b.BlockDate.Date, b => b.Reason, ct);
 
-                var appointmentsCount = await _context.Appointment
+                Dictionary<DateTime, int> appointmentsCount = await _context.Appointment
                     .Where(a => a.IsActive && a.AppointmentDate >= startDate && a.AppointmentDate <= endDate
                            && (a.Status == "Agendada" || a.Status == "Pendiente"))
                     .GroupBy(a => a.AppointmentDate)
                     .Select(g => new { Date = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(g => g.Date, g => g.Count, ct);
 
-                var workingDays = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday };
+                List<DayOfWeek> workingDays = new List<DayOfWeek> { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday };
                 if (settings != null && !string.IsNullOrEmpty(settings.WorkingDays))
                 {
                     workingDays = settings.WorkingDays.Split(',')
-                        .Select(s => int.TryParse(s, out var d) ? (DayOfWeek)d : DayOfWeek.Sunday)
+                        .Select(s => int.TryParse(s, out int d) ? (DayOfWeek)d : DayOfWeek.Sunday)
                         .ToList();
                 }
 
-                var result = new List<AgendaDayConfigDto>();
-                for (var date = startDate; date <= endDate; date = date.AddDays(1))
+                List<AgendaDayConfigDto> result = new List<AgendaDayConfigDto>();
+                for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
                 {
                     if (!workingDays.Contains(date.DayOfWeek)) continue;
 
-                    dailyConfigs.TryGetValue(date.Date, out var config);
-                    appointmentsCount.TryGetValue(date.Date, out var count);
-                    blockedDates.TryGetValue(date.Date, out var blockReason);
-                    var isBlockedInExceptions = blockReason != null;
+                    dailyConfigs.TryGetValue(date.Date, out AgendaDayConfig? config);
+                    appointmentsCount.TryGetValue(date.Date, out int count);
+                    blockedDates.TryGetValue(date.Date, out string? blockReason);
+                    bool isBlockedInExceptions = blockReason != null;
 
                     result.Add(new AgendaDayConfigDto
                     {
@@ -473,7 +473,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var config = await _context.AgendaDayConfig.FirstOrDefaultAsync(c => c.Date.Date == dto.Date.Date, ct);
+                AgendaDayConfig? config = await _context.AgendaDayConfig.FirstOrDefaultAsync(c => c.Date.Date == dto.Date.Date, ct);
                 int.TryParse(_currentUser.UserId, out int userId);
 
                 if (config == null)
@@ -512,7 +512,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var appointment = await _context.Appointment.FirstOrDefaultAsync(a => a.Id == appointmentId, ct);
+                Appointment? appointment = await _context.Appointment.FirstOrDefaultAsync(a => a.Id == appointmentId, ct);
                 if (appointment == null) return false;
 
                 int.TryParse(_currentUser.UserId, out int userId);
@@ -533,7 +533,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var appointment = await _context.Appointment.FirstOrDefaultAsync(a => a.Id == appointmentId, ct);
+                Appointment? appointment = await _context.Appointment.FirstOrDefaultAsync(a => a.Id == appointmentId, ct);
                 if (appointment == null) return false;
 
                 int.TryParse(_currentUser.UserId, out int userId);
@@ -576,7 +576,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Agenda
         {
             try
             {
-                var block = await _context.AgendaBlock.FirstOrDefaultAsync(b => b.Id == id, ct);
+                AgendaBlock? block = await _context.AgendaBlock.FirstOrDefaultAsync(b => b.Id == id, ct);
                 if (block == null) return false;
 
                 int.TryParse(_currentUser.UserId, out int userId);

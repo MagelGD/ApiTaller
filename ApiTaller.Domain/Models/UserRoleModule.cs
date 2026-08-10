@@ -10,7 +10,7 @@ public partial class UserRoleModule : GeneralEntity
 
     public int ModulesRoleId { get; set; }
 
-    public virtual Module ModuleIdNavigation { get; set; }
+    public virtual Module ModuleIdNavigation { get; set; } = null!;
 
-    public virtual UserRole UserRoleIdNavigation { get; set; }
+    public virtual UserRole UserRoleIdNavigation { get; set; } = null!;
 }

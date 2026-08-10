@@ -37,9 +37,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 if (userId != 0)
                 {
                     create.ResponsibleUserId = userId;
-                    foreach (var p in create.Parts) p.ResponsibleUserId = userId;
-                    foreach (var s in create.Services) s.ResponsibleUserId = userId;
-                    foreach (var e in create.Evidences) e.ResponsibleUserId = userId;
+                    foreach (WorkOrderPart p in create.Parts) p.ResponsibleUserId = userId;
+                    foreach (WorkOrderService s in create.Services) s.ResponsibleUserId = userId;
+                    foreach (WorkOrderEvidence e in create.Evidences) e.ResponsibleUserId = userId;
                 }
 
                 await _context.WorkOrder.AddAsync(create, cancellation);
@@ -56,7 +56,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                var query = _context.WorkOrder.AsQueryable();
+                IQueryable<WorkOrder> query = _context.WorkOrder.AsQueryable();
                 if (!string.IsNullOrWhiteSpace(vehicleType))
                 {
                     query = query.Where(w => w.VehicleNavigation.VehicleType == vehicleType);
@@ -249,7 +249,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                var existingOrder = await _context.WorkOrder
+                WorkOrder? existingOrder = await _context.WorkOrder
                     .Include(w => w.Parts)
                     .Include(w => w.Services)
                     .Include(w => w.Evidences)
@@ -262,10 +262,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 if (int.TryParse(_currentUserService.UserId, out int userId))
                     existingOrder.ResponsibleUserId = userId;
 
-                // ─── Sincronizar Repuestos ───────────────────────────────────────────────
-                var inventoryMovements = new List<(int ProductId, int Quantity, string Type, string Obs)>();
+                List<(int ProductId, int Quantity, string Type, string Obs)> inventoryMovements = new List<(int ProductId, int Quantity, string Type, string Obs)>();
 
-                foreach (var existingPart in existingOrder.Parts.ToList())
+                foreach (WorkOrderPart existingPart in existingOrder.Parts.ToList())
                 {
                     if (!update.Parts.Any(p => p.Id == existingPart.Id))
                     {
@@ -275,9 +274,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     }
                 }
 
-                foreach (var part in update.Parts)
+                foreach (WorkOrderPart part in update.Parts)
                 {
-                    var existingPart = existingOrder.Parts.FirstOrDefault(p => p.Id == part.Id && p.Id != 0);
+                    WorkOrderPart? existingPart = existingOrder.Parts.FirstOrDefault(p => p.Id == part.Id && p.Id != 0);
                     if (existingPart != null)
                     {
                         if (existingPart.Quantity != part.Quantity ||
@@ -307,15 +306,15 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 }
 
                 // ─── Sincronizar Servicios ───────────────────────────────────────────────
-                foreach (var existingService in existingOrder.Services.ToList())
+                foreach (WorkOrderService existingService in existingOrder.Services.ToList())
                 {
                     if (!update.Services.Any(s => s.Id == existingService.Id))
                         _context.WorkOrderService.Remove(existingService);
                 }
 
-                foreach (var service in update.Services)
+                foreach (WorkOrderService service in update.Services)
                 {
-                    var existingService = existingOrder.Services.FirstOrDefault(s => s.Id == service.Id && s.Id != 0);
+                    WorkOrderService? existingService = existingOrder.Services.FirstOrDefault(s => s.Id == service.Id && s.Id != 0);
                     if (existingService != null)
                     {
                         if (existingService.Price != service.Price ||
@@ -337,18 +336,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 }
 
                 // ─── Sincronizar Evidencias ──────────────────────────────────────────────
-                foreach (var existingEvidence in existingOrder.Evidences.ToList())
+                foreach (WorkOrderEvidence existingEvidence in existingOrder.Evidences.ToList())
                 {
                     if (!update.Evidences.Any(e => e.Id == existingEvidence.Id))
                         _context.WorkOrderEvidence.Remove(existingEvidence);
                 }
 
-                foreach (var evidence in update.Evidences)
+                foreach (WorkOrderEvidence evidence in update.Evidences)
                 {
-                    var existingEvidence = existingOrder.Evidences.FirstOrDefault(e => e.Id == evidence.Id && e.Id != 0);
+                    WorkOrderEvidence? existingEvidence = existingOrder.Evidences.FirstOrDefault(e => e.Id == evidence.Id && e.Id != 0);
                     if (existingEvidence != null)
                     {
-                        var originalPhotoUrl = existingEvidence.PhotoUrl;
+                        string originalPhotoUrl = existingEvidence.PhotoUrl;
                         _context.Entry(existingEvidence).CurrentValues.SetValues(evidence);
                         if (string.IsNullOrEmpty(existingEvidence.PhotoUrl) || existingEvidence.PhotoUrl == originalPhotoUrl)
                         {
@@ -366,7 +365,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 }
 
                 // ─── Aplicar movimientos de inventario ───────────────────────────────────
-                foreach (var (productId, quantity, type, obs) in inventoryMovements)
+                foreach ((int productId, int quantity, string type, string obs) in inventoryMovements)
                     await ApplyInventoryMovementAsync(productId, quantity, type, obs, existingOrder.Id, cancellation);
 
                 return await _context.SaveChangesAsync(cancellation) > 0;
@@ -382,7 +381,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                var workOrder = await _context.WorkOrder.FindAsync(new object[] { id }, cancellation);
+                WorkOrder? workOrder = await _context.WorkOrder.FindAsync(new object[] { id }, cancellation);
                 if (workOrder == null) return false;
 
                 workOrder.Status = status;
@@ -481,7 +480,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                var evidence = await _context.WorkOrderEvidence.FindAsync(new object[] { id }, cancellation);
+                WorkOrderEvidence? evidence = await _context.WorkOrderEvidence.FindAsync(new object[] { id }, cancellation);
                 if (evidence == null) return false;
 
                 _context.WorkOrderEvidence.Remove(evidence);
@@ -499,7 +498,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                var inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == productId, cancellation);
+                Domain.Models.Inventory? inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == productId, cancellation);
                 if (inventory == null)
                 {
                     inventory = new Domain.Models.Inventory
@@ -520,7 +519,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 inventory.LastUpdate = DateTime.Now;
                 inventory.UpdatedAt = DateTime.Now;
 
-                var movement = new InventoryHistory
+                InventoryHistory movement = new InventoryHistory
                 {
                     ProductId = productId,
                     MovementType = type,

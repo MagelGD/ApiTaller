@@ -7,7 +7,7 @@ namespace ApiTaller.Domain.Dtos.BrandModels
     public class GetBrandModelsDto
     {
         public int Id { get; set; }
-        public string Models { get; set; }
+        public string Models { get; set; } = null!;
         /// <summary>CAR-1: Tipo de vehículo de este modelo. 'moto' | 'car'</summary>
         public string VehicleType { get; set; } = "moto";
         public bool IsActive { get; set; }

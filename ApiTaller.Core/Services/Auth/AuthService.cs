@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BCrypt.Net;
 
 namespace ApiTaller.Core.Services.Auth
 {
@@ -50,6 +51,7 @@ namespace ApiTaller.Core.Services.Auth
             try
             {
                 LoginUserDto? user = await _userService.GetUser(auth.Username, cancellation);
+                string dato = BCrypt.Net.BCrypt.HashPassword(auth.Password);
                 if (user is null || !BCrypt.Net.BCrypt.Verify(auth.Password, user.Password))
                     return default!;
                 //if (user is null || user.Password != auth.Password)
@@ -83,7 +85,7 @@ namespace ApiTaller.Core.Services.Auth
         {
             try
             {
-                var user = await _context.User
+                User? user = await _context.User
                     .Include(u => u.UserRoleIdNavigation)
                     .Include(u => u.WorkshopNavigation)
                     .FirstOrDefaultAsync(u => u.Email.ToLower() == credentials.Email.ToLower() && u.IsActive, ct);
@@ -94,10 +96,10 @@ namespace ApiTaller.Core.Services.Auth
                 }
 
                 // Buscar el cliente asociado
-                var customer = await _context.Customer
+                Domain.Models.Customer? customer = await _context.Customer
                     .FirstOrDefaultAsync(c => c.UserId == user.Id && c.IsActive, ct);
 
-                var token = user.CreateJwt(customer?.Id, _options);
+                string token = user.CreateJwt(customer?.Id, _options);
 
                 return new LoginResponseDto
                 {
@@ -119,7 +121,7 @@ namespace ApiTaller.Core.Services.Auth
         {
             try
             {
-                var user = await _context.User
+                User? user = await _context.User
                     .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower() && u.IsActive, ct);
 
                 if (user == null)
@@ -129,18 +131,18 @@ namespace ApiTaller.Core.Services.Auth
                 }
 
                 // Inactivar tokens de recuperación activos anteriores
-                var previousTokens = await _context.PasswordResetToken
+                List<PasswordResetToken> previousTokens = await _context.PasswordResetToken
                     .Where(t => t.UserId == user.Id && t.IsActive && !t.IsUsed)
                     .ToListAsync(ct);
 
-                foreach (var t in previousTokens)
+                foreach (PasswordResetToken t in previousTokens)
                 {
                     t.IsActive = false;
                     t.UpdatedAt = DateTime.Now;
                 }
 
-                var tokenString = Guid.NewGuid().ToString("N");
-                var resetToken = new PasswordResetToken
+                string tokenString = Guid.NewGuid().ToString("N");
+                PasswordResetToken resetToken = new PasswordResetToken
                 {
                     UserId = user.Id,
                     Token = tokenString,
@@ -152,13 +154,13 @@ namespace ApiTaller.Core.Services.Auth
                 };
 
                 await _context.PasswordResetToken.AddAsync(resetToken, ct);
-                var saved = await _context.SaveChangesAsync(ct) > 0;
+                bool saved = await _context.SaveChangesAsync(ct) > 0;
 
                 if (saved)
                 {
                     // Enviar correo de recuperación con plantilla premium
-                    var resetUrl = $"http://localhost:4200/reset-password?token={tokenString}";
-                    var emailRequest = new EmailRequest
+                    string resetUrl = $"http://localhost:4200/reset-password?token={tokenString}";
+                    EmailRequest emailRequest = new EmailRequest
                     {
                         To = user.Email,
                         Subject = "Recupera tu contraseña — Deivid Motos",
@@ -202,7 +204,7 @@ namespace ApiTaller.Core.Services.Auth
                     throw new ArgumentException("Las contraseñas no coinciden.");
                 }
 
-                var tokenRecord = await _context.PasswordResetToken
+                PasswordResetToken? tokenRecord = await _context.PasswordResetToken
                     .Include(t => t.User)
                     .FirstOrDefaultAsync(t => t.Token == dto.Token && t.IsActive && !t.IsUsed, ct);
 
@@ -211,7 +213,7 @@ namespace ApiTaller.Core.Services.Auth
                     return false;
                 }
 
-                var user = tokenRecord.User;
+                User user = tokenRecord.User;
                 if (user == null) return false;
 
                 // Actualizar contraseña
@@ -239,7 +241,7 @@ namespace ApiTaller.Core.Services.Auth
         {
             try
             {
-                var user = await _context.User
+                User? user = await _context.User
                     .FirstOrDefaultAsync(u => u.Id == userId && u.IsActive, ct);
 
                 if (user == null) return false;

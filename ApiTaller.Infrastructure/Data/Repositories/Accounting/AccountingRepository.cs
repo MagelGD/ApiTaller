@@ -30,19 +30,19 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         {
             try
             {
-                var mechanics = await _context.User
+                List<Domain.Models.User> mechanics = await _context.User
                     .Include(u => u.UserRoleIdNavigation)
                     .Where(u => u.IsActive && u.UserRoleIdNavigation.Role.Contains("Mecanico"))
                     .ToListAsync(ct);
 
-                var settings = await _context.MechanicPaymentSettings
+                Dictionary<int, MechanicPaymentSettings> settings = await _context.MechanicPaymentSettings
                     .Where(s => s.IsActive)
                     .ToDictionaryAsync(s => s.MechanicId, s => s, ct);
 
-                var result = new List<MechanicWithSettingsRawDto>();
-                foreach (var mechanic in mechanics)
+                List<MechanicWithSettingsRawDto> result = new List<MechanicWithSettingsRawDto>();
+                foreach (Domain.Models.User mechanic in mechanics)
                 {
-                    settings.TryGetValue(mechanic.Id, out var setting);
+                    settings.TryGetValue(mechanic.Id, out MechanicPaymentSettings? setting);
                     result.Add(new MechanicWithSettingsRawDto
                     {
                         SettingId = setting?.Id ?? 0,
@@ -66,7 +66,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         {
             try
             {
-                var setting = await _context.MechanicPaymentSettings
+                MechanicPaymentSettings? setting = await _context.MechanicPaymentSettings
                     .FirstOrDefaultAsync(s => s.MechanicId == dto.MechanicId && s.IsActive, ct);
 
                 if (setting == null)
@@ -106,10 +106,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         {
             try
             {
-                var start = startDate.Date;
-                var end = endDate.Date.AddDays(1).AddTicks(-1);
+                DateTime start = startDate.Date;
+                DateTime end = endDate.Date.AddDays(1).AddTicks(-1);
 
-                var query = _context.WorkOrder
+                IQueryable<Domain.Models.WorkOrder> query = _context.WorkOrder
                     .Include(w => w.Parts).ThenInclude(p => p.ProductNavigation)
                     .Include(w => w.Services)
                     .Include(w => w.VehicleNavigation)
@@ -128,9 +128,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
                     query = query.Where(w => w.VehicleNavigation.VehicleType == vehicleType);
                 }
 
-                var orders = await query.ToListAsync(ct);
+                List<Domain.Models.WorkOrder> orders = await query.ToListAsync(ct);
 
-                var inventoryMap = await _context.Inventory
+                Dictionary<int, int> inventoryMap = await _context.Inventory
                     .Where(i => i.IsActive)
                     .ToDictionaryAsync(i => i.ProductId, i => i.StockQuantity, ct);
 
@@ -180,13 +180,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         {
             try
             {
-                var start = startDate.Date;
-                var end = endDate.Date.AddDays(1).AddTicks(-1);
+                DateTime start = startDate.Date;
+                DateTime end = endDate.Date.AddDays(1).AddTicks(-1);
 
-                var settings = await _context.MechanicPaymentSettings
+                MechanicPaymentSettings? settings = await _context.MechanicPaymentSettings
                     .FirstOrDefaultAsync(s => s.MechanicId == mechanicId && s.IsActive, ct);
 
-                var services = await _context.WorkOrderService
+                List<WorkOrderService> services = await _context.WorkOrderService
                     .Include(s => s.WorkOrderNavigation)
                     .Include(s => s.WorkOrderNavigation.CustomerNavigation)
                     .Include(s => s.WorkOrderNavigation.VehicleNavigation)
@@ -223,7 +223,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         {
             try
             {
-                var settlement = new MechanicPaymentSettlement
+                MechanicPaymentSettlement settlement = new MechanicPaymentSettlement
                 {
                     MechanicId = mechanicId,
                     SettlementDate = DateTime.Now,
@@ -241,11 +241,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
 
                 if (serviceIds != null && serviceIds.Any())
                 {
-                    var servicesToPay = await _context.WorkOrderService
+                    List<WorkOrderService> servicesToPay = await _context.WorkOrderService
                         .Where(s => serviceIds.Contains(s.Id) && s.MechanicId == mechanicId)
                         .ToListAsync(ct);
 
-                    foreach (var service in servicesToPay)
+                    foreach (WorkOrderService service in servicesToPay)
                     {
                         service.IsPaidToMechanic = true;
                         service.PaidToMechanicAt = DateTime.Now;
@@ -269,14 +269,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
         {
             try
             {
-                var query = _context.MechanicPaymentSettlement
+                IQueryable<MechanicPaymentSettlement> query = _context.MechanicPaymentSettlement
                     .Include(s => s.MechanicNavigation)
                     .Where(s => s.IsActive);
 
                 if (mechanicId.HasValue && mechanicId.Value > 0)
                     query = query.Where(s => s.MechanicId == mechanicId.Value);
 
-                var settlements = await query
+                List<MechanicPaymentSettlement> settlements = await query
                     .OrderByDescending(s => s.SettlementDate)
                     .ToListAsync(ct);
 

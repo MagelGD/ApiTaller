@@ -6,6 +6,6 @@ namespace ApiTaller.Domain.Models
 {
     public class Module : GeneralEntity
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
     }
 }

@@ -7,8 +7,8 @@ namespace ApiTaller.Domain.Dtos.ServiceCatalogs
     {
         public int Id { get; set; }
         public int ServiceTypeId { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
         public decimal DefaultPrice { get; set; }
         public int DefaultMinutes { get; set; }
         public string? TimeUnit { get; set; }

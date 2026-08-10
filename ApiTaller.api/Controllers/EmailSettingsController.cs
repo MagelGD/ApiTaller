@@ -42,7 +42,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var result = await _emailSettingsService.SaveSettingsAsync(dto, cancellation);
+                bool result = await _emailSettingsService.SaveSettingsAsync(dto, cancellation);
                 if (result)
                 {
                     return Ok(true);
@@ -61,7 +61,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var result = await _emailSettingsService.TestConnectionAsync(dto, cancellation);
+                bool result = await _emailSettingsService.TestConnectionAsync(dto, cancellation);
                 if (result)
                 {
                     return Ok(true);

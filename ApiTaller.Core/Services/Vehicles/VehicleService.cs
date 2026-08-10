@@ -52,10 +52,10 @@ namespace ApiTaller.Core.Services.Vehicles
                     // REGLA DE NEGOCIO: No inactivar vehículo con órdenes de trabajo activas
                     if (!saveData.IsActive)
                     {
-                        var existingDto = await _vehicleRepository.GetByIdAsync(saveData.Id, cancellationToken);
+                        GetVehicleDto? existingDto = await _vehicleRepository.GetByIdAsync(saveData.Id, cancellationToken);
                         if (existingDto != null && existingDto.IsActive)
                         {
-                            var activeWo = await _vehicleRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
+                            KeyValuePair<int, string>? activeWo = await _vehicleRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
                             if (activeWo.HasValue)
                             {
                                 throw new InvalidOperationException(
@@ -126,7 +126,7 @@ namespace ApiTaller.Core.Services.Vehicles
             bool result = false;
             try
             {
-                var existingVehicle = await _vehicleRepository.ValidateExist(plate, cancellation);
+                Domain.Models.Vehicle? existingVehicle = await _vehicleRepository.ValidateExist(plate, cancellation);
                 result = existingVehicle != null;
             }
             catch (Exception ex)

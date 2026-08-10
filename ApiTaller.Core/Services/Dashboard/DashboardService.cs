@@ -15,16 +15,16 @@ namespace ApiTaller.Core.Services.Dashboard
 
         public async Task<AdminDashboardStatsDto> GetAdminStatsAsync(CancellationToken ct)
         {
-            var activeOrders = await _dashboardRepository.GetActiveWorkOrdersCountAsync(ct);
-            var totalCustomers = await _dashboardRepository.GetTotalCustomersCountAsync(ct);
-            var totalVehicles = await _dashboardRepository.GetTotalVehiclesCountAsync(ct);
-            var operatingAvailability = await _dashboardRepository.GetOperatingAvailabilityPercentAsync(ct);
-            var recentActivities = await _dashboardRepository.GetRecentActivityAsync(6, ct);
+            int activeOrders = await _dashboardRepository.GetActiveWorkOrdersCountAsync(ct);
+            int totalCustomers = await _dashboardRepository.GetTotalCustomersCountAsync(ct);
+            int totalVehicles = await _dashboardRepository.GetTotalVehiclesCountAsync(ct);
+            decimal operatingAvailability = await _dashboardRepository.GetOperatingAvailabilityPercentAsync(ct);
+            IEnumerable<DashboardActivityDto> recentActivities = await _dashboardRepository.GetRecentActivityAsync(6, ct);
 
-            var activeMotoOrders = await _dashboardRepository.GetActiveWorkOrdersCountByTypeAsync("moto", ct);
-            var activeCarOrders = await _dashboardRepository.GetActiveWorkOrdersCountByTypeAsync("car", ct);
-            var totalMotoVehicles = await _dashboardRepository.GetTotalVehiclesCountByTypeAsync("moto", ct);
-            var totalCarVehicles = await _dashboardRepository.GetTotalVehiclesCountByTypeAsync("car", ct);
+            int activeMotoOrders = await _dashboardRepository.GetActiveWorkOrdersCountByTypeAsync("moto", ct);
+            int activeCarOrders = await _dashboardRepository.GetActiveWorkOrdersCountByTypeAsync("car", ct);
+            int totalMotoVehicles = await _dashboardRepository.GetTotalVehiclesCountByTypeAsync("moto", ct);
+            int totalCarVehicles = await _dashboardRepository.GetTotalVehiclesCountByTypeAsync("car", ct);
 
             return new AdminDashboardStatsDto
             {

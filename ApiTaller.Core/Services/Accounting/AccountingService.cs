@@ -25,7 +25,7 @@ namespace ApiTaller.Core.Services.Accounting
         {
             try
             {
-                var rawList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
+                IEnumerable<MechanicWithSettingsDto> rawList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
 
                 // LÓGICA DE NEGOCIO: Construir DTO final aplicando defaults de negocio
                 return rawList.Select(r => new MechanicPaymentSettingsDto
@@ -61,9 +61,9 @@ namespace ApiTaller.Core.Services.Accounting
         {
             try
             {
-                var rawOrders = await _accountingRepository.GetWorkOrderSalesRawAsync(startDate, endDate, status, mechanicId, vehicleType, ct);
-                var paymentSettingsList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
-                var settingsMap = paymentSettingsList.ToDictionary(s => s.MechanicId, s => s);
+                IEnumerable<WorkOrderSalesRawDto> rawOrders = await _accountingRepository.GetWorkOrderSalesRawAsync(startDate, endDate, status, mechanicId, vehicleType, ct);
+                IEnumerable<MechanicWithSettingsDto> paymentSettingsList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
+                Dictionary<int, MechanicWithSettingsDto> settingsMap = paymentSettingsList.ToDictionary(s => s.MechanicId, s => s);
 
                 // LÓGICA DE NEGOCIO: Calcular totales y desgloses
                 decimal totalParts = 0;
@@ -79,7 +79,7 @@ namespace ApiTaller.Core.Services.Accounting
                 decimal motoSales = 0;
                 decimal carSales = 0;
 
-                foreach (var order in rawOrders)
+                foreach (WorkOrderSalesRawDto order in rawOrders)
                 {
                     totalDownPayments += order.DownPayment;
                     ordersCount++;
@@ -88,9 +88,9 @@ namespace ApiTaller.Core.Services.Accounting
                     decimal orderServicesVal = 0;
 
                     // Repuestos
-                    foreach (var part in order.Parts)
+                    foreach (WorkOrderSalePartDto part in order.Parts)
                     {
-                        var partTotalVal = part.Quantity * part.UnitPrice;
+                        decimal partTotalVal = part.Quantity * part.UnitPrice;
 
                         if (part.ProductId == null)
                         {
@@ -119,7 +119,7 @@ namespace ApiTaller.Core.Services.Accounting
                     }
 
                     // Servicios
-                    foreach (var service in order.Services)
+                    foreach (WorkOrderSaleServiceDto service in order.Services)
                     {
                         totalServices += service.Price;
                         orderServicesVal += service.Price;
@@ -137,18 +137,18 @@ namespace ApiTaller.Core.Services.Accounting
 
                 // Calcular Pago a Mecánicos
                 decimal mechanicPayout = 0;
-                var allServices = rawOrders.SelectMany(o => o.Services).ToList();
+                List<WorkOrderSaleServiceDto> allServices = rawOrders.SelectMany(o => o.Services).ToList();
                 
                 // Agrupar servicios por mecánico para calcular su payout
-                var groupedByMechanic = allServices.GroupBy(s => s.MechanicId);
-                foreach (var mechanicGroup in groupedByMechanic)
+                IEnumerable<IGrouping<int?, WorkOrderSaleServiceDto>> groupedByMechanic = allServices.GroupBy(s => s.MechanicId);
+                foreach (IGrouping<int?, WorkOrderSaleServiceDto> mechanicGroup in groupedByMechanic)
                 {
                     if (!mechanicGroup.Key.HasValue) continue;
-                    var mechId = mechanicGroup.Key.Value;
+                    int mechId = mechanicGroup.Key.Value;
 
-                    settingsMap.TryGetValue(mechId, out var setting);
-                    var paymentType = setting?.PaymentType ?? "Porcentaje";
-                    var configValue = setting?.Value ?? 0;
+                    settingsMap.TryGetValue(mechId, out MechanicWithSettingsDto? setting);
+                    string paymentType = setting?.PaymentType ?? "Porcentaje";
+                    decimal configValue = setting?.Value ?? 0;
 
                     if (paymentType == "Porcentaje")
                     {
@@ -156,7 +156,7 @@ namespace ApiTaller.Core.Services.Accounting
                     }
                     else // PorDia
                     {
-                        var uniqueDays = mechanicGroup
+                        int uniqueDays = mechanicGroup
                             .Select(s => s.DateCompleted)
                             .Where(d => d != null)
                             .Distinct()
@@ -199,7 +199,7 @@ namespace ApiTaller.Core.Services.Accounting
         {
             try
             {
-                var rawServices = await _accountingRepository.GetPendingServicesRawAsync(mechanicId, startDate, endDate, ct);
+                IEnumerable<PendingServiceRawDto> rawServices = await _accountingRepository.GetPendingServicesRawAsync(mechanicId, startDate, endDate, ct);
 
                 // LÓGICA DE NEGOCIO: Calcular comisión según tipo de pago configurado
                 return rawServices.Select(raw =>

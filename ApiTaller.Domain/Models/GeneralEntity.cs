@@ -11,6 +11,6 @@ namespace ApiTaller.Domain.Models
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int? ResponsibleUserId { get; set; }
-        public virtual User ResponsibleUserIdNavigation { get; set; }
+        public virtual User ResponsibleUserIdNavigation { get; set; } = null!;
     }
 }

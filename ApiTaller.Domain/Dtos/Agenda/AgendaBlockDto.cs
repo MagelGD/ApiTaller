@@ -6,6 +6,6 @@ namespace ApiTaller.Domain.Dtos.Agenda
     {
         public int Id { get; set; }
         public DateTime BlockDate { get; set; }
-        public string Reason { get; set; }
+        public string Reason { get; set; } = null!;
     }
 }

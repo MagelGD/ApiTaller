@@ -20,11 +20,10 @@ namespace ApiTaller.Core.Services.Workshop
 
         public async Task<int> OnboardWorkshopAsync(WorkshopOnboardingRequestDto request)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // 1. Crear el Taller
-                var workshop = new ApiTaller.Domain.Models.Workshop
+                ApiTaller.Domain.Models.Workshop workshop = new ApiTaller.Domain.Models.Workshop
                 {
                     Name = request.WorkshopName,
                     Slug = request.WorkshopName.ToLower().Replace(" ", "-"),
@@ -41,8 +40,7 @@ namespace ApiTaller.Core.Services.Workshop
                 _context.Workshop.Add(workshop);
                 await _context.SaveChangesAsync();
 
-                // 2. Crear Rol Administrador Local
-                var adminRole = new UserRole
+                UserRole adminRole = new UserRole
                 {
                     Role = "Administrador",
                     WorkshopId = workshop.Id,
@@ -53,9 +51,12 @@ namespace ApiTaller.Core.Services.Workshop
                 _context.UserRole.Add(adminRole);
                 await _context.SaveChangesAsync();
 
-                // 3. Asignar todos los modulos activos al nuevo rol administrador
-                var activeModules = await _context.Module.Where(m => m.IsActive).ToListAsync();
-                foreach (var mod in activeModules)
+                string[] excludedModules = new[] { "Roles", "Configuracion Roles", "Modulos", "Operaciones", "Acciones", "Tipos Identificacion", "Modo Vehicular" };
+                List<Module> activeModules = await _context.Module
+                    .Where(m => m.IsActive && !excludedModules.Contains(m.Name))
+                    .ToListAsync();
+                    
+                foreach (Module mod in activeModules)
                 {
                     _context.UserRoleModule.Add(new UserRoleModule
                     {
@@ -66,9 +67,13 @@ namespace ApiTaller.Core.Services.Workshop
                     });
                 }
 
-                // Asignar todas las acciones activas al nuevo rol administrador
-                var activeActions = await _context.Action.Where(a => a.IsActive).ToListAsync();
-                foreach (var act in activeActions)
+                List<int> activeModuleIds = activeModules.Select(m => m.Id).ToList();
+                string[] excludedActionSlugs = new[] { "Guardar_Usuarios" };
+                List<Domain.Models.Action> activeActions = await _context.Action
+                    .Where(a => a.IsActive && activeModuleIds.Contains(a.ModuleId) && !excludedActionSlugs.Contains(a.Slug))
+                    .ToListAsync();
+                    
+                foreach (Domain.Models.Action act in activeActions)
                 {
                     _context.RoleAction.Add(new RoleAction
                     {
@@ -80,8 +85,7 @@ namespace ApiTaller.Core.Services.Workshop
                 }
                 await _context.SaveChangesAsync();
 
-                // 4. Crear Usuario Dueño
-                var user = new User
+                User user = new User
                 {
                     WorkshopId = workshop.Id,
                     UserRoleId = adminRole.Id,
@@ -92,7 +96,7 @@ namespace ApiTaller.Core.Services.Workshop
                     FirstSurname = request.AdminFirstSurname,
                     SecondLastName = "",
                     FullName = $"{request.AdminFirstName} {request.AdminFirstSurname}".Trim(),
-                    Username = request.AdminEmail, // Usamos el correo como username
+                    Username = request.AdminEmail,
                     Email = request.AdminEmail,
                     Password = BCrypt.Net.BCrypt.HashPassword(request.AdminPassword),
                     IsActive = true,
@@ -103,7 +107,6 @@ namespace ApiTaller.Core.Services.Workshop
                 _context.User.Add(user);
                 await _context.SaveChangesAsync();
 
-                // 5. Poblar Catálogo (Clonar del Template Workshop)
                 await _context.Database.ExecuteSqlRawAsync("CALL sp_SeedWorkshopCatalogs({0})", workshop.Id);
 
                 await transaction.CommitAsync();

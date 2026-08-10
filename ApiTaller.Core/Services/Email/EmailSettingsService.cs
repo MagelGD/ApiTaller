@@ -28,7 +28,7 @@ namespace ApiTaller.Core.Services.Email
 
         public async Task<EmailSettingsDto?> GetSettingsAsync(CancellationToken ct)
         {
-            var settings = await _emailSettingsRepository.GetSettingsAsync(ct);
+            EmailSettingsDto? settings = await _emailSettingsRepository.GetSettingsAsync(ct);
             if (settings == null) return null;
 
             return new EmailSettingsDto
@@ -48,7 +48,7 @@ namespace ApiTaller.Core.Services.Email
 
         public async Task<bool> SaveSettingsAsync(EmailSettingsDto dto, CancellationToken ct)
         {
-            var existing = await _emailSettingsRepository.GetSettingsAsync(ct);
+            EmailSettingsDto? existing = await _emailSettingsRepository.GetSettingsAsync(ct);
 
             string finalPassword;
             if (dto.Password == "********" && existing != null)
@@ -64,7 +64,7 @@ namespace ApiTaller.Core.Services.Email
             if (int.TryParse(_currentUserService.UserId, out int parsedId))
                 userId = parsedId;
 
-            var settings = new EmailSettings
+            Domain.Models.EmailSettings settings = new Domain.Models.EmailSettings
             {
                 Id = dto.Id,
                 Host = dto.Host,
@@ -83,7 +83,7 @@ namespace ApiTaller.Core.Services.Email
 
         public async Task<bool> TestConnectionAsync(EmailSettingsDto dto, CancellationToken ct)
         {
-            var existing = await _emailSettingsRepository.GetSettingsAsync(ct);
+            EmailSettingsDto? existing = await _emailSettingsRepository.GetSettingsAsync(ct);
 
             string finalPassword;
             if (dto.Password == "********" && existing != null)
@@ -95,7 +95,7 @@ namespace ApiTaller.Core.Services.Email
                 finalPassword = SecurityHelper.Encrypt(dto.Password);
             }
 
-            var settings = new EmailSettings
+            Domain.Models.EmailSettings settings = new Domain.Models.EmailSettings
             {
                 Host = dto.Host,
                 Port = dto.Port,

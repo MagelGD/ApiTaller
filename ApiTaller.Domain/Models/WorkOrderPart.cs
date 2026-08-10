@@ -6,7 +6,7 @@ namespace ApiTaller.Domain.Models
     {
         public int WorkOrderId { get; set; }
         public int? ProductId { get; set; }
-        public string PartName { get; set; }
+        public string PartName { get; set; } = null!;
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public bool IsProvidedByCustomer { get; set; }
@@ -14,7 +14,7 @@ namespace ApiTaller.Domain.Models
         public string? QuotePhotoUrl { get; set; }
         public bool IsApproved { get; set; } = true;
 
-        public virtual WorkOrder WorkOrderNavigation { get; set; }
-        public virtual Product ProductNavigation { get; set; }
+        public virtual WorkOrder WorkOrderNavigation { get; set; } = null!;
+        public virtual Product ProductNavigation { get; set; } = null!;
     }
 }

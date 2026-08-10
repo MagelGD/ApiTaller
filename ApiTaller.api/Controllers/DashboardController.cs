@@ -22,8 +22,19 @@ namespace ApiTaller.Api.Controllers
         [ProducesResponseType(typeof(AdminDashboardStatsDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAdminStats(CancellationToken ct)
         {
-            var stats = await _dashboardService.GetAdminStatsAsync(ct);
-            return Ok(stats);
+            try
+            {
+                AdminDashboardStatsDto stats = await _dashboardService.GetAdminStatsAsync(ct);
+                return Ok(stats);
+            }
+            catch (OperationCanceledException)
+            {
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error loading dashboard stats", error = ex.Message });
+            }
         }
     }
 }

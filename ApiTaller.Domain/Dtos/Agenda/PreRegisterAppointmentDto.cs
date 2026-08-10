@@ -9,21 +9,21 @@ namespace ApiTaller.Domain.Dtos.Agenda
     public class PreRegisterAppointmentDto
     {
         [Required]
-        public string ContactName { get; set; }
+        public string ContactName { get; set; } = null!;
 
         [Required]
-        public string ContactPhone { get; set; }
+        public string ContactPhone { get; set; } = null!;
 
-        public string ContactEmail { get; set; }
+        public string ContactEmail { get; set; } = null!;
 
         [Required]
-        public string VehicleDescription { get; set; }
+        public string VehicleDescription { get; set; } = null!;
 
         public int? ServiceTypeId { get; set; }
 
         [Required]
         public DateTime AppointmentDate { get; set; }
 
-        public string CustomerNotes { get; set; }
+        public string CustomerNotes { get; set; } = null!;
     }
 }

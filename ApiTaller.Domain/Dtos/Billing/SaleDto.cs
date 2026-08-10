@@ -29,7 +29,7 @@ namespace ApiTaller.Domain.Dtos.Billing
         public string? VehicleColor { get; set; }
         public string? VehicleType { get; set; } = "moto";
 
-        public List<SaleDetailDto> Details { get; set; }
-        public List<SalePaymentDto> Payments { get; set; }
+        public List<SaleDetailDto> Details { get; set; } = null!;
+        public List<SalePaymentDto> Payments { get; set; } = null!;
     }
 }

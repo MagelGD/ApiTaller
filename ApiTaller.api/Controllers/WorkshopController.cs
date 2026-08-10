@@ -24,7 +24,7 @@ namespace ApiTaller.api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterWorkshopDto dto, CancellationToken ct)
         {
-            var result = await _workshopService.RegisterWorkshopAsync(dto, ct);
+            bool result = await _workshopService.RegisterWorkshopAsync(dto, ct);
             if (!result.Success)
             {
                 return BadRequest(new { Message = result.Message });
@@ -36,7 +36,7 @@ namespace ApiTaller.api.Controllers
         [Authorize] // PlatformAdmin o el propio Admin del Taller (validación en un atributo o policy no incluida para simplificar)
         public async Task<IActionResult> GetById(int id, CancellationToken ct)
         {
-            var workshop = await _workshopService.GetByIdAsync(id, ct);
+            WorkshopDto? workshop = await _workshopService.GetByIdAsync(id, ct);
             if (workshop == null) return NotFound(new { Message = "Taller no encontrado." });
             return Ok(workshop);
         }
@@ -45,7 +45,7 @@ namespace ApiTaller.api.Controllers
         [Authorize] // Asume validación de PlatformAdmin
         public async Task<IActionResult> GetAll(CancellationToken ct)
         {
-            var workshops = await _workshopService.GetAllAsync(ct);
+            IEnumerable<WorkshopDto> workshops = await _workshopService.GetAllAsync(ct);
             return Ok(workshops);
         }
 
@@ -55,7 +55,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var success = await _workshopService.UpdateWorkshopAsync(id, dto, ct);
+                bool success = await _workshopService.UpdateWorkshopAsync(id, dto, ct);
                 if (!success) return NotFound(new { Message = "Taller no encontrado o no se pudo actualizar." });
                 return Ok(new { Message = "Taller actualizado exitosamente." });
             }
@@ -70,7 +70,7 @@ namespace ApiTaller.api.Controllers
         [Authorize]
         public async Task<IActionResult> ValidateTypeChange(int id, [FromQuery] string newType, CancellationToken ct)
         {
-            var validation = await _workshopService.ValidateTypeChangeAsync(id, newType, ct);
+            TypeChangeValidationDto validation = await _workshopService.ValidateTypeChangeAsync(id, newType, ct);
             return Ok(validation);
         }
 
@@ -78,7 +78,7 @@ namespace ApiTaller.api.Controllers
         [Authorize] // PlatformAdmin
         public async Task<IActionResult> ToggleStatus(int id, [FromBody] ToggleWorkshopStatusDto dto, CancellationToken ct)
         {
-            var success = await _workshopService.ToggleStatusAsync(id, dto.IsActive, ct);
+            bool success = await _workshopService.ToggleStatusAsync(id, dto.IsActive, ct);
             if (!success) return NotFound(new { Message = "Taller no encontrado." });
             return Ok(new { Message = "Estado del taller actualizado exitosamente." });
         }

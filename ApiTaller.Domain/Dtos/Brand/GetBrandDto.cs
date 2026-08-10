@@ -7,7 +7,7 @@ namespace ApiTaller.Domain.Dtos.Brand
     public class GetBrandDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
         /// <summary>CAR-1: Tipo de vehículo. 'moto' | 'car'</summary>
         public string VehicleType { get; set; } = "moto";
         public bool IsActive { get; set; }

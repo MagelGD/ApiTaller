@@ -7,7 +7,7 @@ namespace ApiTaller.Domain.Dtos.UserRoleModule
 {
     public class SaveUserRoleModuleDto
     {
-        public List<ActionsRoleDto> actions { get; set; } 
+        public List<ActionsRoleDto> actions { get; set; } = null!; 
         public bool isActive { get; set; }
         public int modulesRoleId { get; set; }
         public int userRoleId { get; set; }

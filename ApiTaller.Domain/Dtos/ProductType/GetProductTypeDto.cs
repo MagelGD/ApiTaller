@@ -7,7 +7,7 @@ namespace ApiTaller.Domain.Dtos.ProductType
     public class GetProductTypeDto
     {
         public int Id { get; set; }
-        public string Type { get; set; }
+        public string Type { get; set; } = null!;
         public bool IsActive { get; set; }
         public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

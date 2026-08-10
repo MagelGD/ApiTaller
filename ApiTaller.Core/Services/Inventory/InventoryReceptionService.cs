@@ -26,7 +26,7 @@ namespace ApiTaller.Core.Services.Inventory
         {
             try
             {
-                var result = await _receptionRepository.GetAllAsync(cancellation);
+                IEnumerable<InventoryReceptionDto> result = await _receptionRepository.GetAllAsync(cancellation);
                 return result.Select(r => new InventoryReceptionDto
                 {
                     Id = r.Id,
@@ -57,7 +57,7 @@ namespace ApiTaller.Core.Services.Inventory
         {
             try
             {
-                var reception = new InventoryReception
+                InventoryReception reception = new InventoryReception
                 {
                     SupplierId = value.SupplierId,
                     Observations = value.Observations,

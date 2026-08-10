@@ -31,7 +31,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         private async Task<int?> GetCustomerIdFromUserAsync(CancellationToken cancellation)
         {
             if (!int.TryParse(_currentUserService.UserId, out int userId)) return null;
-            var customer = await _context.Customer
+            Domain.Models.Customer? customer = await _context.Customer
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.IsActive, cancellation);
             return customer?.Id;
         }
@@ -41,25 +41,25 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         {
             try
             {
-                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                int? customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return new List<CustomerPortalVehicleDto>();
 
-                var vehicles = await _context.Vehicle
+                List<Vehicle> vehicles = await _context.Vehicle
                     .Include(v => v.BrandNavigation)
                     .Include(v => v.ModelNavigation)
                     .Include(v => v.VersionNavigation)
                     .Where(v => v.CustomerId == customerId && v.IsActive)
                     .ToListAsync(cancellation);
 
-                var result = new List<CustomerPortalVehicleDto>();
-                foreach (var v in vehicles)
+                List<CustomerPortalVehicleDto> result = new List<CustomerPortalVehicleDto>();
+                foreach (Vehicle v in vehicles)
                 {
-                    var orders = await _context.WorkOrder
+                    List<WorkOrder> orders = await _context.WorkOrder
                         .Where(o => o.VehicleId == v.Id)
                         .OrderByDescending(o => o.CreatedAt)
                         .ToListAsync(cancellation);
 
-                    var activeAppt = await _context.Appointment
+                    Appointment? activeAppt = await _context.Appointment
                         .FirstOrDefaultAsync(a => a.VehicleId == v.Id && a.IsActive && (a.Status == "Agendada" || a.Status == "Pendiente"), cancellation);
 
                     result.Add(new CustomerPortalVehicleDto
@@ -93,15 +93,15 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         {
             try
             {
-                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                int? customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return new List<CustomerPortalOrderSummaryDto>();
 
                 // Verificar que el vehículo pertenece a este cliente
-                var vehicleOwned = await _context.Vehicle
+                bool vehicleOwned = await _context.Vehicle
                     .AnyAsync(v => v.Id == vehicleId && v.CustomerId == customerId, cancellation);
                 if (!vehicleOwned) return new List<CustomerPortalOrderSummaryDto>(); // Seguridad: no expone datos ajenos
 
-                var orders = await _context.WorkOrder
+                List<WorkOrder> orders = await _context.WorkOrder
                     .Include(o => o.Parts)
                     .Include(o => o.Services)
                     .Where(o => o.VehicleId == vehicleId)
@@ -110,9 +110,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
 
                 return orders.Select(o =>
                 {
-                    var totalParts = o.Parts.Where(p => p.IsActive && p.IsApproved).Sum(p => p.UnitPrice * p.Quantity);
-                    var totalServices = o.Services.Where(s => s.IsActive && s.IsApproved).Sum(s => s.Price);
-                    var hasPending = o.Parts.Any(p => p.IsActive && !p.IsApproved) ||
+                    decimal totalParts = o.Parts.Where(p => p.IsActive && p.IsApproved).Sum(p => p.UnitPrice * p.Quantity);
+                    decimal totalServices = o.Services.Where(s => s.IsActive && s.IsApproved).Sum(s => s.Price);
+                    bool hasPending = o.Parts.Any(p => p.IsActive && !p.IsApproved) ||
                                     o.Services.Any(s => s.IsActive && !s.IsApproved);
 
                     return new CustomerPortalOrderSummaryDto
@@ -141,11 +141,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         {
             try
             {
-                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                int? customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return null;
 
                 // Cadena de seguridad completa: orden → vehículo → cliente
-                var order = await _context.WorkOrder
+                WorkOrder? order = await _context.WorkOrder
                     .Include(o => o.VehicleNavigation).ThenInclude(v => v.BrandNavigation)
                     .Include(o => o.VehicleNavigation).ThenInclude(v => v.VersionNavigation)
                     .Include(o => o.Parts).ThenInclude(p => p.ProductNavigation)
@@ -156,7 +156,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 if (order == null) return null; // Orden no encontrada o no pertenece al cliente
 
                 // Todas las fotos de evidencias (ingreso y proceso)
-                var evidences = order.Evidences
+                List<PortalEvidenceDto> evidences = order.Evidences
                     .Where(e => e.IsActive)
                     .Select(e => new CustomerPortalEvidenceDto
                     {
@@ -165,14 +165,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                     })
                     .ToList();
 
-                var activeParts = order.Parts.Where(p => p.IsActive).ToList();
-                var activeServices = order.Services.Where(s => s.IsActive).ToList();
+                List<WorkOrderPart> activeParts = order.Parts.Where(p => p.IsActive).ToList();
+                List<WorkOrderService> activeServices = order.Services.Where(s => s.IsActive).ToList();
 
-                var approvedPartsTotal = activeParts.Where(p => p.IsApproved).Sum(p => p.UnitPrice * p.Quantity);
-                var approvedServicesTotal = activeServices.Where(s => s.IsApproved).Sum(s => s.Price);
+                decimal approvedPartsTotal = activeParts.Where(p => p.IsApproved).Sum(p => p.UnitPrice * p.Quantity);
+                decimal approvedServicesTotal = activeServices.Where(s => s.IsApproved).Sum(s => s.Price);
 
                 // Historial de estados (sin exponer ActionBy)
-                var history = await _context.WorkOrderHistory
+                List<CustomerPortalHistoryDto> history = await _context.WorkOrderHistory
                     .Where(h => h.WorkOrderId == orderId)
                     .OrderByDescending(h => h.CreatedAt)
                     .Select(h => new CustomerPortalHistoryDto
@@ -234,13 +234,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         {
             try
             {
-                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                int? customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return false;
 
                 if (dto.ItemType == "Part")
                 {
                     // Verificar cadena: Part → WorkOrder → Vehicle → Customer
-                    var part = await _context.WorkOrderPart
+                    WorkOrderPart? part = await _context.WorkOrderPart
                         .Include(p => p.WorkOrderNavigation)
                             .ThenInclude(o => o.VehicleNavigation)
                         .FirstOrDefaultAsync(p => p.Id == dto.ItemId
@@ -255,7 +255,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 else if (dto.ItemType == "Service")
                 {
                     // Verificar cadena: Service → WorkOrder → Vehicle → Customer
-                    var service = await _context.WorkOrderService
+                    WorkOrderService? service = await _context.WorkOrderService
                         .Include(s => s.WorkOrderNavigation)
                             .ThenInclude(o => o.VehicleNavigation)
                         .FirstOrDefaultAsync(s => s.Id == dto.ItemId
@@ -272,18 +272,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                     return false; // ItemType desconocido
                 }
 
-                var saved = await _context.SaveChangesAsync(cancellation) > 0;
+                bool saved = await _context.SaveChangesAsync(cancellation) > 0;
                 if (saved)
                 {
                     int orderId = 0;
                     if (dto.ItemType == "Part")
                     {
-                        var p = await _context.WorkOrderPart.FindAsync(dto.ItemId);
+                        WorkOrderPart? p = await _context.WorkOrderPart.FindAsync(dto.ItemId);
                         orderId = p?.WorkOrderId ?? 0;
                     }
                     else
                     {
-                        var s = await _context.WorkOrderService.FindAsync(dto.ItemId);
+                        WorkOrderService? s = await _context.WorkOrderService.FindAsync(dto.ItemId);
                         orderId = s?.WorkOrderId ?? 0;
                     }
 
@@ -305,17 +305,17 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         {
             try
             {
-                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                int? customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return false;
 
-                var plateUpper = dto.Plate.ToUpper().Trim();
-                var exists = await _context.Vehicle.AnyAsync(v => v.Plate == plateUpper, cancellation);
+                string plateUpper = dto.Plate.ToUpper().Trim();
+                bool exists = await _context.Vehicle.AnyAsync(v => v.Plate == plateUpper, cancellation);
                 if (exists)
                 {
                     throw new InvalidOperationException("La placa ya se encuentra registrada en el sistema.");
                 }
 
-                var vehicle = new ApiTaller.Domain.Models.Vehicle
+                ApiTaller.Domain.Models.Vehicle vehicle = new ApiTaller.Domain.Models.Vehicle
                 {
                     Plate = plateUpper,
                     BrandId = dto.BrandId,
@@ -346,7 +346,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
 
         public async Task<IEnumerable<CustomerPortalAppointmentDto>> GetMyAppointmentsAsync(CancellationToken cancellation)
         {
-            var customerId = await GetCustomerIdFromUserAsync(cancellation);
+            int? customerId = await GetCustomerIdFromUserAsync(cancellation);
             if (customerId == null) return new List<CustomerPortalAppointmentDto>();
 
             return await _context.Appointment
@@ -369,10 +369,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         {
             try
             {
-                var customerId = await GetCustomerIdFromUserAsync(cancellation);
+                int? customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return false;
 
-                var order = await _context.WorkOrder
+                WorkOrder? order = await _context.WorkOrder
                     .Include(o => o.Parts)
                     .Include(o => o.Services)
                     .Include(o => o.VehicleNavigation).ThenInclude(v => v.CustomerNavigation)
@@ -380,9 +380,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
 
                 if (order == null) return false;
 
-                // Solo permitir si está en estados de aprobación/cotización
-                var s = order.Status ?? "";
-                var validStatuses = new[] { "Cotización", "Cotizacion", "En Aprobación", "En Aprobacion", "Recepción", "Recepcion", "Ingreso" };
+                string s = order.Status ?? "";
+                string[] validStatuses = new[] { "Cotización", "Cotizacion", "En Aprobación", "En Aprobacion", "Recepción", "Recepcion", "Ingreso" };
                 
                 if (!validStatuses.Any(vs => vs.Equals(s, StringComparison.OrdinalIgnoreCase) || s.Contains(vs, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -391,15 +390,15 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 }
 
                 // 1. Aprobar todo lo activo
-                foreach (var p in order.Parts.Where(p => p.IsActive)) p.IsApproved = true;
-                foreach (var svc in order.Services.Where(s => s.IsActive)) svc.IsApproved = true;
+                foreach (WorkOrderPart p in order.Parts.Where(p => p.IsActive)) p.IsApproved = true;
+                foreach (WorkOrderService svc in order.Services.Where(s => s.IsActive)) svc.IsApproved = true;
 
                 // 2. Cambiar estado
                 order.Status = "Aprobado";
                 order.UpdatedAt = DateTime.Now;
 
                 // 3. Registrar historia
-                var history = new ApiTaller.Domain.Models.WorkOrderHistory
+                ApiTaller.Domain.Models.WorkOrderHistory history = new ApiTaller.Domain.Models.WorkOrderHistory
                 {
                     WorkOrderId = order.Id,
                     Status = "Aprobado",
@@ -412,7 +411,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 
                 _context.WorkOrderHistory.Add(history);
 
-                var saved = await _context.SaveChangesAsync(cancellation) > 0;
+                bool saved = await _context.SaveChangesAsync(cancellation) > 0;
                 if (saved)
                 {
                     await _notificationService.NotifyWorkOrderUpdatedAsync(orderId, customerId.Value);

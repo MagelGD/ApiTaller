@@ -71,7 +71,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Brands
             IEnumerable<GetBrandDto> brands = [];
             try
             {
-                var query = _Context.Brand.Where(b => b.IsActive == true);
+                IQueryable<Domain.Models.Brand> query = _Context.Brand.Where(b => b.IsActive == true);
                 if (!string.IsNullOrWhiteSpace(vehicleType))
                     query = query.Where(b => b.VehicleType == vehicleType);
 
@@ -167,7 +167,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Brands
             try
             {
                 brandDto = await _Context.Brand
-                    .Where(b => b.Name.Equals(brand.Name, StringComparison.CurrentCultureIgnoreCase))
+                    .Where(b => b.Name!.Equals(brand.Name, StringComparison.CurrentCultureIgnoreCase))
                     .Select(b => new GetBrandDto
                     {
                         Id = b.Id,

@@ -70,13 +70,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Workshop
 
         public async Task<WorkshopTypeChangeValidationDto> ValidateTypeChangeAsync(int workshopId, string newType, CancellationToken ct = default)
         {
-            var result = new WorkshopTypeChangeValidationDto
+            WorkshopTypeChangeValidationDto result = new WorkshopTypeChangeValidationDto
             {
                 RequestedType = newType,
                 CanChange = true
             };
 
-            var workshop = await _context.Workshop.FirstOrDefaultAsync(w => w.Id == workshopId, ct);
+            ApiTaller.Domain.Models.Workshop? workshop = await _context.Workshop.FirstOrDefaultAsync(w => w.Id == workshopId, ct);
             if (workshop == null)
             {
                 result.CanChange = false;

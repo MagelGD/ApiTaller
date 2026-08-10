@@ -6,5 +6,5 @@ namespace ApiTaller.Domain.Models;
 public partial class Login : GeneralEntity
 {
     public int UserId { get; set; }
-    public string Message { get; set; }
+    public string Message { get; set; } = null!;
 }

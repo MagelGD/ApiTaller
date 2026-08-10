@@ -60,7 +60,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var result = await _userRoleModuleService.SaveOrEditUserRoleModule(saveUserRoleModule, cancellation);
+                GetUserRoleModuleDto result = await _userRoleModuleService.SaveOrEditUserRoleModule(saveUserRoleModule, cancellation);
                 await _hubContext.Clients.All.SendAsync("PermissionsChanged", result.Role.IdUserRol);
                 return Ok(result);
             }

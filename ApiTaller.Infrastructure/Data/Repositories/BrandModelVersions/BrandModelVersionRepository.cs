@@ -27,7 +27,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
         {
             try
             {
-                if (int.TryParse(_currentUserService.UserId, out var userId))
+                if (int.TryParse(_currentUserService.UserId, out int userId))
                 {
                     brandModelVersion.ResponsibleUserId = userId;
                 }
@@ -85,7 +85,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
             IEnumerable<GetBrandModelVersionDto> result = [];
             try
             {
-                var query = _Context.BrandModelVersion.Include(x => x.Model).Include(x => x.Brand).Where(x => x.IsActive);
+                IQueryable<Domain.Models.BrandModelVersion> query = _Context.BrandModelVersion.Include(x => x.Model).Include(x => x.Brand).Where(x => x.IsActive);
                 if (!string.IsNullOrWhiteSpace(vehicleType))
                     query = query.Where(x => x.VehicleType == vehicleType);
 
@@ -202,7 +202,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
         {
             try
             {
-                if(int.TryParse(_currentUserService.UserId, out var userId))
+                if(int.TryParse(_currentUserService.UserId, out int userId))
                 {
                     brandModelVersion.ResponsibleUserId = userId;
                 }
@@ -221,7 +221,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.BrandModelVersions
             GetBrandModelVersionDto? result = null;
             try
             {
-                result = await _Context.BrandModelVersion.Include(x => x.Model).Include(x => x.Brand).Where(x => x.Version == dto.Version && x.Brand.Id == dto.brandDto.Id && x.Model.Id == dto.BrandModelsDto.Id).Select(x => new GetBrandModelVersionDto
+                result = await _Context.BrandModelVersion.Include(x => x.Model).Include(x => x.Brand).Where(x => x.Version == dto.Version && x.Brand!.Id == dto.brandDto.Id && x.Model!.Id == dto.BrandModelsDto.Id).Select(x => new GetBrandModelVersionDto
                 {
                     Id = x.Id,
                     Version = x.Version,

@@ -24,7 +24,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
 
         public async Task<IEnumerable<InventoryDto>> GetAllAsync(CancellationToken cancellation)
         {
-            var query = from p in _context.Product
+            IQueryable<InventoryDto> query = from p in _context.Product
                         join i in _context.Inventory on p.Id equals i.ProductId into inv
                         from subInv in inv.DefaultIfEmpty()
                         where p.IsActive
@@ -45,7 +45,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
 
         public async Task<InventoryDto> GetByProductIdAsync(int productId, CancellationToken cancellation)
         {
-            var query = from p in _context.Product
+            IQueryable<InventoryDto> query = from p in _context.Product
                         join i in _context.Inventory on p.Id equals i.ProductId into inv
                         from subInv in inv.DefaultIfEmpty()
                         where p.Id == productId
@@ -61,14 +61,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                             CreatedAt = p.CreatedAt,
                             UpdatedAt = p.UpdatedAt
                         };
-            return await query.FirstOrDefaultAsync(cancellation);
+            return await query.FirstOrDefaultAsync(cancellation)!;
         }
 
         public async Task<bool> UpdateStockAsync(InventoryHistory movement, CancellationToken cancellation)
         {
             try
             {
-                var inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == movement.ProductId, cancellation);
+                Domain.Models.Inventory? inventory = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == movement.ProductId, cancellation);
                 
                 if (inventory == null)
                 {

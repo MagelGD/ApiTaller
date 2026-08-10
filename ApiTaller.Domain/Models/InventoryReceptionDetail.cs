@@ -11,7 +11,7 @@ namespace ApiTaller.Domain.Models
         public decimal UnitCost { get; set; }
         public decimal SalePrice { get; set; }
 
-        public virtual InventoryReception ReceptionNavigation { get; set; }
-        public virtual Product ProductNavigation { get; set; }
+        public virtual InventoryReception ReceptionNavigation { get; set; } = null!;
+        public virtual Product ProductNavigation { get; set; } = null!;
     }
 }

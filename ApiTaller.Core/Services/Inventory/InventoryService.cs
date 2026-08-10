@@ -29,19 +29,19 @@ namespace ApiTaller.Core.Services.Inventory
 
         public async Task<bool> AddStockAsync(InventoryHistoryDto movement, CancellationToken cancellation)
         {
-            var model = MapToModel(movement, "Entrada");
+            Domain.Models.InventoryMovement model = MapToModel(movement, "Entrada");
             return await _repository.UpdateStockAsync(model, cancellation);
         }
 
         public async Task<bool> RemoveStockAsync(InventoryHistoryDto movement, CancellationToken cancellation)
         {
-            var model = MapToModel(movement, "Salida");
+            Domain.Models.InventoryMovement model = MapToModel(movement, "Salida");
             return await _repository.UpdateStockAsync(model, cancellation);
         }
 
         public async Task<bool> AdjustStockAsync(InventoryHistoryDto movement, CancellationToken cancellation)
         {
-            var model = MapToModel(movement, "Ajuste");
+            Domain.Models.InventoryMovement model = MapToModel(movement, "Ajuste");
             return await _repository.UpdateStockAsync(model, cancellation);
         }
 

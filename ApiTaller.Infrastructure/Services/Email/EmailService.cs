@@ -25,22 +25,22 @@ namespace ApiTaller.Infrastructure.Services.Email
 
         public async Task SendEmailAsync(EmailRequest request, CancellationToken ct = default)
         {
-            var config = await _context.EmailSettings.FirstOrDefaultAsync(x => x.IsActive, ct);
+            EmailSettings? config = await _context.EmailSettings.FirstOrDefaultAsync(x => x.IsActive, ct);
             if (config == null)
             {
                 throw new Exception("No hay una configuración de correo activa.");
             }
 
-            var message = new MimeMessage();
+            MimeMessage message = new MimeMessage();
             message.From.Add(new MailboxAddress(config.SenderName, config.SenderEmail));
             message.To.Add(new MailboxAddress("", request.To));
             message.Subject = request.Subject;
 
-            var bodyBuilder = new BodyBuilder { HtmlBody = request.Body };
+            BodyBuilder bodyBuilder = new BodyBuilder { HtmlBody = request.Body };
 
             if (request.Attachments != null)
             {
-                foreach (var attachment in request.Attachments)
+                foreach (EmailAttachment attachment in request.Attachments)
                 {
                     bodyBuilder.Attachments.Add(attachment.FileName, attachment.Content, ContentType.Parse(attachment.ContentType));
                 }
@@ -48,11 +48,11 @@ namespace ApiTaller.Infrastructure.Services.Email
 
             message.Body = bodyBuilder.ToMessageBody();
 
-            using (var client = new SmtpClient())
+            using (SmtpClient client = new SmtpClient())
             {
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                var socketOptions = config.EnableSsl 
+                SecureSocketOptions socketOptions = config.EnableSsl 
                     ? (config.Port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls) 
                     : SecureSocketOptions.None;
 
@@ -70,11 +70,11 @@ namespace ApiTaller.Infrastructure.Services.Email
         {
             try
             {
-                using (var client = new SmtpClient())
+                using (SmtpClient client = new SmtpClient())
                 {
                     client.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     
-                    var socketOptions = settings.EnableSsl 
+                    SecureSocketOptions socketOptions = settings.EnableSsl 
                         ? (settings.Port == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls) 
                         : SecureSocketOptions.None;
 

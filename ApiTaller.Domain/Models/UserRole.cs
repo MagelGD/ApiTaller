@@ -5,7 +5,7 @@ namespace ApiTaller.Domain.Models;
 
 public partial class UserRole : GeneralEntity
 {
-    public string Role { get; set; }
+    public string Role { get; set; } = null!;
 
     /// <summary>SAAS-1: ID del taller al que pertenece este rol. NULL = Rol de plataforma (Ej: SuperAdmin)</summary>
     public int? WorkshopId { get; set; }

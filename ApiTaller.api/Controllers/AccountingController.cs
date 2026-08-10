@@ -27,7 +27,7 @@ namespace ApiTaller.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<MechanicPaymentSettingsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPaymentSettings(CancellationToken ct)
         {
-            var result = await _accountingService.GetPaymentSettingsAsync(ct);
+            IEnumerable<MechanicWithSettingsDto> result = await _accountingService.GetPaymentSettingsAsync(ct);
             return Ok(result);
         }
 
@@ -35,7 +35,7 @@ namespace ApiTaller.Api.Controllers
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         public async Task<IActionResult> SavePaymentSettings([FromBody] MechanicPaymentSettingsDto dto, CancellationToken ct)
         {
-            var result = await _accountingService.SavePaymentSettingsAsync(dto, ct);
+            bool result = await _accountingService.SavePaymentSettingsAsync(dto, ct);
             return Ok(result);
         }
 
@@ -49,7 +49,7 @@ namespace ApiTaller.Api.Controllers
             [FromQuery] string? vehicleType,
             CancellationToken ct)
         {
-            var result = await _accountingService.GetSalesSummaryAsync(startDate, endDate, status, mechanicId, vehicleType, ct);
+            SalesSummaryDto result = await _accountingService.GetSalesSummaryAsync(startDate, endDate, status, mechanicId, vehicleType, ct);
             return Ok(result);
         }
 
@@ -61,7 +61,7 @@ namespace ApiTaller.Api.Controllers
             [FromQuery] DateTime endDate, 
             CancellationToken ct)
         {
-            var result = await _accountingService.GetPendingServicesAsync(mechanicId, startDate, endDate, ct);
+            MechanicPendingPaymentsDto result = await _accountingService.GetPendingServicesAsync(mechanicId, startDate, endDate, ct);
             return Ok(result);
         }
 
@@ -70,14 +70,14 @@ namespace ApiTaller.Api.Controllers
         public async Task<IActionResult> SettleServices([FromBody] SettleServicesRequest request, CancellationToken ct)
         {
             // Resolver id de usuario responsable de la liquidación
-            var userIdStr = User.FindFirst(ClaimTypes.Sid)?.Value 
+            string? userIdStr = User.FindFirst(ClaimTypes.Sid)?.Value 
                             ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
                             ?? "1";
 
-            int.TryParse(userIdStr, out var responsibleUserId);
+            int.TryParse(userIdStr, out int responsibleUserId);
             if (responsibleUserId <= 0) responsibleUserId = 1;
 
-            var result = await _accountingService.SettleServicesAsync(
+            bool result = await _accountingService.SettleServicesAsync(
                 request.MechanicId, 
                 request.StartDate, 
                 request.EndDate, 
@@ -93,7 +93,7 @@ namespace ApiTaller.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<MechanicSettlementDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetSettlementHistory([FromQuery] int? mechanicId, CancellationToken ct)
         {
-            var result = await _accountingService.GetSettlementHistoryAsync(mechanicId, ct);
+            IEnumerable<MechanicSettlementDto> result = await _accountingService.GetSettlementHistoryAsync(mechanicId, ct);
             return Ok(result);
         }
     }
@@ -104,6 +104,6 @@ namespace ApiTaller.Api.Controllers
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal TotalAmount { get; set; }
-        public List<int> ServiceIds { get; set; }
+        public List<int> ServiceIds { get; set; } = null!;
     }
 }

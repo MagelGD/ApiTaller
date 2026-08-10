@@ -82,7 +82,7 @@ namespace ApiTaller.Core.Services.WorkOrders
 
                 if (dto.Parts != null)
                 {
-                    foreach (var part in dto.Parts)
+                    foreach (WorkOrderPartDto part in dto.Parts)
                     {
                         model.Parts.Add(new WorkOrderPart
                         {
@@ -105,7 +105,7 @@ namespace ApiTaller.Core.Services.WorkOrders
 
                 if (dto.Services != null)
                 {
-                    foreach (var service in dto.Services)
+                    foreach (WorkOrderServiceDto service in dto.Services)
                     {
                         model.Services.Add(new Domain.Models.WorkOrderService
                         {
@@ -127,7 +127,7 @@ namespace ApiTaller.Core.Services.WorkOrders
 
                 if (dto.Evidences != null)
                 {
-                    foreach (var evidence in dto.Evidences)
+                    foreach (WorkOrderEvidenceDto evidence in dto.Evidences)
                     {
                         model.Evidences.Add(new WorkOrderEvidence
                         {
@@ -170,7 +170,7 @@ namespace ApiTaller.Core.Services.WorkOrders
 
                     // REGLA DE NEGOCIO: No modificar una orden facturada o entregada
                     bool isBilled = await _workOrderRepository.IsBilledAsync(model.Id, cancellation);
-                    var existing = await _workOrderRepository.GetByIdAsync(model.Id, cancellation);
+                    Domain.Models.WorkOrder? existing = await _workOrderRepository.GetByIdAsync(model.Id, cancellation);
 
                     if (existing != null)
                     {
@@ -250,7 +250,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             try
             {
                 // ─── Obtener estado actual ────────────────────────────────────────────────
-                var existing = await _workOrderRepository.GetByIdAsync(id, cancellation);
+                Domain.Models.WorkOrder? existing = await _workOrderRepository.GetByIdAsync(id, cancellation);
                 if (existing == null) return false;
 
                 string oldStatus = existing.Status;
@@ -305,16 +305,18 @@ namespace ApiTaller.Core.Services.WorkOrders
         {
             try
             {
-                var model = new WorkOrderEvidence
+                WorkOrderEvidence model = new WorkOrderEvidence
                 {
                     WorkOrderId = dto.WorkOrderId,
-                    PhotoUrl = dto.PhotoUrl,
-                    EvidenceType = dto.EvidenceType,
-                    Description = dto.Description,
-                    IsActive = true
+                    FileName = dto.FileName,
+                    FileUrl = dto.FileUrl,
+                    FileType = dto.FileType,
+                    IsActive = dto.IsActive,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = dto.ResponsibleUserId
                 };
 
-                var savedModel = await _workOrderRepository.AddEvidenceAsync(model, cancellation);
+                WorkOrderEvidence savedModel = await _workOrderRepository.AddEvidenceAsync(model, cancellation);
 
                 return new WorkOrderEvidenceDto
                 {
@@ -362,7 +364,7 @@ namespace ApiTaller.Core.Services.WorkOrders
 
         private static string BuildUpdateHistoryMessage(WorkOrderDto dto)
         {
-            var msg = new StringBuilder("Actualización de la orden:");
+            StringBuilder msg = new StringBuilder("Actualización de la orden:");
 
             int partsAdded   = dto.Parts?.FindAll(p => p.Id == 0).Count ?? 0;
             int servicesAdded = dto.Services?.FindAll(s => s.Id == 0).Count ?? 0;

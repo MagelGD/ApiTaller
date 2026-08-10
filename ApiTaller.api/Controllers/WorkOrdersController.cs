@@ -57,7 +57,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var success = await _workOrderService.SaveAsync(value, cancellation);
+                bool success = await _workOrderService.SaveAsync(value, cancellation);
                 if (!success)
                 {
                     return BadRequest("No se pudo guardar la orden de trabajo (verifique que los datos sean correctos).");
@@ -76,7 +76,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var success = await _workOrderService.ChangeStatusAsync(id, status, cancellation);
+                bool success = await _workOrderService.ChangeStatusAsync(id, status, cancellation);
                 if (!success)
                 {
                     return BadRequest("No se pudo cambiar el estado de la orden (verifique que tenga repuestos o servicios).");
@@ -109,7 +109,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var result = await _workOrderService.AddEvidenceAsync(value, cancellation);
+                bool result = await _workOrderService.AddEvidenceAsync(value, cancellation);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -124,7 +124,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var success = await _workOrderService.DeleteEvidenceAsync(id, cancellation);
+                bool success = await _workOrderService.DeleteEvidenceAsync(id, cancellation);
                 if (!success)
                 {
                     return BadRequest("No se pudo eliminar la evidencia individual.");

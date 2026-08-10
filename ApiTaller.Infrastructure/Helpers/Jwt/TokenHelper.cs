@@ -66,16 +66,18 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
         public static string NewToken()
         {
-            var bytes = RandomNumberGenerator.GetBytes(64);
+            byte[] bytes = RandomNumberGenerator.GetBytes(64);
             return Convert.ToBase64String(bytes)
                 .TrimEnd('=').Replace('+', '-').Replace('/', '_');
         }
+
         public static string Sha256Base64(this string input)
         {
             using SHA256 sha = SHA256.Create();
-            var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+            byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             return Convert.ToBase64String(bytes);
         }
     }

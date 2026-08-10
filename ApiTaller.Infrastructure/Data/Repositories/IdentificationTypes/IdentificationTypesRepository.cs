@@ -107,7 +107,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.IdentificationTypes
             {
                 _Logger.LogError(ex, "Error getting identification type by id {Id}", id);
             }
-            return result;
+            return result!;
         }
 
         public async Task<GetIdentificationTypeDto?> GetByNameAsync(string name, CancellationToken cancellation)

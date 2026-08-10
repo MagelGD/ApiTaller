@@ -55,7 +55,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
             IEnumerable<GetVehicleDto> result = new List<GetVehicleDto>();
             try
             {
-                var query = _context.Vehicle.Where(v => v.IsActive);
+                IQueryable<Domain.Models.Vehicle> query = _context.Vehicle.Where(v => v.IsActive);
                 if (!string.IsNullOrWhiteSpace(vehicleType))
                 {
                     query = query.Where(v => v.VehicleType == vehicleType);
@@ -91,7 +91,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
             IEnumerable<GetVehicleDto> result = new List<GetVehicleDto>();
             try
             {
-                var query = _context.Vehicle.Include(x => x.BrandNavigation).Include(x => x.ModelNavigation).Include(x => x.VersionNavigation).AsQueryable();
+                IQueryable<Domain.Models.Vehicle> query = _context.Vehicle.Include(x => x.BrandNavigation).Include(x => x.ModelNavigation).Include(x => x.VersionNavigation).AsQueryable();
                 if (!string.IsNullOrWhiteSpace(vehicleType))
                 {
                     query = query.Where(v => v.VehicleType == vehicleType);
@@ -179,7 +179,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
                 {
                     update.Plate = update.Plate.ToUpper().Trim();
                 }
-                var existingVehicle = await _context.Vehicle.FindAsync(new object[] { update.Id }, cancellation);
+                Domain.Models.Vehicle? existingVehicle = await _context.Vehicle.FindAsync(new object[] { update.Id }, cancellation);
                 if (existingVehicle == null) return false;
 
                 if (int.TryParse(_currentUserService.UserId, out int userId))
@@ -200,7 +200,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
         {
             try
             {
-                var wo = await _context.WorkOrder
+                Domain.Models.WorkOrder? wo = await _context.WorkOrder
                     .Where(w => w.VehicleId == vehicleId && w.IsActive &&
                                 (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))
                     .FirstOrDefaultAsync(cancellation);

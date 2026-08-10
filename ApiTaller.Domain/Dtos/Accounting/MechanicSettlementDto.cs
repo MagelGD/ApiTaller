@@ -6,7 +6,7 @@ namespace ApiTaller.Domain.Dtos.Accounting
     {
         public int Id { get; set; }
         public int MechanicId { get; set; }
-        public string MechanicName { get; set; }
+        public string MechanicName { get; set; } = null!;
         public DateTime SettlementDate { get; set; }
         public decimal TotalAmount { get; set; }
         public int ServicesCount { get; set; }

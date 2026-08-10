@@ -32,7 +32,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var emailRequest = new EmailRequest
+                EmailRequest emailRequest = new EmailRequest
                 {
                     To = request.ToEmail,
                     Subject = $"Factura de Venta - David Motos",

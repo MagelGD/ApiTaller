@@ -14,17 +14,17 @@ namespace ApiTaller.Domain.Dtos.Agenda
         public int? VehicleId { get; set; }
 
         // Opción B: cliente nuevo walk-in
-        public string ContactName { get; set; }
-        public string ContactPhone { get; set; }
-        public string ContactEmail { get; set; }
-        public string VehicleDescription { get; set; }
+        public string ContactName { get; set; } = null!;
+        public string ContactPhone { get; set; } = null!;
+        public string ContactEmail { get; set; } = null!;
+        public string VehicleDescription { get; set; } = null!;
 
         public int? ServiceTypeId { get; set; }
 
         [Required]
         public DateTime AppointmentDate { get; set; }
 
-        public string CustomerNotes { get; set; }
+        public string CustomerNotes { get; set; } = null!;
 
         /// <summary>
         /// Si true, fuerza el agendamiento aunque el día esté lleno.

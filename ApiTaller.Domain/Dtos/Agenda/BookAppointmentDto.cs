@@ -10,6 +10,6 @@ namespace ApiTaller.Domain.Dtos.Agenda
         public int VehicleId { get; set; }
         public int? ServiceTypeId { get; set; }
         public DateTime AppointmentDate { get; set; }
-        public string CustomerNotes { get; set; }
+        public string CustomerNotes { get; set; } = null!;
     }
 }

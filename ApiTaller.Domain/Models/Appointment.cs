@@ -13,13 +13,13 @@ namespace ApiTaller.Domain.Models
 
         public DateTime AppointmentDate { get; set; }
         public TimeSpan? AppointmentTime { get; set; }
-        public string CustomerNotes { get; set; }
+        public string CustomerNotes { get; set; } = null!;
 
         // Estados: Pendiente | Agendada | Recibida | Cancelada | No Asistió | Rechazada
-        public string Status { get; set; }
+        public string Status { get; set; } = null!;
 
         // Origen: Portal | Pre-registro | Presencial
-        public string BookingSource { get; set; }
+        public string BookingSource { get; set; } = null!;
 
         // Vínculo con Orden de Trabajo (se asigna al convertir)
         public int? WorkOrderId { get; set; }
@@ -33,9 +33,9 @@ namespace ApiTaller.Domain.Models
         public int WorkshopId { get; set; }
 
         // Navegación
-        public virtual Customer CustomerNavigation { get; set; }
-        public virtual Vehicle VehicleNavigation { get; set; }
-        public virtual ServiceType ServiceTypeNavigation { get; set; }
-        public virtual WorkOrder WorkOrderNavigation { get; set; }
+        public virtual Customer CustomerNavigation { get; set; } = null!;
+        public virtual Vehicle VehicleNavigation { get; set; } = null!;
+        public virtual ServiceType ServiceTypeNavigation { get; set; } = null!;
+        public virtual WorkOrder WorkOrderNavigation { get; set; } = null!;
     }
 }

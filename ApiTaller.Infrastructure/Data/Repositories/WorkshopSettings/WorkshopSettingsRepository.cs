@@ -55,7 +55,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkshopSettings
         {
             try
             {
-                var setting = await _context.WorkshopSettings
+                Domain.Models.WorkshopSettings? setting = await _context.WorkshopSettings
                     .FirstOrDefaultAsync(s => s.SettingKey == key && s.IsActive, cancellation);
 
                 if (setting == null) return null;
@@ -85,7 +85,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkshopSettings
             if (int.TryParse(_currentUserService.UserId, out int parsedId))
                 userId = parsedId;
 
-            var existing = await _context.WorkshopSettings
+            Domain.Models.WorkshopSettings? existing = await _context.WorkshopSettings
                 .FirstOrDefaultAsync(s => s.SettingKey == dto.SettingKey, cancellation);
 
             if (existing != null)
@@ -100,7 +100,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkshopSettings
             else
             {
                 // INSERT
-                var newSetting = new Domain.Models.WorkshopSettings
+                Domain.Models.WorkshopSettings newSetting = new Domain.Models.WorkshopSettings
                 {
                     SettingKey = dto.SettingKey,
                     SettingValue = dto.SettingValue,

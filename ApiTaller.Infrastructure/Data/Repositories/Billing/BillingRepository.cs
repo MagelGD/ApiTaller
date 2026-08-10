@@ -29,15 +29,15 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 int.TryParse(_currentUserService.UserId, out int userId);
                 int? finalUserId = userId != 0 ? userId : null;
 
-                var settings = await _context.WorkshopSettings
-                    .Where(s => s.IsActive)
+                List<Domain.Models.WorkshopSettings> settings = await _context.WorkshopSettings
+                    .Where(s => s.IsActive && (s.SettingKey == "logo" || s.SettingKey == "logo_brands" || s.SettingKey == "workshop_name" || s.SettingKey == "workshop_slogan"))
                     .ToListAsync(cancellation);
-                var logo = settings.FirstOrDefault(s => s.SettingKey == "logo")?.SettingValue;
-                var logoBrands = settings.FirstOrDefault(s => s.SettingKey == "logo_brands")?.SettingValue;
-                var name = settings.FirstOrDefault(s => s.SettingKey == "workshop_name")?.SettingValue;
-                var slogan = settings.FirstOrDefault(s => s.SettingKey == "workshop_slogan")?.SettingValue;
+                string? logo = settings.FirstOrDefault(s => s.SettingKey == "logo")?.SettingValue;
+                string? logoBrands = settings.FirstOrDefault(s => s.SettingKey == "logo_brands")?.SettingValue;
+                string? name = settings.FirstOrDefault(s => s.SettingKey == "workshop_name")?.SettingValue;
+                string? slogan = settings.FirstOrDefault(s => s.SettingKey == "workshop_slogan")?.SettingValue;
 
-                var sale = new Sale
+                Sale sale = new Sale
                 {
                     WorkOrderId = saleDto.WorkOrderId,
                     CustomerId = saleDto.CustomerId,
@@ -64,7 +64,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 // Guardar detalles
                 if (saleDto.Details != null && saleDto.Details.Any())
                 {
-                    var details = saleDto.Details.Select(detailDto => new SaleDetail
+                    IEnumerable<SaleDetail> details = saleDto.Details.Select(detailDto => new SaleDetail
                     {
                         SaleId = sale.Id,
                         ProductId = detailDto.ProductId,
@@ -76,7 +76,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                         IsActive = true,
                         CreatedAt = DateTime.Now,
                         ResponsibleUserId = finalUserId
-                    }).ToList();
+                    });
                     
                     await _context.SaleDetail.AddRangeAsync(details, cancellation);
                 }
@@ -84,7 +84,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 // Guardar pagos
                 if (saleDto.Payments != null && saleDto.Payments.Any())
                 {
-                    var payments = saleDto.Payments.Select(paymentDto => new SalePayment
+                    IEnumerable<SalePayment> payments = saleDto.Payments.Select(paymentDto => new SalePayment
                     {
                         SaleId = sale.Id,
                         PaymentMethodId = paymentDto.PaymentMethodId,
@@ -109,24 +109,29 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
 
         public async Task<SaleDto> GetByWorkOrderAsync(int workOrderId, CancellationToken cancellation)
         {
-            var sale = await _context.Sale
-                .Include(s => s.Customer)
-                .Include(s => s.Details)
-                .Include(s => s.WorkOrder)
-                    .ThenInclude(wo => wo.VehicleNavigation)
+            Domain.Models.Sale? sale = await _context.Sale
+                .Include(s => s.CustomerNavigation)
+                .Include(s => s.WorkOrderNavigation)
+                    .ThenInclude(w => w.VehicleNavigation)
                         .ThenInclude(v => v.BrandNavigation)
-                .Include(s => s.WorkOrder)
-                    .ThenInclude(wo => wo.VehicleNavigation)
+                .Include(s => s.WorkOrderNavigation)
+                    .ThenInclude(w => w.VehicleNavigation)
                         .ThenInclude(v => v.ModelNavigation)
-                .Include(s => s.WorkOrder)
-                    .ThenInclude(wo => wo.VehicleNavigation)
+                .Include(s => s.WorkOrderNavigation)
+                    .ThenInclude(w => w.VehicleNavigation)
                         .ThenInclude(v => v.VersionNavigation)
+                .Include(s => s.SaleDetails)
+                    .ThenInclude(d => d.ProductNavigation)
+                .Include(s => s.SaleDetails)
+                    .ThenInclude(d => d.ServiceNavigation)
+                .Include(s => s.SalePayments)
+                    .ThenInclude(p => p.PaymentMethodNavigation)
                 .FirstOrDefaultAsync(s => s.WorkOrderId == workOrderId, cancellation);
 
-            if (sale == null) return null;
+            if (sale == null) return null!;
 
-            var vehicle = sale.WorkOrder?.VehicleNavigation;
-            var vehicleDisplay = vehicle != null
+            Domain.Models.Vehicle? vehicle = sale.WorkOrderNavigation?.VehicleNavigation;
+            string vehicleDisplay = vehicle != null
                 ? $"{vehicle.BrandNavigation?.Name} {vehicle.ModelNavigation?.Models} {vehicle.VersionNavigation?.Version}".Trim()
                 : "";
 

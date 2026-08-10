@@ -2,6 +2,6 @@ namespace ApiTaller.Domain.Dtos.Auth
 {
     public class ForgotPasswordDto
     {
-        public string Email { get; set; }
+        public string Email { get; set; } = null!;
     }
 }

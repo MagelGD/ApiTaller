@@ -30,7 +30,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var result = await _authService.Login(auth, cancellation);
+                LoginResponseDto result = await _authService.Login(auth, cancellation);
                 if (result == null)
                 {
                     return Unauthorized(new { message = "Credenciales inválidas. Por favor, inténtalo de nuevo." });
@@ -51,7 +51,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var response = await _authService.LoginAsync(credentials, cancellation);
+                LoginResponseDto response = await _authService.LoginAsync(credentials, cancellation);
                 return Ok(response);
             }
             catch (UnauthorizedAccessException ex)
@@ -71,7 +71,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var success = await _authService.GeneratePasswordResetTokenAsync(dto.Email, cancellation);
+                bool success = await _authService.GeneratePasswordResetTokenAsync(dto.Email, cancellation);
                 if (success)
                 {
                     return Ok(new { message = "Se ha enviado un correo para restablecer la contraseña si el correo está registrado." });
@@ -91,7 +91,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var success = await _authService.ResetPasswordAsync(dto, cancellation);
+                bool success = await _authService.ResetPasswordAsync(dto, cancellation);
                 if (success)
                 {
                     return Ok(new { message = "Contraseña restablecida exitosamente." });
@@ -115,13 +115,13 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var sidClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Sid)?.Value;
+                string? sidClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Sid)?.Value;
                 if (string.IsNullOrEmpty(sidClaim) || !int.TryParse(sidClaim, out int userId))
                 {
                     return Unauthorized(new { message = "Usuario no identificado." });
                 }
 
-                var success = await _authService.ChangePasswordAsync(userId, dto, cancellation);
+                bool success = await _authService.ChangePasswordAsync(userId, dto, cancellation);
                 if (success)
                 {
                     return Ok(new { message = "Contraseña cambiada exitosamente." });

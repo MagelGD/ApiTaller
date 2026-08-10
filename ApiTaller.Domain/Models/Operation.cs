@@ -5,5 +5,5 @@ namespace ApiTaller.Domain.Models;
 
 public partial class Operation : GeneralEntity
 {
-    public string Name{ get; set; }
+    public string Name { get; set; } = null!;
 }

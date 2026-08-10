@@ -26,7 +26,7 @@ namespace ApiTaller.api.Controllers
 
         private int GetCustomerIdFromUser()
         {
-            var customerIdClaim = User.FindFirst("customerId")?.Value;
+            string? customerIdClaim = User.FindFirst("customerId")?.Value;
             if (string.IsNullOrEmpty(customerIdClaim) || !int.TryParse(customerIdClaim, out int customerId))
             {
                 throw new UnauthorizedAccessException("El usuario no tiene un rol de cliente válido asociado en su sesión.");
@@ -39,8 +39,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var customerId = GetCustomerIdFromUser();
-                var orders = await _portalService.GetMyOrdersAsync(customerId, cancellation);
+                int? customerId = GetCustomerIdFromUser();
+                IEnumerable<CustomerPortalOrderDto> orders = await _portalService.GetMyOrdersAsync(customerId, cancellation);
                 return Ok(orders);
             }
             catch (UnauthorizedAccessException ex)
@@ -59,8 +59,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var customerId = GetCustomerIdFromUser();
-                var vehicles = await _portalService.GetMyVehiclesAsync(customerId, cancellation);
+                int? customerId = GetCustomerIdFromUser();
+                IEnumerable<CustomerPortalVehicleDto> vehicles = await _portalService.GetMyVehiclesAsync(customerId, cancellation);
                 return Ok(vehicles);
             }
             catch (UnauthorizedAccessException ex)
@@ -79,8 +79,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var customerId = GetCustomerIdFromUser();
-                var order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
+                int? customerId = GetCustomerIdFromUser();
+                CustomerPortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
                 if (order == null)
                 {
                     // Regla clave: retornar 403 Forbidden si el customer_id no coincide con el dueño de la orden
@@ -104,8 +104,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var customerId = GetCustomerIdFromUser();
-                var success = await _portalService.ApproveOrderItemsAsync(id, customerId, dto, cancellation);
+                int? customerId = GetCustomerIdFromUser();
+                bool success = await _portalService.ApproveOrderItemsAsync(id, customerId, dto, cancellation);
                 if (!success)
                 {
                     return Forbid("No tienes permisos para aprobar esta orden o la orden no se encuentra disponible.");
@@ -128,15 +128,15 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var customerId = GetCustomerIdFromUser();
-                var order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
+                int? customerId = GetCustomerIdFromUser();
+                CustomerPortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
                 if (order == null)
                 {
                     return Forbid("No tienes permisos para acceder a la factura de esta orden.");
                 }
 
                 // Generar un mock de PDF con cabecera válida de PDF
-                var pdfBytes = new byte[] { 
+                byte[] pdfBytes = new byte[] { 
                     0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, // %PDF-1.4
                     0x0a, 0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a, 0x0a  // bin markers
                 };
@@ -159,8 +159,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                var customerId = GetCustomerIdFromUser();
-                var order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
+                int? customerId = GetCustomerIdFromUser();
+                CustomerPortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
                 if (order == null)
                 {
                     return Forbid("No tienes permisos para acceder a las fotos de esta orden.");

@@ -103,10 +103,10 @@ namespace ApiTaller.Core.Services.Customers
                     // REGLA DE NEGOCIO: No inactivar cliente con órdenes de trabajo activas
                     if (!saveData.IsActive)
                     {
-                        var existingDto = await _customerRepository.GetByIdAsync(saveData.Id, cancellationToken);
+                        GetCustomerDto? existingDto = await _customerRepository.GetByIdAsync(saveData.Id, cancellationToken);
                         if (existingDto != null && existingDto.IsActive)
                         {
-                            var activeWo = await _customerRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
+                            KeyValuePair<int, string>? activeWo = await _customerRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
                             if (activeWo.HasValue)
                             {
                                 throw new InvalidOperationException(
@@ -134,7 +134,7 @@ namespace ApiTaller.Core.Services.Customers
         {
             try
             {
-                var customer = await _customerRepository.GetByIdAsync(customerId, cancellation);
+                GetCustomerDto? customer = await _customerRepository.GetByIdAsync(customerId, cancellation);
                 if (customer == null)
                 {
                     _logger.LogWarning("ResendWelcomeEmail: No se encontró el cliente con ID {CustomerId}", customerId);
@@ -142,7 +142,7 @@ namespace ApiTaller.Core.Services.Customers
                 }
 
                 // Obtener el usuario asociado por documento o username
-                var userDto = await _userRepository.ValidateExist(customer.IdentificationNumber, customer.IdentificationNumber, cancellation);
+                UserDto? userDto = await _userRepository.ValidateExist(customer.IdentificationNumber, customer.IdentificationNumber, cancellation);
                 if (userDto == null)
                 {
                     _logger.LogWarning("ResendWelcomeEmail: No se encontró el usuario asociado a la identificación {Doc}", customer.IdentificationNumber);
@@ -173,8 +173,8 @@ namespace ApiTaller.Core.Services.Customers
         {
             try
             {
-                var loginUrl = "http://localhost:4200/portal/login";
-                var emailRequest = new EmailRequest
+                string loginUrl = "http://localhost:4200/portal/login";
+                EmailRequest emailRequest = new EmailRequest
                 {
                     To = user.Email,
                     Subject = "¡Bienvenido a Deivid Motos! — Tus credenciales de acceso",
@@ -313,7 +313,7 @@ namespace ApiTaller.Core.Services.Customers
             bool result = false;
             try
             {
-                var existingCustomer = await _customerRepository.ValidateExist(data, cancellation);
+                Domain.Models.Customer? existingCustomer = await _customerRepository.ValidateExist(data, cancellation);
                 result = existingCustomer != null;
             }
             catch (Exception ex)
