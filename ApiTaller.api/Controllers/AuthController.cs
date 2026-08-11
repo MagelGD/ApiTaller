@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ApiTaller.Domain.Dtos.Login;
+using ApiTaller.Domain.Dtos.Auth;
 
 namespace ApiTaller.api.Controllers
 {
@@ -30,7 +32,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                LoginResponseDto result = await _authService.Login(auth, cancellation);
+                IncomeDto result = await _authService.Login(auth, cancellation);
                 if (result == null)
                 {
                     return Unauthorized(new { message = "Credenciales inválidas. Por favor, inténtalo de nuevo." });
@@ -51,8 +53,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                LoginResponseDto response = await _authService.LoginAsync(credentials, cancellation);
-                return Ok(response);
+                LoginResponseDto result = await _authService.LoginAsync(credentials, cancellation);
+                return Ok(result);
             }
             catch (UnauthorizedAccessException ex)
             {

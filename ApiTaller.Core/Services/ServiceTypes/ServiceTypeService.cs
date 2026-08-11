@@ -72,7 +72,7 @@ namespace ApiTaller.Core.Services.ServiceTypes
 
         private async Task<bool> ValidateExist(string name, CancellationToken cancellation)
         {
-            Domain.Models.ServiceType? existing = await _repository.ValidateExist(name, cancellation);
+            GetServiceTypeDto? existing = await _repository.ValidateExist(name, cancellation);
             return existing != null;
         }
     }

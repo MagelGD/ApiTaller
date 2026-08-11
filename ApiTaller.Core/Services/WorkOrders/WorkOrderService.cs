@@ -170,7 +170,7 @@ namespace ApiTaller.Core.Services.WorkOrders
 
                     // REGLA DE NEGOCIO: No modificar una orden facturada o entregada
                     bool isBilled = await _workOrderRepository.IsBilledAsync(model.Id, cancellation);
-                    Domain.Models.WorkOrder? existing = await _workOrderRepository.GetByIdAsync(model.Id, cancellation);
+                    WorkOrderDto? existing = await _workOrderRepository.GetByIdAsync(model.Id, cancellation);
 
                     if (existing != null)
                     {
@@ -250,7 +250,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             try
             {
                 // ─── Obtener estado actual ────────────────────────────────────────────────
-                Domain.Models.WorkOrder? existing = await _workOrderRepository.GetByIdAsync(id, cancellation);
+                WorkOrderDto? existing = await _workOrderRepository.GetByIdAsync(id, cancellation);
                 if (existing == null) return false;
 
                 string oldStatus = existing.Status;
@@ -308,12 +308,11 @@ namespace ApiTaller.Core.Services.WorkOrders
                 WorkOrderEvidence model = new WorkOrderEvidence
                 {
                     WorkOrderId = dto.WorkOrderId,
-                    FileName = dto.FileName,
-                    FileUrl = dto.FileUrl,
-                    FileType = dto.FileType,
+                    PhotoUrl = dto.PhotoUrl,
+                    EvidenceType = dto.EvidenceType,
+                    Description = dto.Description,
                     IsActive = dto.IsActive,
-                    CreatedAt = DateTime.Now,
-                    ResponsibleUserId = dto.ResponsibleUserId
+                    CreatedAt = DateTime.Now
                 };
 
                 WorkOrderEvidence savedModel = await _workOrderRepository.AddEvidenceAsync(model, cancellation);

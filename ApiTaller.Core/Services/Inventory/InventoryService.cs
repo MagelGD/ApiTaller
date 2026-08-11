@@ -29,19 +29,19 @@ namespace ApiTaller.Core.Services.Inventory
 
         public async Task<bool> AddStockAsync(InventoryHistoryDto movement, CancellationToken cancellation)
         {
-            Domain.Models.InventoryMovement model = MapToModel(movement, "Entrada");
+            Domain.Models.InventoryHistory model = MapToModel(movement, "Entrada");
             return await _repository.UpdateStockAsync(model, cancellation);
         }
 
         public async Task<bool> RemoveStockAsync(InventoryHistoryDto movement, CancellationToken cancellation)
         {
-            Domain.Models.InventoryMovement model = MapToModel(movement, "Salida");
+            Domain.Models.InventoryHistory model = MapToModel(movement, "Salida");
             return await _repository.UpdateStockAsync(model, cancellation);
         }
 
         public async Task<bool> AdjustStockAsync(InventoryHistoryDto movement, CancellationToken cancellation)
         {
-            Domain.Models.InventoryMovement model = MapToModel(movement, "Ajuste");
+            Domain.Models.InventoryHistory model = MapToModel(movement, "Ajuste");
             return await _repository.UpdateStockAsync(model, cancellation);
         }
 
@@ -50,9 +50,9 @@ namespace ApiTaller.Core.Services.Inventory
             return await _repository.GetHistoryByProductAsync(productId, cancellation);
         }
 
-        private InventoryHistory MapToModel(InventoryHistoryDto dto, string type)
+        private Domain.Models.InventoryHistory MapToModel(InventoryHistoryDto dto, string type)
         {
-            return new InventoryHistory
+            return new Domain.Models.InventoryHistory
             {
                 ProductId = dto.ProductId,
                 MovementType = type,

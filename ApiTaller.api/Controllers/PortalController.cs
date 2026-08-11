@@ -39,8 +39,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                int? customerId = GetCustomerIdFromUser();
-                IEnumerable<CustomerPortalOrderDto> orders = await _portalService.GetMyOrdersAsync(customerId, cancellation);
+                int customerId = GetCustomerIdFromUser();
+                IEnumerable<PortalOrderListDto> orders = await _portalService.GetMyOrdersAsync(customerId, cancellation);
                 return Ok(orders);
             }
             catch (UnauthorizedAccessException ex)
@@ -59,8 +59,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                int? customerId = GetCustomerIdFromUser();
-                IEnumerable<CustomerPortalVehicleDto> vehicles = await _portalService.GetMyVehiclesAsync(customerId, cancellation);
+                int customerId = GetCustomerIdFromUser();
+                IEnumerable<PortalVehicleDto> vehicles = await _portalService.GetMyVehiclesAsync(customerId, cancellation);
                 return Ok(vehicles);
             }
             catch (UnauthorizedAccessException ex)
@@ -79,8 +79,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                int? customerId = GetCustomerIdFromUser();
-                CustomerPortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
+                int customerId = GetCustomerIdFromUser();
+                PortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
                 if (order == null)
                 {
                     // Regla clave: retornar 403 Forbidden si el customer_id no coincide con el dueño de la orden
@@ -104,7 +104,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                int? customerId = GetCustomerIdFromUser();
+                int customerId = GetCustomerIdFromUser();
                 bool success = await _portalService.ApproveOrderItemsAsync(id, customerId, dto, cancellation);
                 if (!success)
                 {
@@ -128,8 +128,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                int? customerId = GetCustomerIdFromUser();
-                CustomerPortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
+                int customerId = GetCustomerIdFromUser();
+                PortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
                 if (order == null)
                 {
                     return Forbid("No tienes permisos para acceder a la factura de esta orden.");
@@ -159,8 +159,8 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                int? customerId = GetCustomerIdFromUser();
-                CustomerPortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
+                int customerId = GetCustomerIdFromUser();
+                PortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
                 if (order == null)
                 {
                     return Forbid("No tienes permisos para acceder a las fotos de esta orden.");

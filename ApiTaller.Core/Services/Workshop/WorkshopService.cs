@@ -98,7 +98,7 @@ namespace ApiTaller.Core.Services.Workshop
 
         public async Task<WorkshopDto?> GetByIdAsync(int id, CancellationToken ct = default)
         {
-            WorkshopDto? workshop = await _workshopRepository.GetByIdAsync(id, ct);
+            Domain.Models.Workshop? workshop = await _workshopRepository.GetByIdAsync(id, ct);
             if (workshop == null) return null;
 
             return new WorkshopDto
@@ -126,7 +126,7 @@ namespace ApiTaller.Core.Services.Workshop
 
         public async Task<bool> UpdateWorkshopAsync(int id, UpdateWorkshopDto dto, CancellationToken ct = default)
         {
-            WorkshopDto? workshop = await _workshopRepository.GetByIdAsync(id, ct);
+            Domain.Models.Workshop? workshop = await _workshopRepository.GetByIdAsync(id, ct);
             if (workshop == null) return false;
 
             if (!string.IsNullOrEmpty(dto.Name)) workshop.Name = dto.Name;
@@ -137,7 +137,7 @@ namespace ApiTaller.Core.Services.Workshop
             // Lógica especial para cambio de tipo
             if (!string.IsNullOrEmpty(dto.WorkshopType) && dto.WorkshopType != workshop.WorkshopType)
             {
-                TypeChangeValidationDto validation = await _workshopRepository.ValidateTypeChangeAsync(id, dto.WorkshopType, ct);
+                WorkshopTypeChangeValidationDto validation = await _workshopRepository.ValidateTypeChangeAsync(id, dto.WorkshopType, ct);
                 if (!validation.CanChange)
                 {
                     throw new InvalidOperationException(validation.Reason);
@@ -151,7 +151,7 @@ namespace ApiTaller.Core.Services.Workshop
 
         public async Task<bool> ToggleStatusAsync(int id, bool isActive, CancellationToken ct = default)
         {
-            WorkshopDto? workshop = await _workshopRepository.GetByIdAsync(id, ct);
+            Domain.Models.Workshop? workshop = await _workshopRepository.GetByIdAsync(id, ct);
             if (workshop == null) return false;
 
             workshop.IsActive = isActive;

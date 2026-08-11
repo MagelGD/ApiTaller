@@ -19,7 +19,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using ApiTaller.api.Hubs;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -96,7 +96,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ITenantContext, TenantContext>(); // SAAS-1: TenantContext para Global Query Filters
 #region Inject JwtOptions
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Auth"));
-var jwtOptions = builder.Configuration
+JwtOptions jwtOptions = builder.Configuration
     .GetSection("Auth")
     .Get<JwtOptions>() ?? throw new InvalidOperationException("No se pudieron cargar las opciones de JWT");
 #endregion
@@ -119,7 +119,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 #endregion
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

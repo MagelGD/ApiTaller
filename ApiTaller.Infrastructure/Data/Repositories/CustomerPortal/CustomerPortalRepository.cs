@@ -1,4 +1,5 @@
 using ApiTaller.Domain.Dtos.CustomerPortal;
+using ApiTaller.Domain.Models;
 using ApiTaller.Domain.Interfaces.Repositories.CustomerPortal;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Interfaces.Services.WorkOrders;
@@ -156,7 +157,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 if (order == null) return null; // Orden no encontrada o no pertenece al cliente
 
                 // Todas las fotos de evidencias (ingreso y proceso)
-                List<PortalEvidenceDto> evidences = order.Evidences
+                List<CustomerPortalEvidenceDto> evidences = order.Evidences
                     .Where(e => e.IsActive)
                     .Select(e => new CustomerPortalEvidenceDto
                     {

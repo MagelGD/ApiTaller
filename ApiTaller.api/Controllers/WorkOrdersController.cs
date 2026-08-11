@@ -109,7 +109,7 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                bool result = await _workOrderService.AddEvidenceAsync(value, cancellation);
+                WorkOrderEvidenceDto result = await _workOrderService.AddEvidenceAsync(value, cancellation);
                 return Ok(result);
             }
             catch (Exception ex)

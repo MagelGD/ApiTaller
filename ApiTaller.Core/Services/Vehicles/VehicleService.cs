@@ -55,8 +55,8 @@ namespace ApiTaller.Core.Services.Vehicles
                         GetVehicleDto? existingDto = await _vehicleRepository.GetByIdAsync(saveData.Id, cancellationToken);
                         if (existingDto != null && existingDto.IsActive)
                         {
-                            KeyValuePair<int, string>? activeWo = await _vehicleRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
-                            if (activeWo.HasValue)
+                            (bool HasActive, int WorkOrderId, string Status)? activeWo = await _vehicleRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
+                            if (activeWo.HasValue && activeWo.Value.HasActive)
                             {
                                 throw new InvalidOperationException(
                                     $"No es posible inactivar el vehículo porque tiene la orden de trabajo " +
@@ -126,7 +126,7 @@ namespace ApiTaller.Core.Services.Vehicles
             bool result = false;
             try
             {
-                Domain.Models.Vehicle? existingVehicle = await _vehicleRepository.ValidateExist(plate, cancellation);
+                GetVehicleDto? existingVehicle = await _vehicleRepository.ValidateExist(plate, cancellation);
                 result = existingVehicle != null;
             }
             catch (Exception ex)

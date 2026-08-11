@@ -97,7 +97,7 @@ namespace ApiTaller.Core.Services.PaymentMethods
             bool result = false;
             try
             {
-                Domain.Models.PaymentMethod? existingPaymentMethod = await _paymentMethodRepository.ValidateExist(type, cancellation);
+                GetPaymentMethodDto? existingPaymentMethod = await _paymentMethodRepository.ValidateExist(type, cancellation);
                 result = existingPaymentMethod != null;
             }
             catch (Exception ex)

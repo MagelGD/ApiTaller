@@ -28,7 +28,7 @@ namespace ApiTaller.Core.Services.Email
 
         public async Task<EmailSettingsDto?> GetSettingsAsync(CancellationToken ct)
         {
-            EmailSettingsDto? settings = await _emailSettingsRepository.GetSettingsAsync(ct);
+            Domain.Models.EmailSettings? settings = await _emailSettingsRepository.GetSettingsAsync(ct);
             if (settings == null) return null;
 
             return new EmailSettingsDto
@@ -48,7 +48,7 @@ namespace ApiTaller.Core.Services.Email
 
         public async Task<bool> SaveSettingsAsync(EmailSettingsDto dto, CancellationToken ct)
         {
-            EmailSettingsDto? existing = await _emailSettingsRepository.GetSettingsAsync(ct);
+            Domain.Models.EmailSettings? existing = await _emailSettingsRepository.GetSettingsAsync(ct);
 
             string finalPassword;
             if (dto.Password == "********" && existing != null)
@@ -83,7 +83,7 @@ namespace ApiTaller.Core.Services.Email
 
         public async Task<bool> TestConnectionAsync(EmailSettingsDto dto, CancellationToken ct)
         {
-            EmailSettingsDto? existing = await _emailSettingsRepository.GetSettingsAsync(ct);
+            Domain.Models.EmailSettings? existing = await _emailSettingsRepository.GetSettingsAsync(ct);
 
             string finalPassword;
             if (dto.Password == "********" && existing != null)

@@ -25,7 +25,7 @@ namespace ApiTaller.Core.Services.Accounting
         {
             try
             {
-                IEnumerable<MechanicWithSettingsDto> rawList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
+                IEnumerable<MechanicWithSettingsRawDto> rawList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
 
                 // LÓGICA DE NEGOCIO: Construir DTO final aplicando defaults de negocio
                 return rawList.Select(r => new MechanicPaymentSettingsDto
@@ -62,8 +62,8 @@ namespace ApiTaller.Core.Services.Accounting
             try
             {
                 IEnumerable<WorkOrderSalesRawDto> rawOrders = await _accountingRepository.GetWorkOrderSalesRawAsync(startDate, endDate, status, mechanicId, vehicleType, ct);
-                IEnumerable<MechanicWithSettingsDto> paymentSettingsList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
-                Dictionary<int, MechanicWithSettingsDto> settingsMap = paymentSettingsList.ToDictionary(s => s.MechanicId, s => s);
+                IEnumerable<MechanicWithSettingsRawDto> paymentSettingsList = await _accountingRepository.GetMechanicsWithSettingsRawAsync(ct);
+                Dictionary<int, MechanicWithSettingsRawDto> settingsMap = paymentSettingsList.ToDictionary(s => s.MechanicId, s => s);
 
                 // LÓGICA DE NEGOCIO: Calcular totales y desgloses
                 decimal totalParts = 0;
@@ -88,7 +88,7 @@ namespace ApiTaller.Core.Services.Accounting
                     decimal orderServicesVal = 0;
 
                     // Repuestos
-                    foreach (WorkOrderSalePartDto part in order.Parts)
+                    foreach (WorkOrderPartRawDto part in order.Parts)
                     {
                         decimal partTotalVal = part.Quantity * part.UnitPrice;
 
@@ -119,7 +119,7 @@ namespace ApiTaller.Core.Services.Accounting
                     }
 
                     // Servicios
-                    foreach (WorkOrderSaleServiceDto service in order.Services)
+                    foreach (WorkOrderServiceRawDto service in order.Services)
                     {
                         totalServices += service.Price;
                         orderServicesVal += service.Price;
@@ -137,16 +137,16 @@ namespace ApiTaller.Core.Services.Accounting
 
                 // Calcular Pago a Mecánicos
                 decimal mechanicPayout = 0;
-                List<WorkOrderSaleServiceDto> allServices = rawOrders.SelectMany(o => o.Services).ToList();
+                List<WorkOrderServiceRawDto> allServices = rawOrders.SelectMany(o => o.Services).ToList();
                 
                 // Agrupar servicios por mecánico para calcular su payout
-                IEnumerable<IGrouping<int?, WorkOrderSaleServiceDto>> groupedByMechanic = allServices.GroupBy(s => s.MechanicId);
-                foreach (IGrouping<int?, WorkOrderSaleServiceDto> mechanicGroup in groupedByMechanic)
+                IEnumerable<IGrouping<int?, WorkOrderServiceRawDto>> groupedByMechanic = allServices.GroupBy(s => s.MechanicId);
+                foreach (IGrouping<int?, WorkOrderServiceRawDto> mechanicGroup in groupedByMechanic)
                 {
                     if (!mechanicGroup.Key.HasValue) continue;
                     int mechId = mechanicGroup.Key.Value;
 
-                    settingsMap.TryGetValue(mechId, out MechanicWithSettingsDto? setting);
+                    settingsMap.TryGetValue(mechId, out MechanicWithSettingsRawDto? setting);
                     string paymentType = setting?.PaymentType ?? "Porcentaje";
                     decimal configValue = setting?.Value ?? 0;
 

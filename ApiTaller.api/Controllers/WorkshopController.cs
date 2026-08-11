@@ -24,7 +24,7 @@ namespace ApiTaller.api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterWorkshopDto dto, CancellationToken ct)
         {
-            bool result = await _workshopService.RegisterWorkshopAsync(dto, ct);
+            RegisterWorkshopResponseDto result = await _workshopService.RegisterWorkshopAsync(dto, ct);
             if (!result.Success)
             {
                 return BadRequest(new { Message = result.Message });
@@ -70,7 +70,7 @@ namespace ApiTaller.api.Controllers
         [Authorize]
         public async Task<IActionResult> ValidateTypeChange(int id, [FromQuery] string newType, CancellationToken ct)
         {
-            TypeChangeValidationDto validation = await _workshopService.ValidateTypeChangeAsync(id, newType, ct);
+            WorkshopTypeChangeValidationDto validation = await _workshopService.ValidateTypeChangeAsync(id, newType, ct);
             return Ok(validation);
         }
 

@@ -110,27 +110,27 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
         public async Task<SaleDto> GetByWorkOrderAsync(int workOrderId, CancellationToken cancellation)
         {
             Domain.Models.Sale? sale = await _context.Sale
-                .Include(s => s.CustomerNavigation)
-                .Include(s => s.WorkOrderNavigation)
+                .Include(s => s.Customer)
+                .Include(s => s.WorkOrder)
                     .ThenInclude(w => w.VehicleNavigation)
                         .ThenInclude(v => v.BrandNavigation)
-                .Include(s => s.WorkOrderNavigation)
+                .Include(s => s.WorkOrder)
                     .ThenInclude(w => w.VehicleNavigation)
                         .ThenInclude(v => v.ModelNavigation)
-                .Include(s => s.WorkOrderNavigation)
+                .Include(s => s.WorkOrder)
                     .ThenInclude(w => w.VehicleNavigation)
                         .ThenInclude(v => v.VersionNavigation)
-                .Include(s => s.SaleDetails)
-                    .ThenInclude(d => d.ProductNavigation)
-                .Include(s => s.SaleDetails)
-                    .ThenInclude(d => d.ServiceNavigation)
-                .Include(s => s.SalePayments)
-                    .ThenInclude(p => p.PaymentMethodNavigation)
+                .Include(s => s.Details)
+                    .ThenInclude(d => d.Product)
+                .Include(s => s.Details)
+                    .ThenInclude(d => d.Service)
+                .Include(s => s.Payments)
+                    .ThenInclude(p => p.PaymentMethod)
                 .FirstOrDefaultAsync(s => s.WorkOrderId == workOrderId, cancellation);
 
             if (sale == null) return null!;
 
-            Domain.Models.Vehicle? vehicle = sale.WorkOrderNavigation?.VehicleNavigation;
+            Domain.Models.Vehicle? vehicle = sale.WorkOrder?.VehicleNavigation;
             string vehicleDisplay = vehicle != null
                 ? $"{vehicle.BrandNavigation?.Name} {vehicle.ModelNavigation?.Models} {vehicle.VersionNavigation?.Version}".Trim()
                 : "";

@@ -60,7 +60,7 @@ namespace ApiTaller.Core.Services.ServicePrices
                 };
 
                 bool exists = await ValidateExist(servicePrice.ServiceCatalogId, servicePrice.BrandModelVersionId, cancellationToken);
-                Domain.Models.ServicePriceByVersion? existing = await _repository.ValidateExist(servicePrice.ServiceCatalogId, servicePrice.BrandModelVersionId, cancellationToken);
+                GetServicePriceByVersionDto? existing = await _repository.ValidateExist(servicePrice.ServiceCatalogId, servicePrice.BrandModelVersionId, cancellationToken);
 
                 if (saveData.Id == 0 && !exists)
                 {
@@ -89,7 +89,7 @@ namespace ApiTaller.Core.Services.ServicePrices
 
         private async Task<bool> ValidateExist(int catalogId, int brandModelVersionId, CancellationToken cancellation)
         {
-            Domain.Models.ServicePriceByVersion? existing = await _repository.ValidateExist(catalogId, brandModelVersionId, cancellation);
+            GetServicePriceByVersionDto? existing = await _repository.ValidateExist(catalogId, brandModelVersionId, cancellation);
             return existing != null;
         }
     }

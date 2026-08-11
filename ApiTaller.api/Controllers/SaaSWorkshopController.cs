@@ -48,7 +48,7 @@ namespace ApiTaller.API.Controllers
         {
             try
             {
-                IEnumerable<Domain.Models.Workshop> workshops = await _workshopService.GetAllAsync();
+                IEnumerable<WorkshopDto> workshops = await _workshopService.GetAllAsync();
                 object list = workshops.Select(w => new { id = w.Id, name = w.Name, type = w.WorkshopType });
                 return Ok(list);
             }

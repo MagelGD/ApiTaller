@@ -25,7 +25,7 @@ namespace ApiTaller.api.Filters
         public async Task OnActionExecutionAsync(ActionExecutingContext ctx, ActionExecutionDelegate next)
         {
             // Si el endpoint NO tiene el atributo → pasa sin restricción extra (comportamiento actual intacto)
-            var attr = ctx.ActionDescriptor.EndpointMetadata
+            RequirePermissionAttribute? attr = ctx.ActionDescriptor.EndpointMetadata
                 .OfType<RequirePermissionAttribute>()
                 .FirstOrDefault();
 
@@ -36,7 +36,7 @@ namespace ApiTaller.api.Filters
             }
 
             // Leer el roleId desde el claim del JWT (ClaimTypes.Role)
-            var roleIdClaim = ctx.HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+            string? roleIdClaim = ctx.HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
             if (!int.TryParse(roleIdClaim, out int roleId))
             {
                 ctx.Result = new ForbidResult();

@@ -236,7 +236,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Portal
                 // Actualizar aprobación de repuestos
                 if (dto.Parts != null)
                 {
-                    foreach (PortalApprovePartDto partDto in dto.Parts)
+                    foreach (ApprovedPartDto partDto in dto.Parts)
                     {
                         WorkOrderPart? part = order.Parts.FirstOrDefault(p => p.Id == partDto.Id && p.IsActive);
                         if (part != null)
@@ -250,7 +250,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Portal
                 // Actualizar aprobación de servicios
                 if (dto.Services != null)
                 {
-                    foreach (PortalApproveServiceDto svcDto in dto.Services)
+                    foreach (ApprovedServiceDto svcDto in dto.Services)
                     {
                         WorkOrderService? svc = order.Services.FirstOrDefault(s => s.Id == svcDto.Id && s.IsActive);
                         if (svc != null)

@@ -27,7 +27,7 @@ namespace ApiTaller.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<MechanicPaymentSettingsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPaymentSettings(CancellationToken ct)
         {
-            IEnumerable<MechanicWithSettingsDto> result = await _accountingService.GetPaymentSettingsAsync(ct);
+            IEnumerable<MechanicPaymentSettingsDto> result = await _accountingService.GetPaymentSettingsAsync(ct);
             return Ok(result);
         }
 
@@ -61,7 +61,7 @@ namespace ApiTaller.Api.Controllers
             [FromQuery] DateTime endDate, 
             CancellationToken ct)
         {
-            MechanicPendingPaymentsDto result = await _accountingService.GetPendingServicesAsync(mechanicId, startDate, endDate, ct);
+            IEnumerable<PendingServiceDto> result = await _accountingService.GetPendingServicesAsync(mechanicId, startDate, endDate, ct);
             return Ok(result);
         }
 

@@ -106,8 +106,8 @@ namespace ApiTaller.Core.Services.Customers
                         GetCustomerDto? existingDto = await _customerRepository.GetByIdAsync(saveData.Id, cancellationToken);
                         if (existingDto != null && existingDto.IsActive)
                         {
-                            KeyValuePair<int, string>? activeWo = await _customerRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
-                            if (activeWo.HasValue)
+                            (bool HasActive, int WorkOrderId, string? Plate, string Status)? activeWo = await _customerRepository.GetActiveWorkOrderInfoAsync(saveData.Id, cancellationToken);
+                            if (activeWo.HasValue && activeWo.Value.HasActive)
                             {
                                 throw new InvalidOperationException(
                                     $"No es posible inactivar al cliente porque el vehículo con placa '{activeWo.Value.Plate}' " +
@@ -142,7 +142,7 @@ namespace ApiTaller.Core.Services.Customers
                 }
 
                 // Obtener el usuario asociado por documento o username
-                UserDto? userDto = await _userRepository.ValidateExist(customer.IdentificationNumber, customer.IdentificationNumber, cancellation);
+                GetUsersDto? userDto = await _userRepository.ValidateExist(customer.IdentificationNumber, customer.IdentificationNumber, cancellation);
                 if (userDto == null)
                 {
                     _logger.LogWarning("ResendWelcomeEmail: No se encontró el usuario asociado a la identificación {Doc}", customer.IdentificationNumber);
@@ -313,7 +313,7 @@ namespace ApiTaller.Core.Services.Customers
             bool result = false;
             try
             {
-                Domain.Models.Customer? existingCustomer = await _customerRepository.ValidateExist(data, cancellation);
+                GetCustomerDto? existingCustomer = await _customerRepository.ValidateExist(data, cancellation);
                 result = existingCustomer != null;
             }
             catch (Exception ex)

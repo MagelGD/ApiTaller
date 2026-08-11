@@ -26,7 +26,7 @@ namespace ApiTaller.Core.Services.Inventory
         {
             try
             {
-                IEnumerable<InventoryReceptionDto> result = await _receptionRepository.GetAllAsync(cancellation);
+                IEnumerable<Domain.Models.InventoryReception> result = await _receptionRepository.GetAllAsync(cancellation);
                 return result.Select(r => new InventoryReceptionDto
                 {
                     Id = r.Id,
