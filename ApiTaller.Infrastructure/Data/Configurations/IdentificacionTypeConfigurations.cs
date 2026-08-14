@@ -1,4 +1,4 @@
-﻿using ApiTaller.Domain.Models;
+using ApiTaller.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -42,6 +42,17 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasForeignKey(d => d.ResponsibleUserId)
                 .IsRequired(false)
                 .HasConstraintName("FK_TYPE_IDENTIFICATION_USER");
+
+            // SAAS-2: Aislamiento por taller
+            entity.Property(e => e.WorkshopId)
+                .HasColumnType("int(11)")
+                .IsRequired(false)
+                .HasColumnName("workshop_id");
+
+            entity.HasOne(d => d.WorkshopNavigation).WithMany()
+                .HasForeignKey(d => d.WorkshopId)
+                .IsRequired(false)
+                .HasConstraintName("FK_IDENTIFICATION_TYPE_WORKSHOP");
         }
     }
 }

@@ -65,10 +65,16 @@ namespace ApiTaller.Core.Services.Customers
                 {
                     if (!await ValidateUserExist(saveData.UserId, cancellationToken) && !await ValidateDocumentUserExist(saveData.IdentificationNumber, saveData.IdentificationNumber, cancellationToken))
                     {
+                        int roleId = await GetCustomerUserRoleId(cancellationToken);
+                        if (roleId == 0)
+                        {
+                            throw new InvalidOperationException("No se encontró el rol 'Cliente' configurado para este taller. Por favor, comunícate con soporte.");
+                        }
+
                         savedUser = new User()
                         {
                             Id = 0,
-                            UserRoleId = await GetCustomerUserRoleId(cancellationToken),
+                            UserRoleId = roleId,
                             IdentificationTypeId = customer.IdentificationTypeId,
                             IdentificationNumber = customer.IdentificationNumber,
                             FirstName = customer.FirstName,
@@ -87,12 +93,31 @@ namespace ApiTaller.Core.Services.Customers
                         GetUsersDto? userCreated = await _userRepository.ValidateExist(savedUser.Username, savedUser.IdentificationNumber, cancellationToken);
                         saveData.UserId = userCreated?.Id ?? 0;
 
+                        if (saveData.UserId == 0)
+                        {
+                            throw new InvalidOperationException("Hubo un problema al crear el usuario asociado al cliente. Verifica los datos ingresados.");
+                        }
+
                         if (userCreated != null)
                         {
                             savedUser.Id = userCreated.Id;
                             wasUserCreated = true;
                         }
                     }
+                    else if (saveData.UserId == 0)
+                    {
+                        // Si el usuario ya existía pero no llegó el ID
+                        GetUsersDto? userExisting = await _userRepository.ValidateExist(saveData.IdentificationNumber, saveData.IdentificationNumber, cancellationToken);
+                        if (userExisting != null)
+                        {
+                            saveData.UserId = userExisting.Id;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("El documento ingresado ya está asociado a otro usuario del sistema.");
+                        }
+                    }
+
                     await _customerRepository.CreateAsync(saveData, cancellationToken);
 
                     if (wasUserCreated && savedUser != null && !string.IsNullOrEmpty(savedUser.Email))
@@ -124,7 +149,8 @@ namespace ApiTaller.Core.Services.Customers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al crear o editar el cliente con identificación {Doc}", customer.IdentificationNumber);
-                throw;
+                string errMsg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                throw new Exception($"DB Error: {errMsg}", ex);
             }
             return result;
         }

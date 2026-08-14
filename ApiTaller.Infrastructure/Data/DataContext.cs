@@ -100,7 +100,64 @@ namespace ApiTaller.Infrastructure.Data
             modelBuilder.Entity<MechanicPaymentSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<MechanicPaymentSettlement>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
 
+            // SAAS-2: Entidades que antes NO tenían aislamiento (FUGAS CORREGIDAS)
+            modelBuilder.Entity<IdentificationType>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId || (IsPlatformAdmin && x.WorkshopId == null));
+            modelBuilder.Entity<AgendaSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
+            modelBuilder.Entity<AgendaBlock>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
+            modelBuilder.Entity<AgendaDayConfig>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
+            modelBuilder.Entity<EmailSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
+
             base.OnModelCreating(modelBuilder);
+        }
+
+        /// <summary>
+        /// SAAS-2: Interceptor centralizado de Tenant.
+        /// Cualquier entidad nueva que tenga WorkshopId será automáticamente
+        /// asignada al tenant actual, sin depender de que el repositorio lo haga manualmente.
+        /// </summary>
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            if (CurrentTenantId > 0)
+            {
+                foreach (var entry in ChangeTracker.Entries())
+                {
+                    var workshopProp = entry.Properties
+                        .FirstOrDefault(p => p.Metadata.Name == "WorkshopId");
+                    
+                    if (workshopProp != null)
+                    {
+                        if (entry.State == EntityState.Added)
+                        {
+                            var currentValue = workshopProp.CurrentValue;
+                            if (currentValue == null || (currentValue is int intVal && intVal == 0))
+                            {
+                                workshopProp.CurrentValue = CurrentTenantId;
+                            }
+                        }
+                        else if (entry.State == EntityState.Modified)
+                        {
+                            if (workshopProp.IsModified)
+                            {
+                                var currentValue = workshopProp.CurrentValue;
+                                if (currentValue == null || (currentValue is int intVal && intVal == 0))
+                                {
+                                    var originalValue = workshopProp.OriginalValue;
+                                    if (originalValue != null && (originalValue is int origInt && origInt > 0))
+                                    {
+                                        workshopProp.CurrentValue = originalValue;
+                                    }
+                                    else
+                                    {
+                                        workshopProp.CurrentValue = CurrentTenantId;
+                                    }
+                                    workshopProp.IsModified = false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return await base.SaveChangesAsync(cancellationToken);
         }
     }
 }

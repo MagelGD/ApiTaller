@@ -11,5 +11,9 @@ namespace ApiTaller.Domain.Models
         
         public bool IsBlocked { get; set; }
         public string? Reason { get; set; }
+
+        /// <summary>SAAS-2: ID del taller al que pertenece esta configuración diaria.</summary>
+        public int WorkshopId { get; set; }
+        public virtual Workshop? WorkshopNavigation { get; set; }
     }
 }

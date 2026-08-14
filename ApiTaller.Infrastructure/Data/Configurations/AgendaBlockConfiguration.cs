@@ -42,6 +42,15 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             builder.HasOne(d => d.ResponsibleUserIdNavigation)
                 .WithMany()
                 .HasForeignKey(d => d.ResponsibleUserId);
+
+            // SAAS-2: Aislamiento por taller
+            builder.Property(e => e.WorkshopId)
+                .IsRequired()
+                .HasColumnName("workshop_id");
+
+            builder.HasOne(d => d.WorkshopNavigation).WithMany()
+                .HasForeignKey(d => d.WorkshopId)
+                .HasConstraintName("FK_AGENDA_BLOCK_WORKSHOP");
         }
     }
 }

@@ -12,5 +12,6 @@ namespace ApiTaller.Domain.Dtos.Users
         // SAAS-1: ID del taller y tipo
         public int? WorkshopId { get; set; }
         public string? WorkshopType { get; set; }
+        public string? WorkshopName { get; set; }
     }
 }

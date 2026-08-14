@@ -147,7 +147,16 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Customers
 
                 update.UpdatedAt = DateTime.Now;
 
+                int originalWorkshopId = _context.Entry(existingCustomer).Property("WorkshopId").CurrentValue != null ? (int)_context.Entry(existingCustomer).Property("WorkshopId").CurrentValue : 0;
+
                 _context.Entry(existingCustomer).CurrentValues.SetValues(update);
+
+                if (originalWorkshopId > 0)
+                {
+                    _context.Entry(existingCustomer).Property("WorkshopId").CurrentValue = originalWorkshopId;
+                    _context.Entry(existingCustomer).Property("WorkshopId").IsModified = false;
+                }
+
                 return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)

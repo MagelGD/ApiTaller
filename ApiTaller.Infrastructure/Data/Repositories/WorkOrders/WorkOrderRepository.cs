@@ -257,7 +257,16 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
 
                 if (existingOrder == null) return false;
 
+                int originalWorkshopId = _context.Entry(existingOrder).Property("WorkshopId").CurrentValue != null ? (int)_context.Entry(existingOrder).Property("WorkshopId").CurrentValue : 0;
+
                 _context.Entry(existingOrder).CurrentValues.SetValues(update);
+                
+                if (originalWorkshopId > 0)
+                {
+                    _context.Entry(existingOrder).Property("WorkshopId").CurrentValue = originalWorkshopId;
+                    _context.Entry(existingOrder).Property("WorkshopId").IsModified = false;
+                }
+
                 existingOrder.UpdatedAt = DateTime.Now;
                 if (int.TryParse(_currentUserService.UserId, out int userId))
                     existingOrder.ResponsibleUserId = userId;

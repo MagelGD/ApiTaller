@@ -29,6 +29,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Users
         {
             try
             {
+                if (_context.CurrentTenantId > 0 && user.WorkshopId == null)
+                {
+                    user.WorkshopId = _context.CurrentTenantId;
+                }
+
                 await _context.User.AddAsync(user, cancellation);
                 return await _context.SaveChangesAsync(cancellation) > 0;
             }
@@ -52,7 +57,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Users
                     Token = x.Token,
                     IdUserRole = x.UserRoleId,
                     WorkshopId = x.WorkshopId,
-                    WorkshopType = x.WorkshopNavigation != null ? x.WorkshopNavigation.WorkshopType : "moto"
+                    WorkshopType = x.WorkshopNavigation != null ? x.WorkshopNavigation.WorkshopType : "moto",
+                    WorkshopName = x.WorkshopNavigation != null ? x.WorkshopNavigation.Name : null
                 }).FirstOrDefaultAsync(x => x.UserName == username, cancellation);
                 return Query;
             }

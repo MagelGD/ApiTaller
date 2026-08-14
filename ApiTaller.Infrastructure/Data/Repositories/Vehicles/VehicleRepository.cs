@@ -186,7 +186,17 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
                     update.ResponsibleUserId = userId;
 
                 update.UpdatedAt = DateTime.Now;
+
+                int originalWorkshopId = _context.Entry(existingVehicle).Property("WorkshopId").CurrentValue != null ? (int)_context.Entry(existingVehicle).Property("WorkshopId").CurrentValue : 0;
+
                 _context.Entry(existingVehicle).CurrentValues.SetValues(update);
+
+                if (originalWorkshopId > 0)
+                {
+                    _context.Entry(existingVehicle).Property("WorkshopId").CurrentValue = originalWorkshopId;
+                    _context.Entry(existingVehicle).Property("WorkshopId").IsModified = false;
+                }
+
                 return await _context.SaveChangesAsync(cancellation) > 0;
             }
             catch (Exception ex)
