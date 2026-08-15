@@ -100,8 +100,8 @@ namespace ApiTaller.Infrastructure.Data
             modelBuilder.Entity<MechanicPaymentSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<MechanicPaymentSettlement>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
 
-            // SAAS-2: Entidades que antes NO tenían aislamiento (FUGAS CORREGIDAS)
-            modelBuilder.Entity<IdentificationType>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId || (IsPlatformAdmin && x.WorkshopId == null));
+            // SAAS-2: Entidades con tipos globales (IdentificationType es visible para todos los tenants si workshop_id es null)
+            modelBuilder.Entity<IdentificationType>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId || x.WorkshopId == null);
             modelBuilder.Entity<AgendaSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<AgendaBlock>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<AgendaDayConfig>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);

@@ -45,7 +45,7 @@ VALUES (
     1, 1, 1, '123456789', 
     'Magel', '', 'Admin', '', 
     'Magel Admin', 'admin', 
-    '$2a$11$RJ7pgtRSpt1H/g6ryQ6k1.lL2N8tsoNaP3xs.bS7tAeneyn/2L1Am', 
+    '$2a$11$mWgnH3F9wm7ex4rDoiCHGu5BeHU7HXL8sGlHFZbvkj9zXaYP4LAFm', 
     'admin@taller.com', 1, NOW(), NOW()
 );
 

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiTaller.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class VersionFull_1 : Migration
+    public partial class Versionfull : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -80,6 +80,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     block_date = table.Column<DateTime>(type: "date", nullable: false),
                     reason = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -88,6 +89,12 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_agenda_block", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_AGENDA_BLOCK_WORKSHOP",
+                        column: x => x.workshop_id,
+                        principalTable: "workshop",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -102,6 +109,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     is_blocked = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: false),
                     reason = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -110,6 +118,12 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_agenda_day_config", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_AGENDA_DAY_CONFIG_WORKSHOP",
+                        column: x => x.workshop_id,
+                        principalTable: "workshop",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -126,6 +140,7 @@ namespace ApiTaller.Infrastructure.Migrations
                     start_date = table.Column<DateTime>(type: "date", nullable: false),
                     working_days = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
                     created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -134,6 +149,12 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_agenda_settings", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_AGENDA_SETTINGS_WORKSHOP",
+                        column: x => x.workshop_id,
+                        principalTable: "workshop",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -303,6 +324,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     SenderEmail = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    WorkshopId = table.Column<int>(type: "int(11)", nullable: false),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
@@ -312,6 +334,12 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_EmailSettings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmailSettings_workshop_WorkshopId",
+                        column: x => x.WorkshopId,
+                        principalTable: "workshop",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -323,6 +351,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     identification = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    workshop_id = table.Column<int>(type: "int(11)", nullable: true),
                     is_active = table.Column<ulong>(type: "bit(1)", nullable: false),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false),
                     updated_at = table.Column<DateTime>(type: "datetime", nullable: true),
@@ -331,6 +360,11 @@ namespace ApiTaller.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_identification_type", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_IDENTIFICATION_TYPE_WORKSHOP",
+                        column: x => x.workshop_id,
+                        principalTable: "workshop",
+                        principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -1318,14 +1352,29 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "responsible_user_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_agenda_block_workshop_id",
+                table: "agenda_block",
+                column: "workshop_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_agenda_day_config_responsible_user_id",
                 table: "agenda_day_config",
                 column: "responsible_user_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_agenda_day_config_workshop_id",
+                table: "agenda_day_config",
+                column: "workshop_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_agenda_settings_responsible_user_id",
                 table: "agenda_settings",
                 column: "responsible_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agenda_settings_workshop_id",
+                table: "agenda_settings",
+                column: "workshop_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_appointment_customer_id",
@@ -1398,9 +1447,19 @@ namespace ApiTaller.Infrastructure.Migrations
                 column: "ResponsibleUserIdNavigationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_EmailSettings_WorkshopId",
+                table: "EmailSettings",
+                column: "WorkshopId");
+
+            migrationBuilder.CreateIndex(
                 name: "FK_TYPE_IDENTIFICATION_USER",
                 table: "identification_type",
                 column: "responsabilidad_user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_identification_type_workshop_id",
+                table: "identification_type",
+                column: "workshop_id");
 
             migrationBuilder.CreateIndex(
                 name: "FK_inventory_product",

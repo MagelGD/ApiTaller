@@ -305,23 +305,32 @@ namespace ApiTaller.Core.Services.WorkOrders
         {
             try
             {
+                string photo = !string.IsNullOrEmpty(dto.PhotoBase64) ? dto.PhotoBase64 : (dto.PhotoUrl ?? string.Empty);
+                string evidenceType = !string.IsNullOrEmpty(dto.EvidenceType) ? dto.EvidenceType : "recepcion";
+                string desc = !string.IsNullOrEmpty(dto.Description) 
+                    ? dto.Description 
+                    : (!string.IsNullOrEmpty(dto.Notes) ? dto.Notes : $"Evidencia de {evidenceType}");
+
                 WorkOrderEvidence model = new WorkOrderEvidence
                 {
                     WorkOrderId = dto.WorkOrderId,
-                    PhotoUrl = dto.PhotoUrl,
-                    EvidenceType = dto.EvidenceType,
-                    Description = dto.Description,
+                    PhotoUrl = photo,
+                    EvidenceType = evidenceType,
+                    Description = desc,
                     IsActive = dto.IsActive,
                     CreatedAt = DateTime.Now
                 };
 
                 WorkOrderEvidence savedModel = await _workOrderRepository.AddEvidenceAsync(model, cancellation);
 
+                await _notificationService.NotifyWorkOrderUpdatedAsync(savedModel.WorkOrderId, 0);
+
                 return new WorkOrderEvidenceDto
                 {
                     Id = savedModel.Id,
                     WorkOrderId = savedModel.WorkOrderId,
                     PhotoUrl = savedModel.PhotoUrl,
+                    PhotoBase64 = savedModel.PhotoUrl,
                     EvidenceType = savedModel.EvidenceType,
                     Description = savedModel.Description,
                     IsActive = savedModel.IsActive
@@ -338,7 +347,8 @@ namespace ApiTaller.Core.Services.WorkOrders
         {
             try
             {
-                return await _workOrderRepository.DeleteEvidenceAsync(id, cancellation);
+                bool deleted = await _workOrderRepository.DeleteEvidenceAsync(id, cancellation);
+                return deleted;
             }
             catch (Exception ex)
             {

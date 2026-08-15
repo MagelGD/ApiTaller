@@ -238,9 +238,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 int? customerId = await GetCustomerIdFromUserAsync(cancellation);
                 if (customerId == null) return false;
 
+                int orderId = 0;
+
                 if (dto.ItemType == "Part")
                 {
-                    // Verificar cadena: Part → WorkOrder → Vehicle → Customer
                     WorkOrderPart? part = await _context.WorkOrderPart
                         .Include(p => p.WorkOrderNavigation)
                             .ThenInclude(o => o.VehicleNavigation)
@@ -248,14 +249,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                             && p.WorkOrderNavigation.VehicleNavigation.CustomerId == customerId
                             && p.IsActive, cancellation);
 
-                    if (part == null) return false; // No pertenece al cliente
+                    if (part == null) return false;
 
                     part.IsApproved = dto.IsApproved;
                     part.UpdatedAt = DateTime.Now;
+                    orderId = part.WorkOrderId;
                 }
                 else if (dto.ItemType == "Service")
                 {
-                    // Verificar cadena: Service → WorkOrder → Vehicle → Customer
                     WorkOrderService? service = await _context.WorkOrderService
                         .Include(s => s.WorkOrderNavigation)
                             .ThenInclude(o => o.VehicleNavigation)
@@ -263,35 +264,70 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                             && s.WorkOrderNavigation.VehicleNavigation.CustomerId == customerId
                             && s.IsActive, cancellation);
 
-                    if (service == null) return false; // No pertenece al cliente
+                    if (service == null) return false;
 
                     service.IsApproved = dto.IsApproved;
                     service.UpdatedAt = DateTime.Now;
+                    orderId = service.WorkOrderId;
                 }
                 else
                 {
-                    return false; // ItemType desconocido
+                    return false;
+                }
+
+                // Cargar orden completa para validar si todos los ítems quedaron aprobados
+                if (orderId > 0)
+                {
+                    WorkOrder? order = await _context.WorkOrder
+                        .Include(o => o.Parts)
+                        .Include(o => o.Services)
+                        .Include(o => o.VehicleNavigation)
+                            .ThenInclude(v => v.CustomerNavigation)
+                        .FirstOrDefaultAsync(o => o.Id == orderId, cancellation);
+
+                    if (order != null)
+                    {
+                        List<WorkOrderPart> activeParts = order.Parts.Where(p => p.IsActive).ToList();
+                        List<WorkOrderService> activeServices = order.Services.Where(s => s.IsActive).ToList();
+
+                        bool hasActiveItems = activeParts.Count > 0 || activeServices.Count > 0;
+                        bool allPartsApproved = activeParts.All(p => p.IsApproved);
+                        bool allServicesApproved = activeServices.All(s => s.IsApproved);
+
+                        if (hasActiveItems && allPartsApproved && allServicesApproved)
+                        {
+                            string currentStatus = order.Status ?? "";
+                            if (!currentStatus.Equals("Aprobado", StringComparison.OrdinalIgnoreCase) &&
+                                !currentStatus.Equals("En Reparación", StringComparison.OrdinalIgnoreCase) &&
+                                !currentStatus.Equals("Terminado", StringComparison.OrdinalIgnoreCase) &&
+                                !currentStatus.Equals("Entregado", StringComparison.OrdinalIgnoreCase))
+                            {
+                                order.Status = "Aprobado";
+                                order.UpdatedAt = DateTime.Now;
+
+                                WorkOrderHistory history = new WorkOrderHistory
+                                {
+                                    WorkOrderId = order.Id,
+                                    Status = "Aprobado",
+                                    Observations = "Presupuesto aprobado en su totalidad por el cliente desde el portal.",
+                                    ActionBy = order.VehicleNavigation?.CustomerNavigation?.FirstName ?? "Cliente (Portal)",
+                                    CreatedAt = DateTime.Now,
+                                    IsActive = true
+                                };
+                                if (int.TryParse(_currentUserService.UserId, out int uid))
+                                {
+                                    history.ResponsibleUserId = uid;
+                                }
+                                _context.WorkOrderHistory.Add(history);
+                            }
+                        }
+                    }
                 }
 
                 bool saved = await _context.SaveChangesAsync(cancellation) > 0;
-                if (saved)
+                if (saved && orderId > 0)
                 {
-                    int orderId = 0;
-                    if (dto.ItemType == "Part")
-                    {
-                        WorkOrderPart? p = await _context.WorkOrderPart.FindAsync(dto.ItemId);
-                        orderId = p?.WorkOrderId ?? 0;
-                    }
-                    else
-                    {
-                        WorkOrderService? s = await _context.WorkOrderService.FindAsync(dto.ItemId);
-                        orderId = s?.WorkOrderId ?? 0;
-                    }
-
-                    if (orderId > 0)
-                    {
-                        await _notificationService.NotifyWorkOrderUpdatedAsync(orderId, customerId.Value);
-                    }
+                    await _notificationService.NotifyWorkOrderUpdatedAsync(orderId, customerId.Value);
                 }
                 return saved;
             }

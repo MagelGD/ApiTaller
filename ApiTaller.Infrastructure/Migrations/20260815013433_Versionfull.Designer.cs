@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260601215651_VersionFull_1")]
-    partial class VersionFull_1
+    [Migration("20260815013433_Versionfull")]
+    partial class Versionfull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -120,9 +120,15 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_at");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ResponsibleUserId");
+
+                    b.HasIndex("WorkshopId");
 
                     b.ToTable("agenda_block", (string)null);
                 });
@@ -175,9 +181,15 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_at");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ResponsibleUserId");
+
+                    b.HasIndex("WorkshopId");
 
                     b.ToTable("agenda_day_config", (string)null);
                 });
@@ -236,9 +248,15 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("working_days");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ResponsibleUserId");
+
+                    b.HasIndex("WorkshopId");
 
                     b.ToTable("agenda_settings", (string)null);
                 });
@@ -643,9 +661,14 @@ namespace ApiTaller.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int(11)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ResponsibleUserIdNavigationId");
+
+                    b.HasIndex("WorkshopId");
 
                     b.ToTable("EmailSettings");
                 });
@@ -681,7 +704,13 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("updated_at");
 
+                    b.Property<int?>("WorkshopId")
+                        .HasColumnType("int(11)")
+                        .HasColumnName("workshop_id");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("WorkshopId");
 
                     b.HasIndex(new[] { "ResponsibleUserId" }, "FK_TYPE_IDENTIFICATION_USER");
 
@@ -2691,7 +2720,16 @@ namespace ApiTaller.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId");
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany()
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_AGENDA_BLOCK_WORKSHOP");
+
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.AgendaDayConfig", b =>
@@ -2700,7 +2738,16 @@ namespace ApiTaller.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId");
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany()
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_AGENDA_DAY_CONFIG_WORKSHOP");
+
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.AgendaSettings", b =>
@@ -2709,7 +2756,16 @@ namespace ApiTaller.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("ResponsibleUserId");
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany()
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_AGENDA_SETTINGS_WORKSHOP");
+
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Appointment", b =>
@@ -2825,7 +2881,15 @@ namespace ApiTaller.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany()
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.IdentificationType", b =>
@@ -2835,7 +2899,14 @@ namespace ApiTaller.Infrastructure.Migrations
                         .HasForeignKey("ResponsibleUserId")
                         .HasConstraintName("FK_TYPE_IDENTIFICATION_USER");
 
+                    b.HasOne("ApiTaller.Domain.Models.Workshop", "WorkshopNavigation")
+                        .WithMany()
+                        .HasForeignKey("WorkshopId")
+                        .HasConstraintName("FK_IDENTIFICATION_TYPE_WORKSHOP");
+
                     b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("WorkshopNavigation");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Inventory", b =>

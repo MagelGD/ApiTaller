@@ -11,9 +11,8 @@ namespace ApiTaller.Infrastructure.Data.Configurations
             entity.HasKey(e => e.Id);
             entity.ToTable("workshop_settings");
 
-            entity.HasIndex(e => e.SettingKey, "UQ_WORKSHOP_SETTINGS_KEY").IsUnique();
             entity.HasIndex(e => e.ResponsibleUserId, "FK_WORKSHOP_SETTINGS_USER");
-            // SAAS-1: Ahora el índice único es por (workshop_id, setting_key) — cada taller tiene su propio scope
+            // SAAS-1: Índice único por tenant (workshop_id, setting_key) — cada taller tiene su propio scope
             entity.HasIndex(new[] { "WorkshopId", "SettingKey" }, "UQ_WORKSHOP_SETTINGS_TENANT_KEY").IsUnique();
 
             entity.Property(e => e.Id)
