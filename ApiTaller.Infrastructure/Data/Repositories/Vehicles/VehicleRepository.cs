@@ -210,18 +210,39 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Vehicles
         {
             try
             {
+                // 1. Buscar orden activa en proceso (no entregada y no cancelada)
                 Domain.Models.WorkOrder? wo = await _context.WorkOrder
-                    .Where(w => w.VehicleId == vehicleId && w.IsActive &&
-                                (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))
+                    .Where(w => w.VehicleId == vehicleId && w.IsActive && w.Status != "Entregado" && w.Status != "Cancelada")
                     .FirstOrDefaultAsync(cancellation);
 
-                if (wo == null) return null;
-                return (true, wo.Id, wo.Status);
+                if (wo != null) return (true, wo.Id, wo.Status);
+
+                // 2. Si está en 'Entregado', verificar si aún tiene facturación pendiente
+                List<int> deliveredOrderIds = await _context.WorkOrder
+                    .Where(w => w.VehicleId == vehicleId && w.IsActive && w.Status == "Entregado")
+                    .Select(w => w.Id)
+                    .ToListAsync(cancellation);
+
+                if (deliveredOrderIds.Count > 0)
+                {
+                    List<int> billedOrderIds = await _context.Sale
+                        .Where(s => s.IsActive && s.WorkOrderId.HasValue && deliveredOrderIds.Contains(s.WorkOrderId.Value))
+                        .Select(s => s.WorkOrderId!.Value)
+                        .ToListAsync(cancellation);
+
+                    int unbilledId = deliveredOrderIds.FirstOrDefault(id => !billedOrderIds.Contains(id));
+                    if (unbilledId > 0)
+                    {
+                        return (true, unbilledId, "Entregado (Pendiente Facturar)");
+                    }
+                }
+
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al verificar órdenes activas del vehículo {Id}", vehicleId);
-                return null;
+                throw;
             }
         }
 

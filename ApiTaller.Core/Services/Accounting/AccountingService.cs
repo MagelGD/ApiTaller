@@ -169,6 +169,21 @@ namespace ApiTaller.Core.Services.Accounting
                 decimal laborNetProfit = totalServices - mechanicPayout;
                 decimal netProfit = partsNetProfit + laborNetProfit;
 
+                // Desglose de Caja vs Bancos / Transferencias
+                Dictionary<string, decimal> paymentBreakdown = await _accountingRepository.GetPaymentBreakdownAsync(startDate, endDate, ct);
+                decimal cashSales = paymentBreakdown
+                    .Where(kvp => kvp.Key.Contains("Efectivo", StringComparison.OrdinalIgnoreCase))
+                    .Sum(kvp => kvp.Value);
+
+                decimal bankTransferSales = paymentBreakdown
+                    .Where(kvp => !kvp.Key.Contains("Efectivo", StringComparison.OrdinalIgnoreCase))
+                    .Sum(kvp => kvp.Value);
+
+                if (cashSales == 0 && bankTransferSales == 0 && (totalParts + totalServices) > 0)
+                {
+                    cashSales = totalParts + totalServices;
+                }
+
                 return new SalesSummaryDto
                 {
                     TotalParts = totalParts,
@@ -185,7 +200,10 @@ namespace ApiTaller.Core.Services.Accounting
                     MechanicPayout = mechanicPayout,
                     LaborNetProfit = laborNetProfit,
                     MotoSales = motoSales,
-                    CarSales = carSales
+                    CarSales = carSales,
+                    CashSales = cashSales,
+                    BankTransferSales = bankTransferSales,
+                    SalesByPaymentMethod = paymentBreakdown
                 };
             }
             catch (Exception ex)

@@ -21,5 +21,10 @@ namespace ApiTaller.Domain.Dtos.Accounting
         public decimal LaborNetProfit { get; set; } // Ganancia neta de mano de obra (Servicios - Comisión)
         public decimal MotoSales { get; set; }
         public decimal CarSales { get; set; }
+
+        // Control de Caja vs Bancos / Transferencias
+        public decimal CashSales { get; set; }
+        public decimal BankTransferSales { get; set; }
+        public Dictionary<string, decimal> SalesByPaymentMethod { get; set; } = new Dictionary<string, decimal>();
     }
 }

@@ -24,12 +24,13 @@ namespace ApiTaller.Domain.Dtos.Billing
         // Extended info for invoice
         public string? CustomerName { get; set; }
         public string? CustomerPhone { get; set; }
+        public string? CustomerEmail { get; set; }
         public string? VehiclePlate { get; set; }
         public string? VehicleModel { get; set; }
         public string? VehicleColor { get; set; }
         public string? VehicleType { get; set; } = "moto";
 
-        public List<SaleDetailDto> Details { get; set; } = null!;
-        public List<SalePaymentDto> Payments { get; set; } = null!;
+        public List<SaleDetailDto> Details { get; set; } = new List<SaleDetailDto>();
+        public List<SalePaymentDto> Payments { get; set; } = new List<SalePaymentDto>();
     }
 }

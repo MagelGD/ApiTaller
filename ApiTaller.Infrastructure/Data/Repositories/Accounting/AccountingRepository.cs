@@ -173,6 +173,32 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
             }
         }
 
+        public async Task<Dictionary<string, decimal>> GetPaymentBreakdownAsync(DateTime startDate, DateTime endDate, CancellationToken ct)
+        {
+            try
+            {
+                DateTime start = startDate.Date;
+                DateTime end = endDate.Date.AddDays(1).AddTicks(-1);
+
+                var payments = await _context.SalePayment
+                    .Include(sp => sp.PaymentMethod)
+                    .Include(sp => sp.Sale)
+                    .Where(sp => sp.IsActive && sp.Sale != null && sp.Sale.IsActive && sp.Sale.SaleDate >= start && sp.Sale.SaleDate <= end)
+                    .ToListAsync(ct);
+
+                var breakdown = payments
+                    .GroupBy(p => p.PaymentMethod != null ? p.PaymentMethod.Name : "Efectivo")
+                    .ToDictionary(g => g.Key, g => g.Sum(p => p.Amount));
+
+                return breakdown;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener desglose de pagos");
+                return new Dictionary<string, decimal>();
+            }
+        }
+
         /// <summary>
         /// Retorna los servicios pendientes de pago para un mecánico, sin calcular comisiones.
         /// </summary>

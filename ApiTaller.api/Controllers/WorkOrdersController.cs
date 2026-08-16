@@ -33,8 +33,8 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener las ordenes de trabajo");
+                return StatusCode(500, new { message = "Error al obtener las órdenes de trabajo", error = ex.Message });
             }
-            return BadRequest();
         }
 
         [HttpGet("GetWorkOrderById/{id}")]
@@ -48,8 +48,8 @@ namespace ApiTaller.api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error al obtener la orden de trabajo con id {id}");
+                return StatusCode(500, new { message = $"Error al obtener la orden de trabajo con id {id}", error = ex.Message });
             }
-            return BadRequest();
         }
 
         [HttpPost("CreateOrEditWorkOrder")]

@@ -41,7 +41,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener todas las órdenes de trabajo");
-                return new List<WorkOrderDto>();
+                throw;
             }
         }
 
@@ -54,7 +54,7 @@ namespace ApiTaller.Core.Services.WorkOrders
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener la orden de trabajo {Id}", id);
-                return null;
+                throw;
             }
         }
 

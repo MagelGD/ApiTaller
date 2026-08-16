@@ -202,19 +202,41 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Customers
         {
             try
             {
+                // 1. Buscar orden activa en proceso (no entregada y no cancelada)
                 Domain.Models.WorkOrder? wo = await _context.WorkOrder
                     .Include(w => w.VehicleNavigation)
-                    .Where(w => w.CustomerId == customerId && w.IsActive &&
-                                (w.Status != "Entregado" || !_context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive)))
+                    .Where(w => w.CustomerId == customerId && w.IsActive && w.Status != "Entregado" && w.Status != "Cancelada")
                     .FirstOrDefaultAsync(cancellation);
 
-                if (wo == null) return null;
-                return (true, wo.Id, wo.VehicleNavigation?.Plate?.ToUpper(), wo.Status);
+                if (wo != null) return (true, wo.Id, wo.VehicleNavigation?.Plate?.ToUpper(), wo.Status);
+
+                // 2. Si está en 'Entregado', verificar si aún tiene facturación pendiente
+                List<Domain.Models.WorkOrder> deliveredOrders = await _context.WorkOrder
+                    .Include(w => w.VehicleNavigation)
+                    .Where(w => w.CustomerId == customerId && w.IsActive && w.Status == "Entregado")
+                    .ToListAsync(cancellation);
+
+                if (deliveredOrders.Count > 0)
+                {
+                    List<int> deliveredIds = deliveredOrders.Select(d => d.Id).ToList();
+                    List<int> billedOrderIds = await _context.Sale
+                        .Where(s => s.IsActive && s.WorkOrderId.HasValue && deliveredIds.Contains(s.WorkOrderId.Value))
+                        .Select(s => s.WorkOrderId!.Value)
+                        .ToListAsync(cancellation);
+
+                    Domain.Models.WorkOrder? unbilled = deliveredOrders.FirstOrDefault(d => !billedOrderIds.Contains(d.Id));
+                    if (unbilled != null)
+                    {
+                        return (true, unbilled.Id, unbilled.VehicleNavigation?.Plate?.ToUpper(), "Entregado (Pendiente Facturar)");
+                    }
+                }
+
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al verificar órdenes activas del cliente {Id}", customerId);
-                return null;
+                throw;
             }
         }
     }

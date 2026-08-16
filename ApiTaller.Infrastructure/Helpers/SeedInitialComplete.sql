@@ -426,6 +426,11 @@ INSERT IGNORE INTO service_catalog (service_type_id, name, description, default_
 -- Aire Acondicionado
 (10, 'Carga de Gas Refrigerante R134a para A/C', 'Vacío del circuito con bomba, prueba de fugas y recarga con aceite PAG y gas R134a', 60, 120000, 'Minutos', 'car', 1, 1, NOW(), NOW(), 1);
 
+-- Normalizar vehicle_type en registros existentes
+UPDATE service_catalog SET vehicle_type = 'car' WHERE name LIKE '%(Carro%' OR name LIKE '%Carro%' OR name LIKE '%Camioneta%' OR description LIKE '%automóvil%' OR description LIKE '%automovil%';
+UPDATE service_catalog SET vehicle_type = 'moto' WHERE name LIKE '%(Moto%' OR name LIKE '%Moto%' OR name LIKE '%Cadena%' OR name LIKE '%Arrastre%' OR description LIKE '%motocicleta%';
+UPDATE service_catalog SET vehicle_type = 'both' WHERE vehicle_type IS NULL OR vehicle_type = '';
+
 -- ==============================================================================
 -- PASO 12: TIPOS DE PRODUCTOS Y REPUESTOS (Motos + Carros)
 -- ==============================================================================

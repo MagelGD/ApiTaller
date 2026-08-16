@@ -56,83 +56,124 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
+                // 1. Obtener pagos de forma plana (100% traducible a SQL)
+                var flatPayments = await _context.SalePayment
+                    .Where(p => p.IsActive && p.Sale != null && p.Sale.IsActive && p.Sale.WorkOrderId.HasValue)
+                    .Select(p => new {
+                        WorkOrderId = p.Sale!.WorkOrderId!.Value,
+                        MethodName = p.PaymentMethod != null ? p.PaymentMethod.Name : "Efectivo"
+                    })
+                    .ToListAsync(cancellation);
+
+                Dictionary<int, string> paymentMethodMap = flatPayments
+                    .GroupBy(p => p.WorkOrderId)
+                    .ToDictionary(
+                        g => g.Key, 
+                        g => string.Join(", ", g.Select(x => x.MethodName).Distinct())
+                    );
+
+                // 2. Obtener IDs de órdenes facturadas
+                HashSet<int> billedOrderIds = (await _context.Sale
+                    .Where(s => s.IsActive && s.WorkOrderId.HasValue)
+                    .Select(s => s.WorkOrderId!.Value)
+                    .ToListAsync(cancellation))
+                    .ToHashSet();
+
+                // 3. Cargar las órdenes de trabajo con sus navegaciones
                 IQueryable<WorkOrder> query = _context.WorkOrder.AsQueryable();
-                if (!string.IsNullOrWhiteSpace(vehicleType))
+                if (!string.IsNullOrWhiteSpace(vehicleType) && !vehicleType.Equals("all", StringComparison.OrdinalIgnoreCase))
                 {
-                    query = query.Where(w => w.VehicleNavigation.VehicleType == vehicleType);
+                    string vtLower = vehicleType.Trim().ToLower();
+                    query = query.Where(w => w.VehicleNavigation == null || 
+                        w.VehicleNavigation.VehicleType == null || 
+                        w.VehicleNavigation.VehicleType.ToLower() == vtLower || 
+                        (vtLower == "moto" && w.VehicleNavigation.VehicleType == ""));
                 }
 
-                return await query
+                List<WorkOrder> orders = await query
                     .Include(w => w.CustomerNavigation)
                     .Include(w => w.VehicleNavigation)
-                    .Select(w => new WorkOrderDto
-                    {
-                        Id = w.Id,
-                        VehicleId = w.VehicleId,
-                        VehiclePlate = w.VehicleNavigation != null ? w.VehicleNavigation.Plate : null,
-                        VehicleBrand = w.VehicleNavigation != null && w.VehicleNavigation.BrandNavigation != null ? w.VehicleNavigation.BrandNavigation.Name : null,
-                        VehicleVersion = w.VehicleNavigation != null && w.VehicleNavigation.ModelNavigation != null ? w.VehicleNavigation.ModelNavigation.Models : null,
-                        VehicleType = w.VehicleNavigation != null ? w.VehicleNavigation.VehicleType : "moto",
-                        VehicleMotorization = w.VehicleNavigation != null ? w.VehicleNavigation.CylinderCapacity : null,
-                        CustomerId = w.CustomerId,
-                        CustomerName = w.CustomerNavigation != null ? w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName : null,
-                        EntryDate = w.EntryDate,
-                        EstimatedDeliveryDate = w.EstimatedDeliveryDate,
-                        Mileage = w.Mileage,
-                        FuelLevel = w.FuelLevel,
-                        Observations = w.Observations,
-                        Status = w.Status,
-                        IsActive = w.IsActive,
-                        IsBilled = _context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive),
-                        DownPayment = w.DownPayment,
-                        CreatedAt = w.CreatedAt,
-                        UpdatedAt = w.UpdatedAt,
-                        Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
-                        {
-                            Id = e.Id,
-                            WorkOrderId = e.WorkOrderId,
-                            PhotoUrl = e.PhotoUrl,
-                            EvidenceType = e.EvidenceType,
-                            Description = e.Description,
-                            IsActive = e.IsActive
-                        }).ToList(),
-                        Parts = w.Parts.Select(p => new WorkOrderPartDto
-                        {
-                            Id = p.Id,
-                            WorkOrderId = p.WorkOrderId,
-                            ProductId = p.ProductId,
-                            ProductName = p.ProductNavigation != null ? p.ProductNavigation.ProductName : p.PartName,
-                            PartName = p.PartName,
-                            Quantity = p.Quantity,
-                            UnitPrice = p.UnitPrice,
-                            IsProvidedByCustomer = p.IsProvidedByCustomer,
-                            WarrantyEndDate = p.WarrantyEndDate,
-                            IsActive = p.IsActive,
-                            QuotePhotoUrl = p.QuotePhotoUrl,
-                            IsApproved = p.IsApproved
-                        }).ToList(),
-                        Services = w.Services.Select(s => new WorkOrderServiceDto
-                        {
-                            Id = s.Id,
-                            WorkOrderId = s.WorkOrderId,
-                            Description = s.Description,
-                            MechanicId = s.MechanicId,
-                            MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
-                            Price = s.Price,
-                            EstimatedMinutes = s.EstimatedMinutes,
-                            TimeUnit = s.TimeUnit,
-                            WarrantyEndDate = s.WarrantyEndDate,
-                            IsActive = s.IsActive,
-                            IsApproved = s.IsApproved
-                        }).ToList()
-                    })
+                        .ThenInclude(v => v.BrandNavigation)
+                    .Include(w => w.VehicleNavigation)
+                        .ThenInclude(v => v.ModelNavigation)
+                    .Include(w => w.Evidences)
+                    .Include(w => w.Parts)
+                        .ThenInclude(p => p.ProductNavigation)
+                    .Include(w => w.Services)
+                        .ThenInclude(s => s.MechanicNavigation)
                     .OrderByDescending(w => w.CreatedAt)
                     .ToListAsync(cancellation);
+
+                // 4. Mapear en memoria garantizando compatibilidad 100% y cero fallos de traducción LINQ
+                return orders.Select(w => new WorkOrderDto
+                {
+                    Id = w.Id,
+                    VehicleId = w.VehicleId,
+                    VehiclePlate = w.VehicleNavigation?.Plate,
+                    VehicleBrand = w.VehicleNavigation?.BrandNavigation?.Name,
+                    VehicleVersion = w.VehicleNavigation?.ModelNavigation?.Models,
+                    VehicleType = w.VehicleNavigation?.VehicleType ?? "moto",
+                    VehicleMotorization = w.VehicleNavigation?.CylinderCapacity,
+                    CustomerId = w.CustomerId,
+                    CustomerName = w.CustomerNavigation != null ? $"{w.CustomerNavigation.FirstName} {w.CustomerNavigation.LastName}".Trim() : null,
+                    EntryDate = w.EntryDate,
+                    EstimatedDeliveryDate = w.EstimatedDeliveryDate,
+                    Mileage = w.Mileage,
+                    FuelLevel = w.FuelLevel,
+                    Observations = w.Observations,
+                    Status = w.Status,
+                    IsActive = w.IsActive,
+                    IsBilled = billedOrderIds.Contains(w.Id),
+                    DownPayment = w.DownPayment,
+                    PaymentMethodName = (paymentMethodMap.TryGetValue(w.Id, out var pmName) && !string.IsNullOrWhiteSpace(pmName))
+                        ? pmName 
+                        : (billedOrderIds.Contains(w.Id) || w.Status == "Entregado" ? "Efectivo" : (w.DownPayment > 0 ? "Abono Inicial" : "Pendiente")),
+                    CreatedAt = w.CreatedAt,
+                    UpdatedAt = w.UpdatedAt,
+                    Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
+                    {
+                        Id = e.Id,
+                        WorkOrderId = e.WorkOrderId,
+                        PhotoUrl = e.PhotoUrl,
+                        EvidenceType = e.EvidenceType,
+                        Description = e.Description,
+                        IsActive = e.IsActive
+                    }).ToList(),
+                    Parts = w.Parts.Select(p => new WorkOrderPartDto
+                    {
+                        Id = p.Id,
+                        WorkOrderId = p.WorkOrderId,
+                        ProductId = p.ProductId,
+                        ProductName = p.ProductNavigation?.ProductName ?? p.PartName,
+                        PartName = p.PartName,
+                        Quantity = p.Quantity,
+                        UnitPrice = p.UnitPrice,
+                        IsProvidedByCustomer = p.IsProvidedByCustomer,
+                        WarrantyEndDate = p.WarrantyEndDate,
+                        IsActive = p.IsActive,
+                        QuotePhotoUrl = p.QuotePhotoUrl,
+                        IsApproved = p.IsApproved
+                    }).ToList(),
+                    Services = w.Services.Select(s => new WorkOrderServiceDto
+                    {
+                        Id = s.Id,
+                        WorkOrderId = s.WorkOrderId,
+                        Description = s.Description,
+                        MechanicId = s.MechanicId,
+                        MechanicName = s.MechanicNavigation?.FullName ?? "Sin asignar",
+                        Price = s.Price,
+                        EstimatedMinutes = s.EstimatedMinutes,
+                        TimeUnit = s.TimeUnit,
+                        WarrantyEndDate = s.WarrantyEndDate,
+                        IsActive = s.IsActive,
+                        IsApproved = s.IsApproved
+                    }).ToList()
+                }).ToList();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener todas las órdenes de trabajo");
-                return new List<WorkOrderDto>();
+                throw;
             }
         }
 
@@ -140,80 +181,89 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
         {
             try
             {
-                return await _context.WorkOrder
+                WorkOrder? w = await _context.WorkOrder
                     .Include(w => w.CustomerNavigation)
                     .Include(w => w.VehicleNavigation)
+                        .ThenInclude(v => v.BrandNavigation)
+                    .Include(w => w.VehicleNavigation)
+                        .ThenInclude(v => v.ModelNavigation)
                     .Include(w => w.Evidences)
-                    .Include(w => w.Parts).ThenInclude(p => p.ProductNavigation)
-                    .Include(w => w.Services).ThenInclude(s => s.MechanicNavigation)
-                    .Where(w => w.Id == id)
-                    .Select(w => new WorkOrderDto
+                    .Include(w => w.Parts)
+                        .ThenInclude(p => p.ProductNavigation)
+                    .Include(w => w.Services)
+                        .ThenInclude(s => s.MechanicNavigation)
+                    .FirstOrDefaultAsync(w => w.Id == id, cancellation);
+
+                if (w == null) return null;
+
+                bool isBilled = await _context.Sale.AnyAsync(s => s.WorkOrderId == w.Id && s.IsActive, cancellation);
+
+                return new WorkOrderDto
+                {
+                    Id = w.Id,
+                    VehicleId = w.VehicleId,
+                    VehiclePlate = w.VehicleNavigation?.Plate,
+                    VehicleBrand = w.VehicleNavigation?.BrandNavigation?.Name,
+                    VehicleVersion = w.VehicleNavigation?.ModelNavigation?.Models,
+                    VehicleType = w.VehicleNavigation?.VehicleType ?? "moto",
+                    VehicleMotorization = w.VehicleNavigation?.CylinderCapacity,
+                    CustomerId = w.CustomerId,
+                    CustomerName = w.CustomerNavigation != null ? $"{w.CustomerNavigation.FirstName} {w.CustomerNavigation.LastName}".Trim() : null,
+                    EntryDate = w.EntryDate,
+                    EstimatedDeliveryDate = w.EstimatedDeliveryDate,
+                    Mileage = w.Mileage,
+                    FuelLevel = w.FuelLevel,
+                    Observations = w.Observations,
+                    Status = w.Status,
+                    IsActive = w.IsActive,
+                    IsBilled = isBilled,
+                    DownPayment = w.DownPayment,
+                    CreatedAt = w.CreatedAt,
+                    UpdatedAt = w.UpdatedAt,
+                    Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
                     {
-                        Id = w.Id,
-                        VehicleId = w.VehicleId,
-                        VehiclePlate = w.VehicleNavigation != null ? w.VehicleNavigation.Plate : null,
-                        VehicleBrand = w.VehicleNavigation != null && w.VehicleNavigation.BrandNavigation != null ? w.VehicleNavigation.BrandNavigation.Name : null,
-                        VehicleVersion = w.VehicleNavigation != null && w.VehicleNavigation.ModelNavigation != null ? w.VehicleNavigation.ModelNavigation.Models : null,
-                        VehicleType = w.VehicleNavigation != null ? w.VehicleNavigation.VehicleType : "moto",
-                        VehicleMotorization = w.VehicleNavigation != null ? w.VehicleNavigation.CylinderCapacity : null,
-                        CustomerId = w.CustomerId,
-                        CustomerName = w.CustomerNavigation != null ? w.CustomerNavigation.FirstName + " " + w.CustomerNavigation.LastName : null,
-                        EntryDate = w.EntryDate,
-                        EstimatedDeliveryDate = w.EstimatedDeliveryDate,
-                        Mileage = w.Mileage,
-                        FuelLevel = w.FuelLevel,
-                        Observations = w.Observations,
-                        Status = w.Status,
-                        IsActive = w.IsActive,
-                        IsBilled = _context.Sale.Any(s => s.WorkOrderId == w.Id && s.IsActive),
-                        DownPayment = w.DownPayment,
-                        CreatedAt = w.CreatedAt,
-                        UpdatedAt = w.UpdatedAt,
-                        Evidences = w.Evidences.Select(e => new WorkOrderEvidenceDto
-                        {
-                            Id = e.Id,
-                            WorkOrderId = e.WorkOrderId,
-                            PhotoUrl = e.PhotoUrl,
-                            EvidenceType = e.EvidenceType,
-                            Description = e.Description,
-                            IsActive = e.IsActive
-                        }).ToList(),
-                        Parts = w.Parts.Select(p => new WorkOrderPartDto
-                        {
-                            Id = p.Id,
-                            WorkOrderId = p.WorkOrderId,
-                            ProductId = p.ProductId,
-                            ProductName = p.ProductNavigation != null ? p.ProductNavigation.ProductName : p.PartName,
-                            PartName = p.PartName,
-                            Quantity = p.Quantity,
-                            UnitPrice = p.UnitPrice,
-                            IsProvidedByCustomer = p.IsProvidedByCustomer,
-                            WarrantyEndDate = p.WarrantyEndDate,
-                            IsActive = p.IsActive,
-                            QuotePhotoUrl = p.QuotePhotoUrl,
-                            IsApproved = p.IsApproved
-                        }).ToList(),
-                        Services = w.Services.Select(s => new WorkOrderServiceDto
-                        {
-                            Id = s.Id,
-                            WorkOrderId = s.WorkOrderId,
-                            Description = s.Description,
-                            MechanicId = s.MechanicId,
-                            MechanicName = s.MechanicNavigation != null ? s.MechanicNavigation.FullName : "Sin asignar",
-                            Price = s.Price,
-                            EstimatedMinutes = s.EstimatedMinutes,
-                            TimeUnit = s.TimeUnit,
-                            WarrantyEndDate = s.WarrantyEndDate,
-                            IsActive = s.IsActive,
-                            IsApproved = s.IsApproved
-                        }).ToList()
-                    })
-                    .FirstOrDefaultAsync(cancellation);
+                        Id = e.Id,
+                        WorkOrderId = e.WorkOrderId,
+                        PhotoUrl = e.PhotoUrl,
+                        EvidenceType = e.EvidenceType,
+                        Description = e.Description,
+                        IsActive = e.IsActive
+                    }).ToList(),
+                    Parts = w.Parts.Select(p => new WorkOrderPartDto
+                    {
+                        Id = p.Id,
+                        WorkOrderId = p.WorkOrderId,
+                        ProductId = p.ProductId,
+                        ProductName = p.ProductNavigation?.ProductName ?? p.PartName,
+                        PartName = p.PartName,
+                        Quantity = p.Quantity,
+                        UnitPrice = p.UnitPrice,
+                        IsProvidedByCustomer = p.IsProvidedByCustomer,
+                        WarrantyEndDate = p.WarrantyEndDate,
+                        IsActive = p.IsActive,
+                        QuotePhotoUrl = p.QuotePhotoUrl,
+                        IsApproved = p.IsApproved
+                    }).ToList(),
+                    Services = w.Services.Select(s => new WorkOrderServiceDto
+                    {
+                        Id = s.Id,
+                        WorkOrderId = s.WorkOrderId,
+                        Description = s.Description,
+                        MechanicId = s.MechanicId,
+                        MechanicName = s.MechanicNavigation?.FullName ?? "Sin asignar",
+                        Price = s.Price,
+                        EstimatedMinutes = s.EstimatedMinutes,
+                        TimeUnit = s.TimeUnit,
+                        WarrantyEndDate = s.WarrantyEndDate,
+                        IsActive = s.IsActive,
+                        IsApproved = s.IsApproved
+                    }).ToList()
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener la orden de trabajo con ID {Id}", id);
-                return null;
+                throw;
             }
         }
 
@@ -257,10 +307,19 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
 
                 if (existingOrder == null) return false;
 
+                int originalVehicleId = existingOrder.VehicleId;
+                int originalCustomerId = existingOrder.CustomerId;
                 int originalWorkshopId = _context.Entry(existingOrder).Property("WorkshopId").CurrentValue != null ? (int)_context.Entry(existingOrder).Property("WorkshopId").CurrentValue : 0;
 
+                DateTime originalOrderCreatedAt = existingOrder.CreatedAt;
                 _context.Entry(existingOrder).CurrentValues.SetValues(update);
+                existingOrder.CreatedAt = originalOrderCreatedAt;
+                _context.Entry(existingOrder).Property(w => w.CreatedAt).IsModified = false;
                 
+                if (update.VehicleId == 0 && originalVehicleId > 0)
+                    existingOrder.VehicleId = originalVehicleId;
+                if (update.CustomerId == 0 && originalCustomerId > 0)
+                    existingOrder.CustomerId = originalCustomerId;
                 if (originalWorkshopId > 0)
                 {
                     _context.Entry(existingOrder).Property("WorkshopId").CurrentValue = originalWorkshopId;
@@ -288,6 +347,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     WorkOrderPart? existingPart = existingOrder.Parts.FirstOrDefault(p => p.Id == part.Id && p.Id != 0);
                     if (existingPart != null)
                     {
+                        DateTime originalPartCreatedAt = existingPart.CreatedAt;
+                        int? originalPartResponsible = existingPart.ResponsibleUserId;
+
                         if (existingPart.Quantity != part.Quantity ||
                             existingPart.UnitPrice != part.UnitPrice ||
                             existingPart.IsApproved != part.IsApproved ||
@@ -300,7 +362,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                                 inventoryMovements.Add((existingPart.ProductId.Value, Math.Abs(diff), movType, $"Ajuste de cantidad en WO #{existingOrder.Id}"));
                             }
                             _context.Entry(existingPart).CurrentValues.SetValues(part);
+                            existingPart.CreatedAt = originalPartCreatedAt;
+                            existingPart.ResponsibleUserId = originalPartResponsible;
                             existingPart.UpdatedAt = DateTime.Now;
+                            _context.Entry(existingPart).Property(p => p.CreatedAt).IsModified = false;
                         }
                     }
                     else
@@ -326,13 +391,19 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                     WorkOrderService? existingService = existingOrder.Services.FirstOrDefault(s => s.Id == service.Id && s.Id != 0);
                     if (existingService != null)
                     {
+                        DateTime originalServiceCreatedAt = existingService.CreatedAt;
+                        int? originalServiceResponsible = existingService.ResponsibleUserId;
+
                         if (existingService.Price != service.Price ||
                             existingService.IsApproved != service.IsApproved ||
                             existingService.Description != service.Description ||
                             existingService.MechanicId != service.MechanicId)
                         {
                             _context.Entry(existingService).CurrentValues.SetValues(service);
+                            existingService.CreatedAt = originalServiceCreatedAt;
+                            existingService.ResponsibleUserId = originalServiceResponsible;
                             existingService.UpdatedAt = DateTime.Now;
+                            _context.Entry(existingService).Property(s => s.CreatedAt).IsModified = false;
                         }
                     }
                     else
@@ -347,17 +418,33 @@ namespace ApiTaller.Infrastructure.Data.Repositories.WorkOrders
                 // ─── Sincronizar Evidencias ──────────────────────────────────────────────
                 foreach (WorkOrderEvidence existingEvidence in existingOrder.Evidences.ToList())
                 {
-                    if (!update.Evidences.Any(e => e.Id == existingEvidence.Id))
+                    bool stillExists = update.Evidences.Any(e => 
+                        (e.Id > 0 && e.Id == existingEvidence.Id) || 
+                        (!string.IsNullOrEmpty(e.PhotoUrl) && e.PhotoUrl == existingEvidence.PhotoUrl));
+                    
+                    if (!stillExists)
+                    {
                         _context.WorkOrderEvidence.Remove(existingEvidence);
+                    }
                 }
 
                 foreach (WorkOrderEvidence evidence in update.Evidences)
                 {
-                    WorkOrderEvidence? existingEvidence = existingOrder.Evidences.FirstOrDefault(e => e.Id == evidence.Id && e.Id != 0);
+                    WorkOrderEvidence? existingEvidence = existingOrder.Evidences.FirstOrDefault(e => 
+                        (evidence.Id > 0 && e.Id == evidence.Id) || 
+                        (!string.IsNullOrEmpty(evidence.PhotoUrl) && e.PhotoUrl == evidence.PhotoUrl));
+
                     if (existingEvidence != null)
                     {
                         string originalPhotoUrl = existingEvidence.PhotoUrl;
+                        DateTime originalEvidenceCreatedAt = existingEvidence.CreatedAt;
+                        int? originalEvidenceResponsible = existingEvidence.ResponsibleUserId;
+
                         _context.Entry(existingEvidence).CurrentValues.SetValues(evidence);
+                        existingEvidence.CreatedAt = originalEvidenceCreatedAt;
+                        existingEvidence.ResponsibleUserId = originalEvidenceResponsible;
+                        _context.Entry(existingEvidence).Property(e => e.CreatedAt).IsModified = false;
+
                         if (string.IsNullOrEmpty(existingEvidence.PhotoUrl) || existingEvidence.PhotoUrl == originalPhotoUrl)
                         {
                             existingEvidence.PhotoUrl = originalPhotoUrl;

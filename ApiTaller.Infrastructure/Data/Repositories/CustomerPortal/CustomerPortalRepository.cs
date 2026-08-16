@@ -33,6 +33,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
         {
             if (!int.TryParse(_currentUserService.UserId, out int userId)) return null;
             Domain.Models.Customer? customer = await _context.Customer
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(c => c.UserId == userId && c.IsActive, cancellation);
             return customer?.Id;
         }
@@ -46,6 +47,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 if (customerId == null) return new List<CustomerPortalVehicleDto>();
 
                 List<Vehicle> vehicles = await _context.Vehicle
+                    .IgnoreQueryFilters()
                     .Include(v => v.BrandNavigation)
                     .Include(v => v.ModelNavigation)
                     .Include(v => v.VersionNavigation)
@@ -56,11 +58,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 foreach (Vehicle v in vehicles)
                 {
                     List<WorkOrder> orders = await _context.WorkOrder
+                        .IgnoreQueryFilters()
                         .Where(o => o.VehicleId == v.Id)
                         .OrderByDescending(o => o.CreatedAt)
                         .ToListAsync(cancellation);
 
                     Appointment? activeAppt = await _context.Appointment
+                        .IgnoreQueryFilters()
                         .FirstOrDefaultAsync(a => a.VehicleId == v.Id && a.IsActive && (a.Status == "Agendada" || a.Status == "Pendiente"), cancellation);
 
                     result.Add(new CustomerPortalVehicleDto
@@ -99,10 +103,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
 
                 // Verificar que el vehículo pertenece a este cliente
                 bool vehicleOwned = await _context.Vehicle
+                    .IgnoreQueryFilters()
                     .AnyAsync(v => v.Id == vehicleId && v.CustomerId == customerId, cancellation);
                 if (!vehicleOwned) return new List<CustomerPortalOrderSummaryDto>(); // Seguridad: no expone datos ajenos
 
                 List<WorkOrder> orders = await _context.WorkOrder
+                    .IgnoreQueryFilters()
                     .Include(o => o.Parts)
                     .Include(o => o.Services)
                     .Where(o => o.VehicleId == vehicleId)
@@ -126,7 +132,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                         TotalParts = totalParts,
                         TotalServices = totalServices,
                         GrandTotal = totalParts + totalServices,
-                        HasPendingApproval = hasPending && (o.Status == "Cotización" || o.Status == "Esperando Aprobación")
+                        HasPendingApproval = hasPending && (o.Status == "Cotización" || o.Status == "Esperando Aprobación" || o.Status == "En Aprobación")
                     };
                 }).ToList();
             }
@@ -147,6 +153,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
 
                 // Cadena de seguridad completa: orden → vehículo → cliente
                 WorkOrder? order = await _context.WorkOrder
+                    .IgnoreQueryFilters()
                     .Include(o => o.VehicleNavigation).ThenInclude(v => v.BrandNavigation)
                     .Include(o => o.VehicleNavigation).ThenInclude(v => v.VersionNavigation)
                     .Include(o => o.Parts).ThenInclude(p => p.ProductNavigation)
@@ -243,6 +250,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 if (dto.ItemType == "Part")
                 {
                     WorkOrderPart? part = await _context.WorkOrderPart
+                        .IgnoreQueryFilters()
                         .Include(p => p.WorkOrderNavigation)
                             .ThenInclude(o => o.VehicleNavigation)
                         .FirstOrDefaultAsync(p => p.Id == dto.ItemId
@@ -258,6 +266,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 else if (dto.ItemType == "Service")
                 {
                     WorkOrderService? service = await _context.WorkOrderService
+                        .IgnoreQueryFilters()
                         .Include(s => s.WorkOrderNavigation)
                             .ThenInclude(o => o.VehicleNavigation)
                         .FirstOrDefaultAsync(s => s.Id == dto.ItemId
@@ -279,6 +288,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                 if (orderId > 0)
                 {
                     WorkOrder? order = await _context.WorkOrder
+                        .IgnoreQueryFilters()
                         .Include(o => o.Parts)
                         .Include(o => o.Services)
                         .Include(o => o.VehicleNavigation)

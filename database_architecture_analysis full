@@ -1,0 +1,511 @@
+# Arquitectura Modular de Base de Datos: TallerMotoCar SaaS
+
+Esta guía desglosa la base de datos en **macro-flujos y submódulos independientes**, permitiendo entender con claridad cómo fluyen los datos y qué tablas intervienen en cada proceso del taller.
+
+---
+
+## 1. Macro-Flujo Operativo del Negocio
+
+```mermaid
+flowchart LR
+    A["📅 1. Cita Online / Recepción"] --> B["📋 2. Orden de Trabajo (OT)"]
+    B --> C["🔧 3. Diagnóstico y Cotización"]
+    C --> D["🛠️ 4. Ejecución del Mecánico"]
+    D --> E["🧾 5. Facturación y Caja"]
+    E --> F["💰 6. Liquidación de Nómina"]
+
+    subgraph Modulos_Soporte["Módulos de Soporte Transversal"]
+        G["🛵 Parque Automotor"] -.-> B
+        H["📦 Inventario y Repuestos"] -.-> C
+        I["⚙️ Catálogo de Servicios"] -.-> C
+        J["💳 Medios de Pago"] -.-> E
+    end
+
+    style A fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style B fill:#1e293b,stroke:#a855f7,stroke-width:2px,color:#fff
+    style C fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+    style D fill:#1e293b,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style E fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+    style F fill:#1e293b,stroke:#ec4899,stroke-width:2px,color:#fff
+```
+
+---
+
+## 2. Diagramas ER Modulares por Área de Negocio
+
+---
+
+### 📌 Módulo 1: Core Operativo (Órdenes de Trabajo)
+Gestiona el ciclo de vida del vehículo desde que ingresa al taller hasta que es entregado.
+
+```mermaid
+erDiagram
+    WORK_ORDER ||--o{ WORK_ORDER_EVIDENCE : "tiene_fotos"
+    WORK_ORDER ||--o{ WORK_ORDER_PART : "utiliza_repuestos"
+    WORK_ORDER ||--o{ WORK_ORDER_SERVICE : "realiza_servicios"
+    WORK_ORDER ||--o{ WORK_ORDER_HISTORY : "registra_historial"
+
+    WORK_ORDER {
+        int id PK
+        int workshop_id FK
+        int vehicle_id FK
+        int customer_id FK
+        datetime entry_date
+        datetime estimated_delivery_date
+        int mileage
+        string fuel_level
+        decimal down_payment
+        string status "Recepción | Cotización | Aprobado | Terminado | Entregado"
+        string observations
+    }
+
+    WORK_ORDER_PART {
+        int id PK
+        int work_order_id FK
+        int product_id FK "Opcional (NULL si es cotización externa)"
+        string part_name
+        int quantity
+        decimal unit_price
+        boolean is_provided_by_customer "True = Traído por cliente"
+        boolean is_approved
+    }
+
+    WORK_ORDER_SERVICE {
+        int id PK
+        int work_order_id FK
+        int service_catalog_id FK
+        int mechanic_id FK "User ID del mecánico asignado"
+        decimal price
+        boolean is_approved
+    }
+
+    WORK_ORDER_EVIDENCE {
+        int id PK
+        int work_order_id FK
+        string photo_url
+        string evidence_type "Ingreso | Diagnostico | Salida"
+    }
+
+    WORK_ORDER_HISTORY {
+        int id PK
+        int work_order_id FK
+        string status
+        datetime changed_at
+        int responsible_user_id FK
+    }
+```
+
+> **Regla de Negocio**:
+> - Si `is_provided_by_customer = true`, el repuesto no suma al costo del taller ni se descuenta del inventario.
+> - Si `product_id = NULL`, es una cotización externa de tercero (pase directo sin margen).
+> - Al pasar a estado `Terminado`/`Entregado`, los valores quedan bloqueados contra edición manual.
+
+---
+
+### 📌 Módulo 2: Facturación, Medios de Pago y Caja
+Registra la transacción comercial, el arqueo de caja física vs transferencias electrónicas y las garantías.
+
+```mermaid
+erDiagram
+    WORK_ORDER ||--o| SALE : "genera_factura"
+    CUSTOMER ||--o{ SALE : "facturado_a"
+    SALE ||--o{ SALE_DETAIL : "desglosa_items"
+    SALE ||--o{ SALE_PAYMENT : "recauda_fondos"
+    PAYMENT_METHOD ||--o{ SALE_PAYMENT : "metodo_utilizado"
+
+    SALE {
+        int id PK
+        int workshop_id FK
+        int work_order_id FK
+        int customer_id FK
+        datetime sale_date
+        decimal subtotal
+        decimal discount_percent
+        decimal discount_amount
+        decimal total
+        decimal down_payment
+        decimal balance "Total - DownPayment"
+        string observations "Terminos de Garantia"
+        string workshop_name
+    }
+
+    SALE_DETAIL {
+        int id PK
+        int sale_id FK
+        int product_id FK "Opcional"
+        int service_catalog_id FK "Opcional"
+        string description
+        int quantity
+        decimal unit_price
+        decimal total
+    }
+
+    SALE_PAYMENT {
+        int id PK
+        int sale_id FK
+        int payment_method_id FK
+        decimal amount
+        string reference_code "Nro Comprobante / Transf."
+    }
+
+    PAYMENT_METHOD {
+        int id PK
+        string name "Efectivo | Transferencia | Nequi | Tarjeta"
+        string icon
+    }
+```
+
+> **Regla de Negocio**:
+> - `sale_payment` permite pagos mixtos (ej. $100.000 en Efectivo + $55.000 por Nequi).
+> - `reference_code` es obligatorio cuando el método es transferencia o tarjeta para facilitar la conciliación bancaria.
+
+---
+
+### 📌 Módulo 3: Parque Automotor y Clientes
+Jerarquía vehicular estandarizada para clasificar motos y carros con precisión.
+
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ VEHICLE : "es_propietario"
+    BRAND ||--o{ BRAND_MODELS : "fabrica"
+    BRAND_MODELS ||--o{ BRAND_MODEL_VERSION : "tiene_versiones"
+    BRAND ||--o{ VEHICLE : "marca"
+    BRAND_MODELS ||--o{ VEHICLE : "modelo"
+    BRAND_MODEL_VERSION ||--o{ VEHICLE : "version"
+
+    CUSTOMER {
+        int id PK
+        int workshop_id FK
+        int identification_type_id FK
+        string identification_number
+        string first_name
+        string last_name
+        string phone_number
+        string email
+    }
+
+    VEHICLE {
+        int id PK
+        int workshop_id FK
+        int customer_id FK
+        int brand_id FK
+        int model_id FK
+        int version_id FK
+        string plate "Placa Unica (Mayusculas)"
+        string color
+        string vehicle_type "moto | car"
+        string cylinder_capacity
+        int current_mileage
+    }
+
+    BRAND {
+        int id PK
+        string name "Yamaha | Honda | Chevrolet"
+        string vehicle_type "moto | car | all"
+    }
+
+    BRAND_MODELS {
+        int id PK
+        int brand_id FK
+        string models "MT-09 | FZ-25 | Spark GT"
+    }
+
+    BRAND_MODEL_VERSION {
+        int id PK
+        int model_id FK
+        string version "2024 ABS 890cc"
+    }
+```
+
+---
+
+### 📌 Módulo 4: Catálogo de Servicios y Matriz Tarifaria
+Permite cobrar tarifas diferentes según el cilindraje o la complejidad de la versión del vehículo.
+
+```mermaid
+erDiagram
+    SERVICE_TYPE ||--o{ SERVICE_CATALOG : "agrupa"
+    SERVICE_CATALOG ||--o{ SERVICE_PRICE_BY_VERSION : "tiene_precios_especificos"
+    BRAND_MODEL_VERSION ||--o{ SERVICE_PRICE_BY_VERSION : "aplica_para"
+
+    SERVICE_TYPE {
+        int id PK
+        string name "Preventivo | Frenos | Motor | Electrico"
+        string vehicle_type "moto | car | all"
+    }
+
+    SERVICE_CATALOG {
+        int id PK
+        int service_type_id FK
+        string name "Sincronizacion | Cambio de Aceite"
+        decimal base_price "Precio estandar por defecto"
+        int estimated_minutes
+        string vehicle_type "moto | car"
+    }
+
+    SERVICE_PRICE_BY_VERSION {
+        int id PK
+        int service_catalog_id FK
+        int brand_model_version_id FK
+        decimal price "Precio especial para esta version exacta"
+    }
+```
+
+> **Lógica de Precios**:
+> Si una versión tiene precio en `service_price_by_version`, el sistema toma esa tarifa especial. Si no existe registro, toma el `base_price` del catálogo general.
+
+---
+
+### 📌 Módulo 5: Inventario, Productos y Recepciones
+Control de stock físico, compras a proveedores y trazabilidad de entradas/salidas (Kardex).
+
+```mermaid
+erDiagram
+    SUPPLIER ||--o{ INVENTORY_RECEPTION : "provee"
+    PRODUCT_TYPE ||--o{ PRODUCT : "categoriza"
+    PRODUCT ||--o{ INVENTORY : "tiene_stock"
+    INVENTORY ||--o{ INVENTORY_HISTORY : "audita_kardex"
+    INVENTORY_RECEPTION ||--o{ INVENTORY_RECEPTION_DETAIL : "contiene"
+    PRODUCT ||--o{ INVENTORY_RECEPTION_DETAIL : "recibe_item"
+
+    PRODUCT {
+        int id PK
+        int product_type_id FK
+        string reference "SKU / Codigo"
+        string product_name
+        decimal base_price "Costo de compra"
+        decimal price "Precio de venta al publico"
+        string vehicle_type "moto | car | all"
+    }
+
+    INVENTORY {
+        int id PK
+        int product_id FK
+        int stock_quantity "Stock actual en bodega"
+        int minimum_stock "Alerta de reposicion"
+    }
+
+    INVENTORY_HISTORY {
+        int id PK
+        int inventory_id FK
+        string movement_type "Entrada | Salida | Ajuste"
+        int quantity
+        string reason
+        datetime created_at
+    }
+
+    INVENTORY_RECEPTION {
+        int id PK
+        int supplier_id FK
+        string invoice_number "Factura de Compra"
+        decimal total_amount
+        datetime reception_date
+    }
+
+    INVENTORY_RECEPTION_DETAIL {
+        int id PK
+        int inventory_reception_id FK
+        int product_id FK
+        int quantity
+        decimal unit_cost
+    }
+```
+
+---
+
+### 📌 Módulo 6: Agenda y Agendamiento Online (Portal Cliente)
+Control de disponibilidad horaria, turnos y conversión fluida de citas en órdenes de trabajo.
+
+```mermaid
+erDiagram
+    AGENDA_SETTINGS ||--o{ AGENDA_DAY_CONFIG : "dias_laborables"
+    AGENDA_SETTINGS ||--o{ AGENDA_BLOCK : "bloqueos_festivos"
+    CUSTOMER ||--o{ APPOINTMENT : "reserva"
+    VEHICLE ||--o{ APPOINTMENT : "vehiculo_cita"
+    SERVICE_CATALOG ||--o{ APPOINTMENT : "servicio_solicitado"
+    APPOINTMENT ||--o| WORK_ORDER : "se_convierte_en"
+
+    AGENDA_SETTINGS {
+        int id PK
+        int slot_duration_minutes "Ej: 30 o 60 min"
+        int simultaneous_slots "Capacidad de elevadores"
+        boolean allow_same_day
+    }
+
+    AGENDA_DAY_CONFIG {
+        int id PK
+        int agenda_settings_id FK
+        int day_of_week "1 = Lunes ... 7 = Domingo"
+        time start_time
+        time end_time
+        boolean is_active
+    }
+
+    AGENDA_BLOCK {
+        int id PK
+        datetime start_date
+        datetime end_date
+        string reason "Mantenimiento | Festivo"
+    }
+
+    APPOINTMENT {
+        int id PK
+        int customer_id FK
+        int vehicle_id FK
+        int service_catalog_id FK
+        datetime appointment_date
+        time start_time
+        time end_time
+        string status "Pendiente | Confirmada | En Taller | Cancelada"
+        int converted_work_order_id FK "OT generada al recibir"
+    }
+```
+
+---
+
+### 📌 Módulo 7: Nómina y Liquidación de Mecánicos
+Cálculo automático de comisiones por porcentaje sobre mano de obra o tarifa fija por día.
+
+```mermaid
+erDiagram
+    USER ||--o| MECHANIC_PAYMENT_SETTINGS : "esquema_pago"
+    USER ||--o{ MECHANIC_PAYMENT_SETTLEMENT : "recibe_nomina"
+    USER ||--o{ WORK_ORDER_SERVICE : "ejecuta_servicios"
+
+    MECHANIC_PAYMENT_SETTINGS {
+        int id PK
+        int mechanic_id FK "User ID"
+        string payment_type "Porcentaje | PorDia"
+        decimal value "Ej: 40 (%) o 60.000 ($/dia)"
+    }
+
+    MECHANIC_PAYMENT_SETTLEMENT {
+        int id PK
+        int mechanic_id FK
+        datetime start_date
+        datetime end_date
+        decimal total_amount
+        string status "Pagado | Pendiente"
+        string receipt_number
+        int responsible_user_id FK
+    }
+```
+
+---
+
+### 📌 Módulo 8: Seguridad, Usuarios y RBAC Dinámico
+Control de acceso basado en roles con permisos específicos a nivel de acción y módulo.
+
+```mermaid
+erDiagram
+    USERROLE ||--o{ USER : "pertenece"
+    USERROLE ||--o{ ROLEACTION : "tiene_acciones"
+    USERROLE ||--o{ USER_ROLE_MODULE : "tiene_modulos"
+    MODULE ||--o{ ACTION : "contiene"
+    OPERATION ||--o{ ACTION : "combina"
+    ACTION ||--o{ ROLEACTION : "asigna"
+    MODULE ||--o{ USER_ROLE_MODULE : "autoriza"
+
+    USERROLE {
+        int id PK
+        string role "SuperAdmin | Administrador | Mecanico | Cliente"
+    }
+
+    USER {
+        int id PK
+        int user_role_id FK
+        string username
+        string password "BCrypt Hash"
+        string full_name
+        string email
+        boolean is_active
+    }
+
+    MODULE {
+        int id PK
+        string name "Ordenes Trabajo | Inventario | Ventas"
+    }
+
+    OPERATION {
+        int id PK
+        string name "Ver | Guardar | Editar | Inactivar"
+    }
+
+    ACTION {
+        int id PK
+        int module_id FK
+        int operation_id FK
+        string slug "Guardar_Ordenes_Trabajo"
+    }
+```
+
+---
+
+### 📌 Módulo 9: Multi-Tenancy SaaS y Configuración
+Aislamiento institucional por taller y personalización de marca.
+
+```mermaid
+erDiagram
+    WORKSHOP ||--o{ WORKSHOP_SETTINGS : "ajustes_taller"
+    WORKSHOP ||--o{ EMAIL_SETTINGS : "servidor_smtp"
+
+    WORKSHOP {
+        int id PK
+        string name "Nombre del Taller"
+        string slug "identificador-url"
+        string owner_email
+        string phone
+        string workshop_type "moto | car | multi"
+        string plan "basic | pro | enterprise"
+        datetime trial_ends_at
+    }
+
+    WORKSHOP_SETTINGS {
+        int id PK
+        int workshop_id FK
+        string setting_key "logo | workshop_name | slogan"
+        string setting_value "Valor en texto o Base64"
+    }
+
+    EMAIL_SETTINGS {
+        int id PK
+        int workshop_id FK
+        string host
+        int port
+        string user_name
+        string password
+        boolean enable_ssl
+    }
+```
+
+---
+
+## 3. Puntos Críticos y Reglas de Oro de la Base de Datos
+
+> [!IMPORTANT]
+> **1. Aislamiento Multi-Tenant (`workshop_id`)**
+> Cada registro transaccional pertenece a un `workshop_id`. En el backend, Entity Framework aplica filtros globales automáticos para evitar que un taller vea información de otro.
+
+> [!WARNING]
+> **2. Inmutabilidad de la Factura (`sale`)**
+> Una vez facturada una orden de trabajo, los precios, servicios y repuestos quedan sellados para garantizar la integridad contable y tributaria.
+
+> [!TIP]
+> **3. Clasificación de Rentabilidad en Ventas**
+> - **Repuestos Propios con Stock**: Margen $= \text{Precio Venta} - \text{Costo de Compra}$.
+> - **Repuestos Bajo Pedido**: Margen $= \text{Precio Cobrado} - \text{Costo Adquisición}$.
+> - **Cotizaciones Externas**: Pase directo sin margen (se cobra exactamente lo facturado por el tercero).
+> - **Mano de Obra Neta**: Total Servicios menos Comisión del Mecánico.
+
+---
+
+## 4. Guía de Reseteo Rápido de la Base de Datos
+
+Para vaciar los datos de prueba y re-inicializar el sistema en blanco:
+
+1. **Ejecutar el script de reseteo**:
+   - Abrir y correr: [`ResetDatabaseData.sql`](file:///c:/Users/migue/Documents/Proyecto%20PWA/Api/ApiTaller.Infrastructure/Helpers/ResetDatabaseData.sql) en MySQL Workbench / DBeaver.
+   - Vacía todas las 41 tablas con `TRUNCATE TABLE` y resetea los autoincrementables a 1.
+2. **Ejecutar el script de datos iniciales**:
+   - Abrir y correr: [`SeedInitialComplete.sql`](file:///c:/Users/migue/Documents/Proyecto%20PWA/Api/ApiTaller.Infrastructure/Helpers/SeedInitialComplete.sql).
+   - Crea el taller maestro, roles, usuarios, marcas, modelos, repuestos y catálogo de servicios.

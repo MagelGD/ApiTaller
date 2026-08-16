@@ -2,6 +2,7 @@ using ApiTaller.Domain.Dtos.Agenda;
 using ApiTaller.Domain.Interfaces.Repositories.Agenda;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Interfaces.Services.Agenda;
+using ApiTaller.Domain.Interfaces.Services.WorkOrders;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,15 +15,18 @@ namespace ApiTaller.Core.Services.Agenda
     {
         private readonly IAgendaRepository _agendaRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IWorkOrderNotificationService _notificationService;
         private readonly ILogger<AgendaService> _logger;
 
         public AgendaService(
             IAgendaRepository agendaRepository,
             ICurrentUserService currentUserService,
+            IWorkOrderNotificationService notificationService,
             ILogger<AgendaService> logger)
         {
             _agendaRepository = agendaRepository;
             _currentUserService = currentUserService;
+            _notificationService = notificationService;
             _logger = logger;
         }
 
@@ -96,7 +100,12 @@ namespace ApiTaller.Core.Services.Agenda
                     return false;
                 }
 
-                return await _agendaRepository.BookAsync(dto, userId, ct);
+                bool result = await _agendaRepository.BookAsync(dto, userId, ct);
+                if (result)
+                {
+                    await _notificationService.NotifyWorkOrderUpdatedAsync(0, 0);
+                }
+                return result;
             }
             catch (Exception ex)
             {
@@ -137,7 +146,12 @@ namespace ApiTaller.Core.Services.Agenda
                     }
                 }
 
-                return await _agendaRepository.AdminBookAsync(dto, responsibleUserId, ct);
+                bool result = await _agendaRepository.AdminBookAsync(dto, responsibleUserId, ct);
+                if (result)
+                {
+                    await _notificationService.NotifyWorkOrderUpdatedAsync(0, 0);
+                }
+                return result;
             }
             catch (Exception ex)
             {
@@ -182,7 +196,12 @@ namespace ApiTaller.Core.Services.Agenda
                     return null;
                 }
 
-                return await _agendaRepository.ConvertToWorkOrderAsync(appointmentId, responsibleUserId, ct);
+                int? workOrderId = await _agendaRepository.ConvertToWorkOrderAsync(appointmentId, responsibleUserId, ct);
+                if (workOrderId.HasValue && workOrderId.Value > 0)
+                {
+                    await _notificationService.NotifyWorkOrderUpdatedAsync(workOrderId.Value, 0);
+                }
+                return workOrderId;
             }
             catch (Exception ex)
             {

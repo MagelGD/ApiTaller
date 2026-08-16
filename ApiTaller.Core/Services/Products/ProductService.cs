@@ -33,6 +33,7 @@ namespace ApiTaller.Core.Services.Products
                     Code = product.Code,
                     Reference = product.Reference,
                     Description = product.Description,
+                    VehicleType = string.IsNullOrEmpty(product.VehicleType) ? "both" : product.VehicleType,
                     ProducTypeId = product.ProductType?.Id ?? 0,
                     IsActive = product.IsActive,
                     CreatedAt = product.Id == 0 ? DateTime.Now : product.CreatedAt,

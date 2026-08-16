@@ -29,18 +29,27 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 int.TryParse(_currentUserService.UserId, out int userId);
                 int? finalUserId = userId != 0 ? userId : null;
 
+                // 1. Validar y resolver CustomerId desde la orden si viene en 0
+                int finalCustomerId = saleDto.CustomerId;
+                if (finalCustomerId == 0 && saleDto.WorkOrderId.HasValue)
+                {
+                    Domain.Models.WorkOrder? wo = await _context.WorkOrder.FindAsync(new object[] { saleDto.WorkOrderId.Value }, cancellation);
+                    if (wo != null) finalCustomerId = wo.CustomerId;
+                }
+
+                // 2. Obtener datos comerciales del taller o aplicar fallbacks
                 List<Domain.Models.WorkshopSettings> settings = await _context.WorkshopSettings
                     .Where(s => s.IsActive && (s.SettingKey == "logo" || s.SettingKey == "logo_brands" || s.SettingKey == "workshop_name" || s.SettingKey == "workshop_slogan"))
                     .ToListAsync(cancellation);
                 string? logo = settings.FirstOrDefault(s => s.SettingKey == "logo")?.SettingValue;
                 string? logoBrands = settings.FirstOrDefault(s => s.SettingKey == "logo_brands")?.SettingValue;
-                string? name = settings.FirstOrDefault(s => s.SettingKey == "workshop_name")?.SettingValue;
-                string? slogan = settings.FirstOrDefault(s => s.SettingKey == "workshop_slogan")?.SettingValue;
+                string name = settings.FirstOrDefault(s => s.SettingKey == "workshop_name")?.SettingValue ?? "DAVID MOTOS";
+                string slogan = settings.FirstOrDefault(s => s.SettingKey == "workshop_slogan")?.SettingValue ?? "SERVICIO TÉCNICO ESPECIALIZADO";
 
                 Sale sale = new Sale
                 {
                     WorkOrderId = saleDto.WorkOrderId,
-                    CustomerId = saleDto.CustomerId,
+                    CustomerId = finalCustomerId,
                     SaleDate = DateTime.Now,
                     Subtotal = saleDto.Subtotal,
                     DiscountPercent = saleDto.DiscountPercent,
@@ -61,39 +70,70 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 await _context.Sale.AddAsync(sale, cancellation);
                 await _context.SaveChangesAsync(cancellation);
 
-                // Guardar detalles
+                // 3. Guardar detalles con validación estricta de Foreign Keys
                 if (saleDto.Details != null && saleDto.Details.Any())
                 {
-                    IEnumerable<SaleDetail> details = saleDto.Details.Select(detailDto => new SaleDetail
+                    List<SaleDetail> details = new List<SaleDetail>();
+                    foreach (var detailDto in saleDto.Details)
                     {
-                        SaleId = sale.Id,
-                        ProductId = detailDto.ProductId,
-                        ServiceCatalogId = detailDto.ServiceCatalogId,
-                        Description = detailDto.Description,
-                        Quantity = detailDto.Quantity,
-                        UnitPrice = detailDto.UnitPrice,
-                        Total = detailDto.Total,
-                        IsActive = true,
-                        CreatedAt = DateTime.Now,
-                        ResponsibleUserId = finalUserId
-                    });
-                    
+                        int? validProductId = (detailDto.ProductId.HasValue && detailDto.ProductId.Value > 0) ? detailDto.ProductId : null;
+                        int? validServiceId = (detailDto.ServiceCatalogId.HasValue && detailDto.ServiceCatalogId.Value > 0) ? detailDto.ServiceCatalogId : null;
+
+                        if (validProductId.HasValue)
+                        {
+                            bool exists = await _context.Product.AnyAsync(p => p.Id == validProductId.Value, cancellation);
+                            if (!exists) validProductId = null;
+                        }
+
+                        if (validServiceId.HasValue)
+                        {
+                            bool exists = await _context.ServiceCatalog.AnyAsync(s => s.Id == validServiceId.Value, cancellation);
+                            if (!exists) validServiceId = null;
+                        }
+
+                        details.Add(new SaleDetail
+                        {
+                            SaleId = sale.Id,
+                            ProductId = validProductId,
+                            ServiceCatalogId = validServiceId,
+                            Description = !string.IsNullOrWhiteSpace(detailDto.Description) ? detailDto.Description : "Item Facturado",
+                            Quantity = detailDto.Quantity > 0 ? detailDto.Quantity : 1,
+                            UnitPrice = detailDto.UnitPrice,
+                            Total = detailDto.Total > 0 ? detailDto.Total : (detailDto.Quantity * detailDto.UnitPrice),
+                            IsActive = true,
+                            CreatedAt = DateTime.Now,
+                            ResponsibleUserId = finalUserId
+                        });
+                    }
+
                     await _context.SaleDetail.AddRangeAsync(details, cancellation);
                 }
 
-                // Guardar pagos
+                // 4. Guardar pagos con ReferenceCode seguro
                 if (saleDto.Payments != null && saleDto.Payments.Any())
                 {
-                    IEnumerable<SalePayment> payments = saleDto.Payments.Select(paymentDto => new SalePayment
+                    List<SalePayment> payments = new List<SalePayment>();
+                    foreach (var paymentDto in saleDto.Payments)
                     {
-                        SaleId = sale.Id,
-                        PaymentMethodId = paymentDto.PaymentMethodId,
-                        Amount = paymentDto.Amount,
-                        ReferenceCode = paymentDto.ReferenceCode,
-                        IsActive = true,
-                        CreatedAt = DateTime.Now,
-                        ResponsibleUserId = finalUserId
-                    }).ToList();
+                        int methodId = paymentDto.PaymentMethodId > 0 ? paymentDto.PaymentMethodId : 1;
+                        bool methodExists = await _context.PaymentMethod.AnyAsync(p => p.Id == methodId, cancellation);
+                        if (!methodExists)
+                        {
+                            var defaultMethod = await _context.PaymentMethod.FirstOrDefaultAsync(p => p.IsActive, cancellation);
+                            if (defaultMethod != null) methodId = defaultMethod.Id;
+                        }
+
+                        payments.Add(new SalePayment
+                        {
+                            SaleId = sale.Id,
+                            PaymentMethodId = methodId,
+                            Amount = paymentDto.Amount,
+                            ReferenceCode = !string.IsNullOrWhiteSpace(paymentDto.ReferenceCode) ? paymentDto.ReferenceCode : "N/A",
+                            IsActive = true,
+                            CreatedAt = DateTime.Now,
+                            ResponsibleUserId = finalUserId
+                        });
+                    }
 
                     await _context.SalePayment.AddRangeAsync(payments, cancellation);
                 }
@@ -144,6 +184,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                     ? $"{sale.Customer.FirstName} {sale.Customer.LastName}".Trim()
                     : "Consumidor Final",
                 CustomerPhone = sale.Customer?.PhoneNumber,
+                CustomerEmail = sale.Customer?.Email,
                 VehiclePlate = vehicle?.Plate,
                 VehicleColor = vehicle?.Color,
                 VehicleModel = vehicleDisplay,
@@ -169,7 +210,15 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                     Quantity = d.Quantity,
                     UnitPrice = d.UnitPrice,
                     Total = d.Total
-                }).ToList() ?? new List<SaleDetailDto>()
+                }).ToList() ?? new List<SaleDetailDto>(),
+                Payments = sale.Payments?.Select(p => new SalePaymentDto
+                {
+                    Id = p.Id,
+                    PaymentMethodId = p.PaymentMethodId,
+                    PaymentMethodName = p.PaymentMethod != null ? p.PaymentMethod.Name : "Efectivo",
+                    Amount = p.Amount,
+                    ReferenceCode = p.ReferenceCode
+                }).ToList() ?? new List<SalePaymentDto>()
             };
         }
     }
