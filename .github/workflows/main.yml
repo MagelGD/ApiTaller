@@ -3,7 +3,7 @@ name: Compilar Dev y Enviar API a Produccion (FTP)
 on:
   push:
     branches:
-      - devcar
+      - dev
 
 jobs:
   build-and-deploy-api:
