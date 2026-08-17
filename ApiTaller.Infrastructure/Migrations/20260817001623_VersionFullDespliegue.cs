@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiTaller.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Versionfull : Migration
+    public partial class VersionFullDespliegue : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -1821,12 +1821,6 @@ namespace ApiTaller.Infrastructure.Migrations
                 name: "FK_WORKSHOP_SETTINGS_USER",
                 table: "workshop_settings",
                 column: "responsible_user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "UQ_WORKSHOP_SETTINGS_KEY",
-                table: "workshop_settings",
-                column: "setting_key",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UQ_WORKSHOP_SETTINGS_TENANT_KEY",

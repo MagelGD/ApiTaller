@@ -1,17 +1,16 @@
-USE TallerMotoCar;
-
 -- ==============================================================================
--- SCRIPT MAESTRO DE INICIALIZACIÓN COMPLETA (SEED DATA MULTI-MODAL)
+-- SCRIPT MAESTRO DE INICIALIZACIÓN DE DATOS PARA SERVIDOR (SEED DATA SERVER)
 -- Sistema: TallerMotoCar Multi-Tenant SaaS
--- Modalidades Soportadas: Motos, Carros, Lubricentros y Talleres Mixtos
--- Propósito: Despliegue en producción o nueva instancia de desarrollo desde cero
+-- Compatibilidad: MySQL 8.x / phpMyAdmin (site4now y cualquier hosting)
+-- Propósito: Poblar datos maestros iniciales (Roles, Módulos, Permisos, Vehículos, Repuestos, Servicios)
 -- ==============================================================================
 
--- 1. Desactivar temporalmente la verificación de llaves foráneas
+-- 1. Desactivar temporalmente la verificación de llaves foráneas y safe updates
 SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_SAFE_UPDATES = 0;
 
 -- ==============================================================================
--- PASO 1: LIMPIEZA Y RESTRICCIONES DE INTEGRIDAD
+-- PASO 1: LIMPIEZA DE TABLAS DE MATRIZ DE PERMISOS
 -- ==============================================================================
 TRUNCATE TABLE roleaction;
 TRUNCATE TABLE user_role_module;
@@ -417,11 +416,6 @@ INSERT IGNORE INTO service_catalog (service_type_id, name, description, default_
 
 -- Aire Acondicionado
 (10, 'Carga de Gas Refrigerante R134a para A/C', 'Vacío del circuito con bomba, prueba de fugas y recarga con aceite PAG y gas R134a', 60, 120000, 'Minutos', 'car', 1, 1, NOW(), NOW(), 1);
-
--- Normalizar vehicle_type en registros existentes
-UPDATE service_catalog SET vehicle_type = 'car' WHERE name LIKE '%(Carro%' OR name LIKE '%Carro%' OR name LIKE '%Camioneta%' OR description LIKE '%automóvil%' OR description LIKE '%automovil%';
-UPDATE service_catalog SET vehicle_type = 'moto' WHERE name LIKE '%(Moto%' OR name LIKE '%Moto%' OR name LIKE '%Cadena%' OR name LIKE '%Arrastre%' OR description LIKE '%motocicleta%';
-UPDATE service_catalog SET vehicle_type = 'both' WHERE vehicle_type IS NULL OR vehicle_type = '';
 
 -- ==============================================================================
 -- PASO 12: TIPOS DE PRODUCTOS Y REPUESTOS (Motos + Carros)
@@ -931,6 +925,9 @@ END //
 DELIMITER ;
 
 -- ==============================================================================
--- FINALIZACIÓN: Reactivar validación de llaves foráneas
+-- FINALIZACIÓN: Reactivar validación de llaves foráneas y safe updates
 -- ==============================================================================
+SET SQL_SAFE_UPDATES = 1;
 SET FOREIGN_KEY_CHECKS = 1;
+
+SELECT 'Datos maestros iniciales poblados exitosamente en el servidor' AS Resultado;
