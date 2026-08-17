@@ -45,7 +45,7 @@ namespace ApiTaller.Infrastructure.Data.Configurations
 
             builder.Property(e => e.CreatedAt)
                 .IsRequired()
-                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
                 .HasColumnName("created_at");
 
             builder.Property(e => e.UpdatedAt)

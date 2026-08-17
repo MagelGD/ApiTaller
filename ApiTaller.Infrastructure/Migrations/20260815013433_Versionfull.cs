@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -82,7 +82,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
@@ -111,7 +111,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
@@ -142,7 +142,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     workshop_id = table.Column<int>(type: "int(11)", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
@@ -186,7 +186,7 @@ namespace ApiTaller.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     WorkshopId = table.Column<int>(type: "int", nullable: false),
                     is_active = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValue: true),
-                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    created_at = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
                     updated_at = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     responsible_user_id = table.Column<int>(type: "int(11)", nullable: true)
                 },
