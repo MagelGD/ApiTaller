@@ -121,13 +121,19 @@ namespace ApiTaller.Core.Services.Auth
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    throw new ArgumentException("El correo electrónico es requerido.");
+                }
+
+                string normalizedEmail = email.Trim().ToLower();
+
                 User? user = await _context.User
-                    .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower() && u.IsActive, ct);
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail && u.IsActive, ct);
 
                 if (user == null)
                 {
-                    // Retornamos true por seguridad para evitar enumeración de cuentas
-                    return true;
+                    throw new KeyNotFoundException("El correo electrónico no se encuentra registrado en el sistema.");
                 }
 
                 // Inactivar tokens de recuperación activos anteriores
@@ -158,40 +164,61 @@ namespace ApiTaller.Core.Services.Auth
 
                 if (saved)
                 {
-                    // Enviar correo de recuperación con plantilla premium
-                    string resetUrl = $"http://localhost:4200/reset-password?token={tokenString}";
+                    // Enviar correo de recuperación con plantilla oficial GarageMotor
+                    string resetUrl = $"https://garagemotor.co/reset-password?token={tokenString}";
                     EmailRequest emailRequest = new EmailRequest
                     {
                         To = user.Email,
-                        Subject = "Recupera tu contraseña — Deivid Motos",
+                        Subject = "Recupera tu contraseña — GarageMotor",
                         Body = $@"
-                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #ffffff;'>
-                            <div style='text-align: center; margin-bottom: 20px;'>
-                                <h2 style='color: #0ea5e9; margin: 0;'>Deivid Motos</h2>
-                                <p style='color: #6b7280; font-size: 14px; margin: 5px 0 0 0;'>Portal Cliente</p>
+                        <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #1e293b; border-radius: 16px; background-color: #0f172a; color: #f8fafc;'>
+                            <div style='text-align: center; margin-bottom: 24px;'>
+                                <h2 style='color: #38bdf8; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;'>GarageMotor</h2>
+                                <p style='color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;'>Gestión Profesional de Talleres</p>
                             </div>
-                            <hr style='border: 0; border-top: 1px solid #e0e0e0; margin-bottom: 20px;' />
-                            <p style='color: #374151; font-size: 16px; line-height: 1.5;'>Hola <strong>{user.FullName}</strong>,</p>
-                            <p style='color: #374151; font-size: 16px; line-height: 1.5;'>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en el portal de Deivid Motos.</p>
-                            <div style='text-align: center; margin: 30px 0;'>
-                                <a href='{resetUrl}' style='background-color: #0ea5e9; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;'>Restablecer mi Contraseña</a>
+                            <div style='background-color: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid rgba(255, 255, 255, 0.05);'>
+                                <p style='color: #f8fafc; font-size: 16px; line-height: 1.5; margin-top: 0;'>Hola <strong>{user.FullName}</strong>,</p>
+                                <p style='color: #cbd5e1; font-size: 15px; line-height: 1.6;'>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en <strong>GarageMotor</strong>.</p>
+                                <div style='text-align: center; margin: 32px 0;'>
+                                    <a href='{resetUrl}' style='background: linear-gradient(90deg, #0284c7 0%, #2563eb 100%); color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 10px; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);'>Restablecer mi Contraseña</a>
+                                </div>
+                                <p style='color: #f59e0b; font-size: 13px; line-height: 1.5; margin-bottom: 0;'>⚠️ Este enlace de recuperación expirará en <strong>1 hora</strong> por motivos de seguridad.</p>
                             </div>
-                            <p style='color: #ef4444; font-size: 14px; line-height: 1.5;'>Este enlace de recuperación expirará en 1 hora por razones de seguridad.</p>
-                            <p style='color: #6b7280; font-size: 14px; line-height: 1.5; margin-top: 20px;'>Si tú no solicitaste este cambio, puedes ignorar este correo de forma segura; tu contraseña seguirá siendo la misma.</p>
-                            <hr style='border: 0; border-top: 1px solid #e0e0e0; margin: 25px 0 15px 0;' />
-                            <p style='text-align: center; color: #9ca3af; font-size: 12px; margin: 0;'>Deivid Motos PWA — Todos los derechos reservados.</p>
+                            <p style='color: #64748b; font-size: 13px; line-height: 1.5; margin-top: 20px; text-align: center;'>Si tú no solicitaste este cambio, puedes ignorar este correo de forma segura; tu contraseña permanecerá sin cambios.</p>
+                            <hr style='border: 0; border-top: 1px solid #1e293b; margin: 24px 0 16px 0;' />
+                            <p style='text-align: center; color: #475569; font-size: 12px; margin: 0;'>GarageMotor PWA — Todos los derechos reservados.</p>
                         </div>"
                     };
 
-                    await _emailService.SendEmailAsync(emailRequest, ct);
+                    try
+                    {
+                        await _emailService.SendEmailAsync(emailRequest, ct);
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogError(emailEx, "Error al enviar correo SMTP de recuperación para {Email}", user.Email);
+                        throw new InvalidOperationException("No se pudo enviar el correo de recuperación. Por favor contacta al administrador para verificar la configuración de correo.");
+                    }
                 }
 
                 return true;
             }
+            catch (KeyNotFoundException)
+            {
+                throw;
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al generar token de recuperación para {Email}", email);
-                return false;
+                throw new Exception("Ocurrió un error interno al procesar la solicitud de recuperación.");
             }
         }
 

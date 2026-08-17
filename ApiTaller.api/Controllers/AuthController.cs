@@ -73,17 +73,34 @@ namespace ApiTaller.api.Controllers
         {
             try
             {
-                bool success = await _authService.GeneratePasswordResetTokenAsync(dto.Email, cancellation);
+                if (string.IsNullOrWhiteSpace(dto?.Email))
+                {
+                    return BadRequest(new { message = "Por favor ingresa un correo electrónico válido." });
+                }
+
+                bool success = await _authService.GeneratePasswordResetTokenAsync(dto.Email.Trim(), cancellation);
                 if (success)
                 {
-                    return Ok(new { message = "Se ha enviado un correo para restablecer la contraseña si el correo está registrado." });
+                    return Ok(new { message = "Se ha enviado un correo con las instrucciones para restablecer tu contraseña." });
                 }
-                return BadRequest(new { message = "Error al procesar la solicitud." });
+                return BadRequest(new { message = "No se pudo procesar la solicitud de recuperación." });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en forgot-password");
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                _logger.LogError(ex, "Error en forgot-password para {Email}", dto?.Email);
+                return StatusCode(500, new { message = "Ocurrió un error al procesar el correo de recuperación. Inténtalo de nuevo más tarde." });
             }
         }
 
