@@ -131,7 +131,7 @@ app.UseSwaggerUI(options =>
 
 
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 // Rate limiting nativo aplicado antes de autenticación
 app.UseRateLimiter();
