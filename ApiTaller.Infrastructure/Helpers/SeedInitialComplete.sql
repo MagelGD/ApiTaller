@@ -810,6 +810,17 @@ INSERT IGNORE INTO agenda_settings (
     CURRENT_DATE(), '1,2,3,4,5,6', 1, 1, NOW(), NOW(), 1
 );
 
+-- C. Configuración de Correo Electrónico Base del Software (EmailSettings)
+INSERT IGNORE INTO EmailSettings (
+    id, Host, Port, UserName, Password, EnableSsl, 
+    SenderName, SenderEmail, WorkshopId, 
+    IsActive, CreatedAt, UpdatedAt, ResponsibleUserId, ResponsibleUserIdNavigationId
+) VALUES (
+    1, 'smtp.gmail.com', 587, 'garagepwa@gmail.com', 'yyma gdkg imcy imia', 1, 
+    'GarageMotor - Notificaciones', 'garagepwa@gmail.com', 1, 
+    1, NOW(), NOW(), 1, 1
+);
+
 -- ==============================================================================
 -- PASO 16: PROCEDIMIENTO ALMACENADO PARA CLONACIÓN SAAS INTELIGENTE
 -- Clona automáticamente catálogos según el tipo de taller registrado ('moto', 'car', 'multi')
@@ -932,6 +943,13 @@ BEGIN
     INSERT INTO agenda_settings (weeks_to_open, daily_slots, business_hours_start, business_hours_end, start_date, working_days, workshop_id, is_active, created_at, updated_at, responsible_user_id)
     SELECT weeks_to_open, daily_slots, business_hours_start, business_hours_end, CURRENT_DATE(), working_days, p_NewWorkshopId, is_active, NOW(), NOW(), responsible_user_id
     FROM agenda_settings WHERE workshop_id = 1;
+
+    -- 10. Clonar Configuración de Correo Electrónico Base
+    INSERT INTO EmailSettings (Host, Port, UserName, Password, EnableSsl, SenderName, SenderEmail, WorkshopId, IsActive, CreatedAt, UpdatedAt, ResponsibleUserId, ResponsibleUserIdNavigationId)
+    SELECT Host, Port, UserName, Password, EnableSsl, SenderName, SenderEmail, p_NewWorkshopId, IsActive, NOW(), NOW(), ResponsibleUserId, ResponsibleUserIdNavigationId
+    FROM EmailSettings 
+    WHERE WorkshopId = 1 
+    LIMIT 1;
 
 END //
 DELIMITER ;
