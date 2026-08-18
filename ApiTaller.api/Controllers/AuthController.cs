@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ApiTaller.Domain.Dtos.Login;
 using ApiTaller.Domain.Dtos.Auth;
 
 namespace ApiTaller.api.Controllers
@@ -158,7 +157,26 @@ namespace ApiTaller.api.Controllers
             }
         }
 
-      
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout(CancellationToken cancellation)
+        {
+            try
+            {
+                string? sidClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Sid)?.Value;
+                if (!string.IsNullOrEmpty(sidClaim) && int.TryParse(sidClaim, out int userId))
+                {
+                    await _authService.LogoutAsync(userId, cancellation);
+                }
+                return Ok(new { message = "Sesión cerrada correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en proceso de logout");
+                return StatusCode(500, new { message = "Error al cerrar sesión" });
+            }
+        }
+
         [HttpGet("Pruebo")]
         public async Task<IActionResult> GetPrueba(CancellationToken cancellation)
         {

@@ -14,6 +14,7 @@ using ApiTaller.api.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -81,9 +82,11 @@ builder.Services.AddCors(options =>
     });
 });
 #endregion
+builder.Services.AddMemoryCache();
 #region Inject Services
 builder.Services.AddServices();
 builder.Services.AddScoped<ApiTaller.Domain.Interfaces.Services.WorkOrders.IWorkOrderNotificationService, ApiTaller.api.Services.WorkOrderNotificationService>();
+builder.Services.AddScoped<ApiTaller.Domain.Interfaces.Services.Session.ISessionNotificationService, ApiTaller.api.Services.SessionNotificationService>();
 #endregion
 #region Inject Repositories
 builder.Services.AddRespositories();
@@ -121,6 +124,67 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.JwtSigningKey)),
             ClockSkew = TimeSpan.Zero
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = async context =>
+            {
+                var claimsPrincipal = context.Principal;
+                if (claimsPrincipal == null) return;
+
+                string? sidClaim = claimsPrincipal.FindFirst(System.Security.Claims.ClaimTypes.Sid)?.Value;
+                string? jtiClaim = claimsPrincipal.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti)?.Value;
+
+                if (string.IsNullOrEmpty(sidClaim) || string.IsNullOrEmpty(jtiClaim) || !int.TryParse(sidClaim, out int userId))
+                {
+                    return;
+                }
+
+                var memoryCache = context.HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>();
+                string cacheKey = $"active_session_user_{userId}";
+
+                if (!memoryCache.TryGetValue(cacheKey, out string? activeJti))
+                {
+                    using var scope = context.HttpContext.RequestServices.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+                    activeJti = await db.User
+                        .IgnoreQueryFilters()
+                        .Where(u => u.Id == userId && u.IsActive)
+                        .Select(u => u.Token)
+                        .FirstOrDefaultAsync();
+
+                    if (!string.IsNullOrEmpty(activeJti))
+                    {
+                        memoryCache.Set(cacheKey, activeJti, TimeSpan.FromMinutes(jwtOptions.AccessTokenMinutes));
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(activeJti) && activeJti != jtiClaim)
+                {
+                    context.Fail("session_replaced");
+                }
+            },
+            OnChallenge = async context =>
+            {
+                if (context.AuthenticateFailure?.Message == "session_replaced")
+                {
+                    context.HandleResponse();
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"message\": \"Tu sesión ha sido cerrada porque se inició sesión desde otro dispositivo.\", \"reason\": \"session_replaced\"}");
+                }
+            }
+        };
     });
 #endregion
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -149,5 +213,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<PermissionsHub>("/hubs/permissions");
 app.MapHub<WorkOrderHub>("/hubs/work-orders");
+app.MapHub<SessionHub>("/hubs/session");
 
 app.Run();

@@ -17,5 +17,6 @@ namespace ApiTaller.Domain.Interfaces.Services.Auth
         Task<bool> GeneratePasswordResetTokenAsync(string email, CancellationToken ct);
         Task<bool> ResetPasswordAsync(ResetPasswordDto dto, CancellationToken ct);
         Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto dto, CancellationToken ct);
+        Task<bool> LogoutAsync(int userId, CancellationToken ct = default);
     }
 }

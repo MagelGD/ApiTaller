@@ -8,9 +8,11 @@ using System.Text;
 
 namespace ApiTaller.Infrastructure.Helpers.Jwt
 {
+    public record JwtResult(string Token, string Jti);
+
     public static class TokenHelper
     {
-        public static string CreateJwt(this LoginUserDto user, JwtOptions options)
+        public static JwtResult CreateJwt(this LoginUserDto user, JwtOptions options)
         {
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(options.JwtSigningKey));
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
@@ -34,10 +36,10 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
                 expires: expiresUtc,
                 signingCredentials: creds
             );
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtResult(new JwtSecurityTokenHandler().WriteToken(token), jti);
         }
 
-        public static string CreateJwt(this Domain.Models.User user, int? customerId, JwtOptions options)
+        public static JwtResult CreateJwt(this Domain.Models.User user, int? customerId, JwtOptions options)
         {
             SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(options.JwtSigningKey));
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);
@@ -66,7 +68,7 @@ namespace ApiTaller.Infrastructure.Helpers.Jwt
                 expires: expiresUtc,
                 signingCredentials: creds
             );
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtResult(new JwtSecurityTokenHandler().WriteToken(token), jti);
         }
 
         public static string NewToken()

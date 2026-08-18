@@ -6,10 +6,12 @@ using ApiTaller.Domain.Interfaces.Services.Auth;
 using ApiTaller.Domain.Interfaces.Services.Login;
 using ApiTaller.Domain.Interfaces.Services.Users;
 using ApiTaller.Domain.Interfaces.Services.Email;
+using ApiTaller.Domain.Interfaces.Services.Session;
 using ApiTaller.Domain.Models;
 using ApiTaller.Infrastructure.Helpers.Jwt;
 using ApiTaller.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -29,6 +31,8 @@ namespace ApiTaller.Core.Services.Auth
         private readonly ILoginService _loginService;
         private readonly DataContext _context;
         private readonly IEmailService _emailService;
+        private readonly IMemoryCache _memoryCache;
+        private readonly ISessionNotificationService _sessionNotificationService;
 
         public AuthService(
             IUserService userService, 
@@ -36,7 +40,9 @@ namespace ApiTaller.Core.Services.Auth
             IOptions<JwtOptions> options, 
             ILoginService loginService,
             DataContext context,
-            IEmailService emailService)
+            IEmailService emailService,
+            IMemoryCache memoryCache,
+            ISessionNotificationService sessionNotificationService)
         {
             _userService = userService;
             _logger = logger;
@@ -44,6 +50,8 @@ namespace ApiTaller.Core.Services.Auth
             _loginService = loginService;
             _context = context;
             _emailService = emailService;
+            _memoryCache = memoryCache;
+            _sessionNotificationService = sessionNotificationService;
         }
 
         public async Task<IncomeDto> Login(AuthDto auth, CancellationToken cancellation = default)
@@ -51,23 +59,32 @@ namespace ApiTaller.Core.Services.Auth
             try
             {
                 LoginUserDto? user = await _userService.GetUser(auth.Username, cancellation);
-                string dato = BCrypt.Net.BCrypt.HashPassword(auth.Password);
                 if (user is null || !BCrypt.Net.BCrypt.Verify(auth.Password, user.Password))
                     return default!;
-                //if (user is null || user.Password != auth.Password)
-                //    return default!;
-                user.Token = user.CreateJwt(_options);
-                user.ExpireToken = _options.AccessTokenMinutes;
-                if (string.IsNullOrEmpty(user.Token))
+
+                JwtResult jwtResult = user.CreateJwt(_options);
+                if (string.IsNullOrEmpty(jwtResult.Token))
                     return default!;
+
+                // 1. Notificar expulsión en tiempo real a sesiones previas
+                await _sessionNotificationService.NotifyForceLogoutAsync(user.Id, "Se ha iniciado sesión desde otro dispositivo.");
+
+                // 2. Guardar el JTI en User.Token y en IMemoryCache como sesión activa
+                user.Token = jwtResult.Jti;
+                user.ExpireToken = _options.AccessTokenMinutes;
+
                 if (!await _userService.UpdateUserToken(user, cancellation))
                     return default!;
+
+                _memoryCache.Set($"active_session_user_{user.Id}", jwtResult.Jti, TimeSpan.FromMinutes(_options.AccessTokenMinutes));
+
                 if (!await _loginService.AddUserLogin(user, cancellation))
                     return default!;
+
                 IncomeDto income = new()
                 {
                     Fullname = user.Fullname,
-                    Token = user.Token,
+                    Token = jwtResult.Token,
                     Success = true,
                     IdUser = user.Id,
                     IdRoleUser = user.IdUserRole ?? 0
@@ -76,7 +93,7 @@ namespace ApiTaller.Core.Services.Auth
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "");
+                _logger.LogError(ex, "Error en el proceso de Login");
                 return default!;
             }
         }
@@ -99,11 +116,22 @@ namespace ApiTaller.Core.Services.Auth
                 Domain.Models.Customer? customer = await _context.Customer
                     .FirstOrDefaultAsync(c => c.UserId == user.Id && c.IsActive, ct);
 
-                string token = user.CreateJwt(customer?.Id, _options);
+                JwtResult jwtResult = user.CreateJwt(customer?.Id, _options);
+
+                // 1. Notificar expulsión en tiempo real a sesiones previas
+                await _sessionNotificationService.NotifyForceLogoutAsync(user.Id, "Se ha iniciado sesión desde otro dispositivo.");
+
+                // 2. Guardar el JTI en BD y en IMemoryCache como sesión activa
+                user.Token = jwtResult.Jti;
+                user.ExpirationDate = DateTime.Now.AddMinutes(_options.AccessTokenMinutes);
+                user.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync(ct);
+
+                _memoryCache.Set($"active_session_user_{user.Id}", jwtResult.Jti, TimeSpan.FromMinutes(_options.AccessTokenMinutes));
 
                 return new LoginResponseDto
                 {
-                    Token = token,
+                    Token = jwtResult.Token,
                     Role = user.UserRoleIdNavigation?.Role?.ToLower() ?? "cliente",
                     MustChangePassword = user.MustChangePassword,
                     UserId = user.Id,
@@ -114,6 +142,25 @@ namespace ApiTaller.Core.Services.Auth
             {
                 _logger.LogError(ex, "Error durante el inicio de sesión móvil para {Email}", credentials.Email);
                 throw;
+            }
+        }
+
+        public async Task<bool> LogoutAsync(int userId, CancellationToken ct = default)
+        {
+            try
+            {
+                _memoryCache.Remove($"active_session_user_{userId}");
+                await _context.User
+                    .Where(u => u.Id == userId)
+                    .ExecuteUpdateAsync(x => x
+                        .SetProperty(p => p.Token, (string?)null)
+                        .SetProperty(p => p.UpdatedAt, DateTime.Now), ct);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al procesar logout para usuario {UserId}", userId);
+                return false;
             }
         }
 
