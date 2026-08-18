@@ -107,7 +107,12 @@ namespace ApiTaller.Core.Services.Workshop
                 _context.User.Add(user);
                 await _context.SaveChangesAsync();
 
-                await _context.Database.ExecuteSqlRawAsync("CALL sp_SeedWorkshopCatalogs({0})", workshop.Id);
+                await _context.Database.ExecuteSqlRawAsync(
+                    "CALL sp_SeedWorkshopCatalogs({0}, {1}, {2})",
+                    workshop.Id,
+                    request.SeedProducts ? 1 : 0,
+                    request.SeedServices ? 1 : 0
+                );
 
                 await transaction.CommitAsync();
 

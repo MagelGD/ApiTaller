@@ -817,7 +817,11 @@ INSERT IGNORE INTO agenda_settings (
 DROP PROCEDURE IF EXISTS sp_SeedWorkshopCatalogs;
 
 DELIMITER //
-CREATE PROCEDURE sp_SeedWorkshopCatalogs(IN p_NewWorkshopId INT)
+CREATE PROCEDURE sp_SeedWorkshopCatalogs(
+    IN p_NewWorkshopId INT,
+    IN p_SeedProducts BIT,
+    IN p_SeedServices BIT
+)
 BEGIN
     DECLARE v_WorkshopType VARCHAR(20) DEFAULT 'moto';
 
@@ -865,58 +869,60 @@ BEGIN
     SELECT name, icon, p_NewWorkshopId, is_active, NOW(), NOW(), responsible_user_id
     FROM payment_method WHERE workshop_id = 1;
 
-    -- 5. Clonar Tipos de Producto
-    INSERT INTO product_type (type, workshop_id, is_active, created_at, updated_at, responsible_user_id)
-    SELECT type, p_NewWorkshopId, is_active, NOW(), NOW(), responsible_user_id
-    FROM product_type WHERE workshop_id = 1;
+    -- 5 y 6. Clonar Tipos de Producto y Productos (Condicional)
+    IF p_SeedProducts = 1 THEN
+        INSERT INTO product_type (type, workshop_id, is_active, created_at, updated_at, responsible_user_id)
+        SELECT type, p_NewWorkshopId, is_active, NOW(), NOW(), responsible_user_id
+        FROM product_type WHERE workshop_id = 1;
 
-    -- 6. Clonar Productos y Repuestos (Filtrado por tipo de vehículo del taller)
-    INSERT INTO product (product_type_id, product_name, price, sale_price, code, reference, description, vehicle_type, workshop_id, is_active, created_at, updated_at, responsible_user_id)
-    SELECT 
-        pt_new.id,
-        p_old.product_name,
-        p_old.price,
-        p_old.sale_price,
-        p_old.code,
-        p_old.reference,
-        p_old.description,
-        p_old.vehicle_type,
-        p_NewWorkshopId,
-        p_old.is_active,
-        NOW(),
-        NOW(),
-        p_old.responsible_user_id
-    FROM product p_old
-    JOIN product_type pt_old ON p_old.product_type_id = pt_old.id AND pt_old.workshop_id = 1
-    JOIN product_type pt_new ON pt_old.type = pt_new.type AND pt_new.workshop_id = p_NewWorkshopId
-    WHERE p_old.workshop_id = 1
-      AND (v_WorkshopType = 'multi' OR p_old.vehicle_type = v_WorkshopType OR p_old.vehicle_type = 'both');
+        INSERT INTO product (product_type_id, product_name, price, sale_price, code, reference, description, vehicle_type, workshop_id, is_active, created_at, updated_at, responsible_user_id)
+        SELECT 
+            pt_new.id,
+            p_old.product_name,
+            p_old.price,
+            p_old.sale_price,
+            p_old.code,
+            p_old.reference,
+            p_old.description,
+            p_old.vehicle_type,
+            p_NewWorkshopId,
+            p_old.is_active,
+            NOW(),
+            NOW(),
+            p_old.responsible_user_id
+        FROM product p_old
+        JOIN product_type pt_old ON p_old.product_type_id = pt_old.id AND pt_old.workshop_id = 1
+        JOIN product_type pt_new ON pt_old.type = pt_new.type AND pt_new.workshop_id = p_NewWorkshopId
+        WHERE p_old.workshop_id = 1
+          AND (v_WorkshopType = 'multi' OR p_old.vehicle_type = v_WorkshopType OR p_old.vehicle_type = 'both');
+    END IF;
 
-    -- 7. Clonar Tipos de Servicio
-    INSERT INTO service_type (name, workshop_id, is_active, created_at, updated_at, responsible_user_id)
-    SELECT name, p_NewWorkshopId, is_active, NOW(), NOW(), responsible_user_id
-    FROM service_type WHERE workshop_id = 1;
+    -- 7 y 8. Clonar Tipos de Servicio y Catálogos de Servicio (Condicional)
+    IF p_SeedServices = 1 THEN
+        INSERT INTO service_type (name, workshop_id, is_active, created_at, updated_at, responsible_user_id)
+        SELECT name, p_NewWorkshopId, is_active, NOW(), NOW(), responsible_user_id
+        FROM service_type WHERE workshop_id = 1;
 
-    -- 8. Clonar Catálogos de Servicio (Join por Tipo de Servicio y Filtrado por Tipo de Vehículo)
-    INSERT INTO service_catalog (service_type_id, name, description, default_minutes, default_price, time_unit, vehicle_type, workshop_id, is_active, created_at, updated_at, responsible_user_id)
-    SELECT 
-        st_new.id,
-        sc_old.name,
-        sc_old.description,
-        sc_old.default_minutes,
-        sc_old.default_price,
-        sc_old.time_unit,
-        sc_old.vehicle_type,
-        p_NewWorkshopId,
-        sc_old.is_active,
-        NOW(),
-        NOW(),
-        sc_old.responsible_user_id
-    FROM service_catalog sc_old
-    JOIN service_type st_old ON sc_old.service_type_id = st_old.id AND st_old.workshop_id = 1
-    JOIN service_type st_new ON st_old.name = st_new.name AND st_new.workshop_id = p_NewWorkshopId
-    WHERE sc_old.workshop_id = 1
-      AND (v_WorkshopType = 'multi' OR sc_old.vehicle_type = v_WorkshopType OR sc_old.vehicle_type = 'both');
+        INSERT INTO service_catalog (service_type_id, name, description, default_minutes, default_price, time_unit, vehicle_type, workshop_id, is_active, created_at, updated_at, responsible_user_id)
+        SELECT 
+            st_new.id,
+            sc_old.name,
+            sc_old.description,
+            sc_old.default_minutes,
+            sc_old.default_price,
+            sc_old.time_unit,
+            sc_old.vehicle_type,
+            p_NewWorkshopId,
+            sc_old.is_active,
+            NOW(),
+            NOW(),
+            sc_old.responsible_user_id
+        FROM service_catalog sc_old
+        JOIN service_type st_old ON sc_old.service_type_id = st_old.id AND st_old.workshop_id = 1
+        JOIN service_type st_new ON st_old.name = st_new.name AND st_new.workshop_id = p_NewWorkshopId
+        WHERE sc_old.workshop_id = 1
+          AND (v_WorkshopType = 'multi' OR sc_old.vehicle_type = v_WorkshopType OR sc_old.vehicle_type = 'both');
+    END IF;
 
     -- 9. Clonar Configuraciones Básicas (Modo Vehicular y Agenda)
     INSERT INTO workshop_settings (setting_key, setting_value, description, workshop_id, is_active, created_at, updated_at, responsible_user_id)

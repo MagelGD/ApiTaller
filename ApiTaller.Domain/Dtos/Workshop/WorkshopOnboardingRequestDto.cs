@@ -19,5 +19,9 @@ namespace ApiTaller.Domain.Dtos.Workshop
         public string AdminIdentification { get; set; } = string.Empty;
         public string AdminEmail { get; set; } = string.Empty;
         public string AdminPassword { get; set; } = string.Empty;
+
+        // Opciones de Carga Inicial
+        public bool SeedProducts { get; set; } = false;
+        public bool SeedServices { get; set; } = false;
     }
 }
