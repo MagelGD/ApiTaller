@@ -85,7 +85,7 @@ namespace ApiTaller.Core.Services.BulkImport
             return memoryStream.ToArray();
         }
 
-        public async Task<BulkImportResultDto> ImportProductsAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default)
+        public async Task<BulkImportResultDto> ImportProductsAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default)
         {
             var result = new BulkImportResultDto();
 
@@ -252,6 +252,15 @@ namespace ApiTaller.Core.Services.BulkImport
                 return result;
             }
 
+            if (dryRun)
+            {
+                result.Success = true;
+                result.SuccessCount = validRowData.Count;
+                result.CreatedCategoriesCount = newCategoriesNeeded.Count;
+                result.Message = $"Archivo válido. Se detectaron {validRowData.Count} producto(s) listos para importar.";
+                return result;
+            }
+
             // ─── PASADA 2: INSERCIÓN ATÓMICA EN TRANSACCIÓN ───
             using var transaction = await _context.Database.BeginTransactionAsync(ct);
             try
@@ -388,7 +397,7 @@ namespace ApiTaller.Core.Services.BulkImport
             return memoryStream.ToArray();
         }
 
-        public async Task<BulkImportResultDto> ImportProductTypesAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default)
+        public async Task<BulkImportResultDto> ImportProductTypesAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default)
         {
             var result = new BulkImportResultDto();
 
@@ -447,6 +456,14 @@ namespace ApiTaller.Core.Services.BulkImport
                 result.Success = false;
                 result.ErrorCount = result.Errors.Count;
                 result.Message = $"Se encontraron {result.Errors.Count} errores. No se insertó ningún tipo de producto.";
+                return result;
+            }
+
+            if (dryRun)
+            {
+                result.Success = true;
+                result.SuccessCount = typesToCreate.Count;
+                result.Message = $"Archivo válido. Se detectaron {typesToCreate.Count} tipo(s) de producto nuevos para importar.";
                 return result;
             }
 
@@ -533,7 +550,7 @@ namespace ApiTaller.Core.Services.BulkImport
             return memoryStream.ToArray();
         }
 
-        public async Task<BulkImportResultDto> ImportServiceCatalogsAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default)
+        public async Task<BulkImportResultDto> ImportServiceCatalogsAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default)
         {
             var result = new BulkImportResultDto();
 
@@ -663,6 +680,15 @@ namespace ApiTaller.Core.Services.BulkImport
                 return result;
             }
 
+            if (dryRun)
+            {
+                result.Success = true;
+                result.SuccessCount = validRowData.Count;
+                result.CreatedCategoriesCount = newCategoriesNeeded.Count;
+                result.Message = $"Archivo válido. Se detectaron {validRowData.Count} servicio(s) listos para importar.";
+                return result;
+            }
+
             // ─── PASADA 2: INSERCIÓN ATÓMICA ───
             using var transaction = await _context.Database.BeginTransactionAsync(ct);
             try
@@ -771,7 +797,7 @@ namespace ApiTaller.Core.Services.BulkImport
             return memoryStream.ToArray();
         }
 
-        public async Task<BulkImportResultDto> ImportServiceTypesAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default)
+        public async Task<BulkImportResultDto> ImportServiceTypesAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default)
         {
             var result = new BulkImportResultDto();
 
@@ -830,6 +856,14 @@ namespace ApiTaller.Core.Services.BulkImport
                 result.Success = false;
                 result.ErrorCount = result.Errors.Count;
                 result.Message = $"Se encontraron {result.Errors.Count} errores. No se insertó ningún tipo de servicio.";
+                return result;
+            }
+
+            if (dryRun)
+            {
+                result.Success = true;
+                result.SuccessCount = typesToCreate.Count;
+                result.Message = $"Archivo válido. Se detectaron {typesToCreate.Count} tipo(s) de servicio nuevos para importar.";
                 return result;
             }
 

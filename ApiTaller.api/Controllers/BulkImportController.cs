@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
 using System.Threading;
@@ -18,6 +19,15 @@ namespace ApiTaller.api.Controllers
     [RequestSizeLimit(5_242_880)] // 5 MB máximo
     public class BulkImportController : ControllerBase
     {
+        private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".xlsx",
+            ".xlsm",
+            ".xls",
+            ".xltx",
+            ".xltm"
+        };
+
         private readonly IBulkImportService _service;
         private readonly ILogger<BulkImportController> _logger;
 
@@ -45,20 +55,19 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("products")]
-        public async Task<IActionResult> ImportProducts([FromForm] IFormFile file, CancellationToken ct)
+        public async Task<IActionResult> ImportProducts([FromForm] IFormFile file, [FromQuery] bool dryRun = false, CancellationToken ct = default)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Debe proporcionar un archivo válido." });
 
-            string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (extension != ".xlsx")
-                return BadRequest(new { message = "Formato no válido. Solo se admiten archivos de Excel (.xlsx)." });
+            if (!IsValidSpreadsheetFile(file.FileName))
+                return BadRequest(new { message = "Formato no válido. Se admiten archivos de hoja de cálculo (.xlsx, .xlsm, .xls)." });
 
             try
             {
                 int userId = GetCurrentUserId();
                 using Stream stream = file.OpenReadStream();
-                BulkImportResultDto result = await _service.ImportProductsAsync(stream, userId, ct);
+                BulkImportResultDto result = await _service.ImportProductsAsync(stream, userId, dryRun, ct);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -88,20 +97,19 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("product-types")]
-        public async Task<IActionResult> ImportProductTypes([FromForm] IFormFile file, CancellationToken ct)
+        public async Task<IActionResult> ImportProductTypes([FromForm] IFormFile file, [FromQuery] bool dryRun = false, CancellationToken ct = default)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Debe proporcionar un archivo válido." });
 
-            string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (extension != ".xlsx")
-                return BadRequest(new { message = "Formato no válido. Solo se admiten archivos de Excel (.xlsx)." });
+            if (!IsValidSpreadsheetFile(file.FileName))
+                return BadRequest(new { message = "Formato no válido. Se admiten archivos de hoja de cálculo (.xlsx, .xlsm, .xls)." });
 
             try
             {
                 int userId = GetCurrentUserId();
                 using Stream stream = file.OpenReadStream();
-                BulkImportResultDto result = await _service.ImportProductTypesAsync(stream, userId, ct);
+                BulkImportResultDto result = await _service.ImportProductTypesAsync(stream, userId, dryRun, ct);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -131,20 +139,19 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("services")]
-        public async Task<IActionResult> ImportServices([FromForm] IFormFile file, CancellationToken ct)
+        public async Task<IActionResult> ImportServices([FromForm] IFormFile file, [FromQuery] bool dryRun = false, CancellationToken ct = default)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Debe proporcionar un archivo válido." });
 
-            string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (extension != ".xlsx")
-                return BadRequest(new { message = "Formato no válido. Solo se admiten archivos de Excel (.xlsx)." });
+            if (!IsValidSpreadsheetFile(file.FileName))
+                return BadRequest(new { message = "Formato no válido. Se admiten archivos de hoja de cálculo (.xlsx, .xlsm, .xls)." });
 
             try
             {
                 int userId = GetCurrentUserId();
                 using Stream stream = file.OpenReadStream();
-                BulkImportResultDto result = await _service.ImportServiceCatalogsAsync(stream, userId, ct);
+                BulkImportResultDto result = await _service.ImportServiceCatalogsAsync(stream, userId, dryRun, ct);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -174,20 +181,19 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("service-types")]
-        public async Task<IActionResult> ImportServiceTypes([FromForm] IFormFile file, CancellationToken ct)
+        public async Task<IActionResult> ImportServiceTypes([FromForm] IFormFile file, [FromQuery] bool dryRun = false, CancellationToken ct = default)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Debe proporcionar un archivo válido." });
 
-            string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (extension != ".xlsx")
-                return BadRequest(new { message = "Formato no válido. Solo se admiten archivos de Excel (.xlsx)." });
+            if (!IsValidSpreadsheetFile(file.FileName))
+                return BadRequest(new { message = "Formato no válido. Se admiten archivos de hoja de cálculo (.xlsx, .xlsm, .xls)." });
 
             try
             {
                 int userId = GetCurrentUserId();
                 using Stream stream = file.OpenReadStream();
-                BulkImportResultDto result = await _service.ImportServiceTypesAsync(stream, userId, ct);
+                BulkImportResultDto result = await _service.ImportServiceTypesAsync(stream, userId, dryRun, ct);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -200,6 +206,12 @@ namespace ApiTaller.api.Controllers
         #endregion
 
         #region Private Helpers
+
+        private static bool IsValidSpreadsheetFile(string fileName)
+        {
+            string ext = Path.GetExtension(fileName).ToLowerInvariant();
+            return AllowedExtensions.Contains(ext);
+        }
 
         private int GetCurrentUserId()
         {

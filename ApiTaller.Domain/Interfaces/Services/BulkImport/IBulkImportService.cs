@@ -9,18 +9,18 @@ namespace ApiTaller.Domain.Interfaces.Services.BulkImport
     {
         // Productos
         Task<byte[]> GenerateProductTemplateAsync(CancellationToken ct = default);
-        Task<BulkImportResultDto> ImportProductsAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default);
+        Task<BulkImportResultDto> ImportProductsAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default);
 
         // Tipos de Producto
         Task<byte[]> GenerateProductTypeTemplateAsync(CancellationToken ct = default);
-        Task<BulkImportResultDto> ImportProductTypesAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default);
+        Task<BulkImportResultDto> ImportProductTypesAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default);
 
         // Catálogo de Servicios
         Task<byte[]> GenerateServiceCatalogTemplateAsync(CancellationToken ct = default);
-        Task<BulkImportResultDto> ImportServiceCatalogsAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default);
+        Task<BulkImportResultDto> ImportServiceCatalogsAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default);
 
         // Tipos de Servicio
         Task<byte[]> GenerateServiceTypeTemplateAsync(CancellationToken ct = default);
-        Task<BulkImportResultDto> ImportServiceTypesAsync(Stream fileStream, int responsibleUserId, CancellationToken ct = default);
+        Task<BulkImportResultDto> ImportServiceTypesAsync(Stream fileStream, int responsibleUserId, bool dryRun = false, CancellationToken ct = default);
     }
 }
