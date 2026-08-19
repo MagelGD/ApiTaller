@@ -308,6 +308,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.CustomerPortal
                         {
                             string currentStatus = order.Status ?? "";
                             if (!currentStatus.Equals("Aprobado", StringComparison.OrdinalIgnoreCase) &&
+                                !currentStatus.Equals("En Proceso", StringComparison.OrdinalIgnoreCase) &&
+                                !currentStatus.Equals("En Servicio", StringComparison.OrdinalIgnoreCase) &&
                                 !currentStatus.Equals("En Reparación", StringComparison.OrdinalIgnoreCase) &&
                                 !currentStatus.Equals("Terminado", StringComparison.OrdinalIgnoreCase) &&
                                 !currentStatus.Equals("Entregado", StringComparison.OrdinalIgnoreCase))

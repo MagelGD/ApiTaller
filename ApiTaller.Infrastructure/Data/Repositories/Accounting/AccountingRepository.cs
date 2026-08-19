@@ -32,7 +32,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Accounting
             {
                 List<Domain.Models.User> mechanics = await _context.User
                     .Include(u => u.UserRoleIdNavigation)
-                    .Where(u => u.IsActive && u.UserRoleIdNavigation.Role.Contains("Mecanico"))
+                    .Where(u => u.IsActive && (
+                        u.UserRoleIdNavigation.Role.Contains("Mecanico") ||
+                        u.UserRoleIdNavigation.Role.Contains("Tecnico") ||
+                        u.UserRoleIdNavigation.Role.Contains("Técnico") ||
+                        u.UserRoleIdNavigation.Role.Contains("Instalador") ||
+                        u.UserRoleIdNavigation.Role.Contains("Operario")
+                    ))
                     .ToListAsync(ct);
 
                 Dictionary<int, MechanicPaymentSettings> settings = await _context.MechanicPaymentSettings
