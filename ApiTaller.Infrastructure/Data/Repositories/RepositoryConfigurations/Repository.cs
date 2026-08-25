@@ -97,7 +97,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Agenda.IAgendaRepository, ApiTaller.Infrastructure.Data.Repositories.Agenda.AgendaRepository>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Email.IEmailService, ApiTaller.Infrastructure.Services.Email.EmailService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.IDashboardRepository, ApiTaller.Infrastructure.Data.Repositories.Dashboard.DashboardRepository>();
-            services.TryAddScoped<IEmailSettingsRepository, EmailSettingsRepository>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Quotations.IQuotationRepository, ApiTaller.Infrastructure.Data.Repositories.Quotations.QuotationRepository>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Accounting.IAccountingRepository, ApiTaller.Infrastructure.Data.Repositories.Accounting.AccountingRepository>();
             return services;
         }

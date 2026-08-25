@@ -1,9 +1,12 @@
 using ApiTaller.Domain.Dtos.Portal;
+using ApiTaller.Domain.Dtos.Quotations;
 using ApiTaller.Domain.Interfaces.Services.Portal;
+using ApiTaller.Domain.Interfaces.Services.Quotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,11 +20,16 @@ namespace ApiTaller.api.Controllers
     {
         private readonly ILogger<PortalController> _logger;
         private readonly IPortalService _portalService;
+        private readonly IQuotationService _quotationService;
 
-        public PortalController(ILogger<PortalController> logger, IPortalService portalService)
+        public PortalController(
+            ILogger<PortalController> logger, 
+            IPortalService portalService,
+            IQuotationService quotationService)
         {
             _logger = logger;
             _portalService = portalService;
+            _quotationService = quotationService;
         }
 
         private int GetCustomerIdFromUser()
@@ -175,6 +183,104 @@ namespace ApiTaller.api.Controllers
             {
                 _logger.LogError(ex, "Error al obtener las fotos de la orden {OrderId}", id);
                 return StatusCode(500, new { message = "Error interno del servidor" });
+            }
+        }
+
+        // ==================== SECCIÓN DE COTIZACIONES DEL PORTAL ====================
+
+        [HttpGet("mis-cotizaciones")]
+        public async Task<IActionResult> GetMyQuotations(CancellationToken cancellation)
+        {
+            try
+            {
+                int customerId = GetCustomerIdFromUser();
+                var quotations = await _quotationService.GetMyQuotationsAsync(customerId, cancellation);
+                return Ok(quotations);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener cotizaciones del cliente");
+                return StatusCode(500, new { message = "Error al obtener cotizaciones" });
+            }
+        }
+
+        [HttpGet("cotizacion/{id}")]
+        public async Task<IActionResult> GetQuotationDetail(int id, CancellationToken cancellation)
+        {
+            try
+            {
+                int customerId = GetCustomerIdFromUser();
+                var quote = await _quotationService.GetByIdAsync(id, cancellation);
+                if (quote == null || quote.CustomerId != customerId)
+                {
+                    return Forbid("No tienes permisos para acceder a esta cotización.");
+                }
+                return Ok(quote);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener detalle de la cotización {Id}", id);
+                return StatusCode(500, new { message = "Error al obtener cotización" });
+            }
+        }
+
+        [HttpPost("cotizacion/{id}/aprobar")]
+        public async Task<IActionResult> ApproveQuotation(int id, [FromBody] QuotationApprovalRequestDto dto, CancellationToken cancellation)
+        {
+            try
+            {
+                int customerId = GetCustomerIdFromUser();
+                var quote = await _quotationService.GetByIdAsync(id, cancellation);
+                if (quote == null || quote.CustomerId != customerId)
+                {
+                    return Forbid("No tienes permisos para aprobar esta cotización.");
+                }
+
+                bool approved = await _quotationService.ProcessApprovalAsync(id, dto, cancellation);
+                return Ok(new { success = approved, message = "Cotización aprobada correctamente" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al aprobar cotización {Id}", id);
+                return StatusCode(500, new { message = "Error al aprobar la cotización" });
+            }
+        }
+
+        [HttpPost("cotizacion/{id}/rechazar")]
+        public async Task<IActionResult> RejectQuotation(int id, [FromBody] RejectRequest request, CancellationToken cancellation)
+        {
+            try
+            {
+                int customerId = GetCustomerIdFromUser();
+                var quote = await _quotationService.GetByIdAsync(id, cancellation);
+                if (quote == null || quote.CustomerId != customerId)
+                {
+                    return Forbid("No tienes permisos para rechazar esta cotización.");
+                }
+
+                bool rejected = await _quotationService.RejectQuotationAsync(id, request?.Reason, cancellation);
+                return Ok(new { success = rejected, message = "Cotización rechazada" });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al rechazar cotización {Id}", id);
+                return StatusCode(500, new { message = "Error al rechazar cotización" });
             }
         }
     }

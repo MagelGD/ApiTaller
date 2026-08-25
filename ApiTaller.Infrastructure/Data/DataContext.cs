@@ -64,6 +64,11 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<Appointment> Appointment { get; set; }
         public DbSet<AgendaDayConfig> AgendaDayConfig { get; set; }
 
+        // Módulo Cotizaciones
+        public DbSet<Quotation> Quotation { get; set; }
+        public DbSet<QuotationDetail> QuotationDetail { get; set; }
+        public DbSet<QuotationAttachment> QuotationAttachment { get; set; }
+
         // Módulo Contabilidad (Fase 13)
         public DbSet<MechanicPaymentSettings> MechanicPaymentSettings { get; set; }
         public DbSet<MechanicPaymentSettlement> MechanicPaymentSettlement { get; set; }
@@ -96,6 +101,7 @@ namespace ApiTaller.Infrastructure.Data
             modelBuilder.Entity<InventoryReception>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<Appointment>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<Sale>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
+            modelBuilder.Entity<Quotation>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<WorkshopSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<MechanicPaymentSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<MechanicPaymentSettlement>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);

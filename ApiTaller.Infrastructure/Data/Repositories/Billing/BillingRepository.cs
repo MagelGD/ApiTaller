@@ -107,6 +107,46 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                     }
 
                     await _context.SaleDetail.AddRangeAsync(details, cancellation);
+
+                    // Descontar inventario automáticamente para los productos vendidos
+                    foreach (var d in details.Where(x => x.ProductId.HasValue && x.ProductId.Value > 0))
+                    {
+                        var inv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == d.ProductId!.Value, cancellation);
+                        if (inv == null)
+                        {
+                            inv = new Domain.Models.Inventory
+                            {
+                                ProductId = d.ProductId!.Value,
+                                StockQuantity = -d.Quantity,
+                                MinStock = 0,
+                                CreatedAt = DateTime.Now,
+                                IsActive = true,
+                                ResponsibleUserId = finalUserId
+                            };
+                            await _context.Inventory.AddAsync(inv, cancellation);
+                        }
+                        else
+                        {
+                            inv.StockQuantity -= d.Quantity;
+                            inv.LastUpdate = DateTime.Now;
+                            inv.UpdatedAt = DateTime.Now;
+                        }
+
+                        var history = new InventoryHistory
+                        {
+                            ProductId = d.ProductId!.Value,
+                            MovementType = "Salida",
+                            Quantity = d.Quantity,
+                            ReferenceId = sale.WorkOrderId ?? sale.Id,
+                            Observations = sale.WorkOrderId.HasValue 
+                                ? $"Facturación OT #{sale.WorkOrderId.Value} (Venta #{sale.Id})"
+                                : $"Venta Directa de Mostrador #{sale.Id}",
+                            CreatedAt = DateTime.Now,
+                            IsActive = true,
+                            ResponsibleUserId = finalUserId
+                        };
+                        await _context.InventoryHistory.AddAsync(history, cancellation);
+                    }
                 }
 
                 // 4. Guardar pagos con ReferenceCode seguro

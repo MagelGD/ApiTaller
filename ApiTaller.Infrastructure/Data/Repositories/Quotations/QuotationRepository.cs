@@ -1,0 +1,656 @@
+using ApiTaller.Domain.Dtos.Quotations;
+using ApiTaller.Domain.Interfaces.Repositories.Quotations;
+using ApiTaller.Domain.Interfaces.Services;
+using ApiTaller.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
+{
+    public class QuotationRepository : IQuotationRepository
+    {
+        private readonly DataContext _context;
+        private readonly ICurrentUserService _currentUserService;
+
+        public QuotationRepository(DataContext context, ICurrentUserService currentUserService)
+        {
+            _context = context;
+            _currentUserService = currentUserService;
+        }
+
+        private int? GetCurrentUserId()
+        {
+            return int.TryParse(_currentUserService.UserId, out int uid) && uid > 0 ? uid : null;
+        }
+
+        public async Task<IEnumerable<QuotationDto>> GetAllAsync(string? status, DateTime? startDate, DateTime? endDate, CancellationToken cancellation)
+        {
+            var query = _context.Quotation
+                .Include(q => q.Customer)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.BrandNavigation)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.ModelNavigation)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.Product)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.ServiceCatalog)
+                .Include(q => q.Attachments)
+                .Where(q => q.IsActive);
+
+            if (!string.IsNullOrWhiteSpace(status) && !status.Equals("all", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(q => q.Status == status);
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(q => q.CreatedAt >= startDate.Value.Date);
+            }
+
+            if (endDate.HasValue)
+            {
+                DateTime endOfDay = endDate.Value.Date.AddDays(1).AddTicks(-1);
+                query = query.Where(q => q.CreatedAt <= endOfDay);
+            }
+
+            var list = await query.OrderByDescending(q => q.CreatedAt).ToListAsync(cancellation);
+            return list.Select(MapToDto);
+        }
+
+        public async Task<QuotationDto?> GetByIdAsync(int id, CancellationToken cancellation)
+        {
+            var entity = await _context.Quotation
+                .Include(q => q.Customer)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.BrandNavigation)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.ModelNavigation)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.Product)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.ServiceCatalog)
+                .Include(q => q.Attachments)
+                .FirstOrDefaultAsync(q => q.Id == id && q.IsActive, cancellation);
+
+            return entity != null ? MapToDto(entity) : null;
+        }
+
+        public async Task<QuotationDto?> GetByTokenAsync(string token, CancellationToken cancellation)
+        {
+            var entity = await _context.Quotation
+                .IgnoreQueryFilters() // Para permitir acceso a clientes públicos por token
+                .Include(q => q.Customer)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.BrandNavigation)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.ModelNavigation)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.Product)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.ServiceCatalog)
+                .Include(q => q.Attachments)
+                .FirstOrDefaultAsync(q => q.PublicToken == token && q.IsActive, cancellation);
+
+            return entity != null ? MapToDto(entity) : null;
+        }
+
+        public async Task<IEnumerable<QuotationDto>> GetByCustomerIdAsync(int customerId, CancellationToken cancellation)
+        {
+            var list = await _context.Quotation
+                .Include(q => q.Customer)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.BrandNavigation)
+                .Include(q => q.Vehicle)
+                    .ThenInclude(v => v.ModelNavigation)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.Product)
+                .Include(q => q.Details)
+                    .ThenInclude(d => d.ServiceCatalog)
+                .Include(q => q.Attachments)
+                .Where(q => q.CustomerId == customerId && q.IsActive)
+                .OrderByDescending(q => q.CreatedAt)
+                .ToListAsync(cancellation);
+
+            return list.Select(MapToDto);
+        }
+
+        public async Task<Quotation> CreateAsync(QuotationCreateDto dto, CancellationToken cancellation)
+        {
+            int? userId = GetCurrentUserId();
+            int tenantId = _context.CurrentTenantId;
+
+            // Generar número consecutivo COT-0001
+            int countToday = await _context.Quotation.CountAsync(cancellation) + 1;
+            string quoteNumber = $"COT-{countToday:D4}";
+
+            var quotation = new Quotation
+            {
+                QuotationNumber = quoteNumber,
+                WorkshopId = tenantId,
+                CustomerId = dto.CustomerId > 0 ? dto.CustomerId : null,
+                VehicleId = dto.VehicleId > 0 ? dto.VehicleId : null,
+                ProspectName = dto.ProspectName,
+                ProspectEmail = dto.ProspectEmail,
+                ProspectPhone = dto.ProspectPhone,
+                ProspectVehicleInfo = dto.ProspectVehicleInfo,
+                Status = "Draft",
+                Subtotal = dto.Subtotal,
+                DiscountPercent = dto.DiscountPercent,
+                DiscountAmount = dto.DiscountAmount,
+                Total = dto.Total,
+                ExpirationDate = dto.ExpirationDate ?? DateTime.Now.AddDays(15),
+                PublicToken = Guid.NewGuid().ToString("N"),
+                Observations = dto.Observations,
+                TermsAndConditions = dto.TermsAndConditions ?? "Cotización válida por 15 días. Sujeto a disponibilidad de inventario.",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                ResponsibleUserId = userId
+            };
+
+            await _context.Quotation.AddAsync(quotation, cancellation);
+            await _context.SaveChangesAsync(cancellation);
+
+            if (dto.Details != null && dto.Details.Any())
+            {
+                var details = dto.Details.Select(d => new QuotationDetail
+                {
+                    QuotationId = quotation.Id,
+                    ItemType = d.ItemType,
+                    ProductId = d.ProductId > 0 ? d.ProductId : null,
+                    ServiceCatalogId = d.ServiceCatalogId > 0 ? d.ServiceCatalogId : null,
+                    Description = !string.IsNullOrWhiteSpace(d.Description) ? d.Description : "Ítem de Cotización",
+                    Quantity = d.Quantity > 0 ? d.Quantity : 1,
+                    UnitPrice = d.UnitPrice,
+                    Total = d.Total > 0 ? d.Total : (d.Quantity * d.UnitPrice),
+                    IsApproved = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                }).ToList();
+
+                await _context.QuotationDetail.AddRangeAsync(details, cancellation);
+            }
+
+            if (dto.Attachments != null && dto.Attachments.Any())
+            {
+                var attachments = dto.Attachments.Select(a => new QuotationAttachment
+                {
+                    QuotationId = quotation.Id,
+                    FileName = a.FileName,
+                    ContentType = a.ContentType,
+                    FileSizeBytes = a.FileSizeBytes,
+                    Category = a.Category ?? "Photo",
+                    DataBase64 = a.DataBase64,
+                    FilePath = a.FilePath,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                }).ToList();
+
+                await _context.QuotationAttachment.AddRangeAsync(attachments, cancellation);
+            }
+
+            await _context.SaveChangesAsync(cancellation);
+            return quotation;
+        }
+
+        public async Task<bool> UpdateAsync(int id, QuotationCreateDto dto, CancellationToken cancellation)
+        {
+            var entity = await _context.Quotation
+                .Include(q => q.Details)
+                .Include(q => q.Attachments)
+                .FirstOrDefaultAsync(q => q.Id == id && q.IsActive, cancellation);
+
+            if (entity == null) return false;
+            int? userId = GetCurrentUserId();
+
+            entity.CustomerId = dto.CustomerId > 0 ? dto.CustomerId : null;
+            entity.VehicleId = dto.VehicleId > 0 ? dto.VehicleId : null;
+            entity.ProspectName = dto.ProspectName;
+            entity.ProspectEmail = dto.ProspectEmail;
+            entity.ProspectPhone = dto.ProspectPhone;
+            entity.ProspectVehicleInfo = dto.ProspectVehicleInfo;
+            entity.Subtotal = dto.Subtotal;
+            entity.DiscountPercent = dto.DiscountPercent;
+            entity.DiscountAmount = dto.DiscountAmount;
+            entity.Total = dto.Total;
+            entity.ExpirationDate = dto.ExpirationDate;
+            entity.Observations = dto.Observations;
+            entity.TermsAndConditions = dto.TermsAndConditions;
+            entity.UpdatedAt = DateTime.Now;
+
+            // Reemplazar detalles
+            _context.QuotationDetail.RemoveRange(entity.Details);
+            if (dto.Details != null && dto.Details.Any())
+            {
+                var details = dto.Details.Select(d => new QuotationDetail
+                {
+                    QuotationId = entity.Id,
+                    ItemType = d.ItemType,
+                    ProductId = d.ProductId > 0 ? d.ProductId : null,
+                    ServiceCatalogId = d.ServiceCatalogId > 0 ? d.ServiceCatalogId : null,
+                    Description = !string.IsNullOrWhiteSpace(d.Description) ? d.Description : "Ítem de Cotización",
+                    Quantity = d.Quantity > 0 ? d.Quantity : 1,
+                    UnitPrice = d.UnitPrice,
+                    Total = d.Total > 0 ? d.Total : (d.Quantity * d.UnitPrice),
+                    IsApproved = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                }).ToList();
+                await _context.QuotationDetail.AddRangeAsync(details, cancellation);
+            }
+
+            // Actualizar adjuntos si vienen nuevos
+            if (dto.Attachments != null && dto.Attachments.Any())
+            {
+                _context.QuotationAttachment.RemoveRange(entity.Attachments);
+                var attachments = dto.Attachments.Select(a => new QuotationAttachment
+                {
+                    QuotationId = entity.Id,
+                    FileName = a.FileName,
+                    ContentType = a.ContentType,
+                    FileSizeBytes = a.FileSizeBytes,
+                    Category = a.Category ?? "Photo",
+                    DataBase64 = a.DataBase64,
+                    FilePath = a.FilePath,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                }).ToList();
+                await _context.QuotationAttachment.AddRangeAsync(attachments, cancellation);
+            }
+
+            return await _context.SaveChangesAsync(cancellation) > 0;
+        }
+
+        public async Task<bool> UpdateStatusAsync(int id, string status, string? reason, CancellationToken cancellation)
+        {
+            var entity = await _context.Quotation.FirstOrDefaultAsync(q => q.Id == id && q.IsActive, cancellation);
+            if (entity == null) return false;
+
+            entity.Status = status;
+            entity.UpdatedAt = DateTime.Now;
+            if (status == "Sent") entity.SentAt = DateTime.Now;
+            if (status == "Approved") entity.ApprovedAt = DateTime.Now;
+            if (status == "Rejected")
+            {
+                entity.RejectedAt = DateTime.Now;
+                entity.RejectionReason = reason;
+            }
+
+            return await _context.SaveChangesAsync(cancellation) > 0;
+        }
+
+        public async Task<bool> ProcessApprovalAsync(int id, QuotationApprovalRequestDto approvalDto, CancellationToken cancellation)
+        {
+            var entity = await _context.Quotation
+                .Include(q => q.Details)
+                .FirstOrDefaultAsync(q => q.Id == id && q.IsActive, cancellation);
+
+            if (entity == null) return false;
+
+            if (approvalDto.ApproveAll || approvalDto.ApprovedDetailIds == null || !approvalDto.ApprovedDetailIds.Any())
+            {
+                foreach (var detail in entity.Details)
+                {
+                    detail.IsApproved = true;
+                }
+                entity.Status = "Approved";
+            }
+            else
+            {
+                foreach (var detail in entity.Details)
+                {
+                    detail.IsApproved = approvalDto.ApprovedDetailIds.Contains(detail.Id);
+                }
+
+                bool anyApproved = entity.Details.Any(d => d.IsApproved);
+                bool allApproved = entity.Details.All(d => d.IsApproved);
+
+                entity.Status = allApproved ? "Approved" : (anyApproved ? "PartiallyApproved" : "Rejected");
+            }
+
+            // Recalcular total aprobado
+            decimal approvedSubtotal = entity.Details.Where(d => d.IsApproved).Sum(d => d.Total);
+            decimal discount = approvedSubtotal * (entity.DiscountPercent / 100m);
+            entity.Subtotal = approvedSubtotal;
+            entity.DiscountAmount = discount;
+            entity.Total = approvedSubtotal - discount;
+            entity.ApprovedAt = DateTime.Now;
+            entity.UpdatedAt = DateTime.Now;
+
+            return await _context.SaveChangesAsync(cancellation) > 0;
+        }
+
+        public async Task<int> ConvertToWorkOrderAsync(QuotationConvertToOrderDto dto, CancellationToken cancellation)
+        {
+            var quote = await _context.Quotation
+                .Include(q => q.Details)
+                .FirstOrDefaultAsync(q => q.Id == dto.QuotationId && q.IsActive, cancellation);
+
+            if (quote == null) throw new InvalidOperationException("Cotización no encontrada");
+
+            int? userId = GetCurrentUserId();
+            int tenantId = quote.WorkshopId;
+
+            // Asegurar que exista cliente y vehiculo
+            int customerId = quote.CustomerId ?? 0;
+            int vehicleId = quote.VehicleId ?? 0;
+
+            if (customerId == 0)
+            {
+                // Crear cliente rápido con datos del prospecto
+                var newCustomer = new Customer
+                {
+                    FirstName = !string.IsNullOrWhiteSpace(quote.ProspectName) ? quote.ProspectName : "Cliente Cotización",
+                    LastName = "General",
+                    Email = quote.ProspectEmail,
+                    PhoneNumber = quote.ProspectPhone,
+                    Address = "N/A",
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                };
+                await _context.Customer.AddAsync(newCustomer, cancellation);
+                await _context.SaveChangesAsync(cancellation);
+                customerId = newCustomer.Id;
+            }
+
+            if (vehicleId == 0)
+            {
+                // Crear vehículo genérico para el cliente
+                var newVehicle = new Vehicle
+                {
+                    CustomerId = customerId,
+                    Plate = !string.IsNullOrWhiteSpace(quote.ProspectVehicleInfo) ? quote.ProspectVehicleInfo.Split(' ').FirstOrDefault() ?? "PENDIENTE" : "PENDIENTE",
+                    Color = "Sin especificar",
+                    VehicleType = "moto",
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                };
+                await _context.Vehicle.AddAsync(newVehicle, cancellation);
+                await _context.SaveChangesAsync(cancellation);
+                vehicleId = newVehicle.Id;
+            }
+
+            var workOrder = new WorkOrder
+            {
+                CustomerId = customerId,
+                VehicleId = vehicleId,
+                EntryDate = dto.EntryDate ?? DateTime.Now,
+                EstimatedDeliveryDate = dto.EstimatedDeliveryDate,
+                Mileage = dto.Mileage,
+                FuelLevel = dto.FuelLevel ?? "1/2",
+                Observations = $"Generada automáticamente desde Cotización #{quote.QuotationNumber}. {quote.Observations}".Trim(),
+                Status = "Aprobado",
+                DownPayment = dto.DownPayment,
+                WorkshopId = tenantId,
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                ResponsibleUserId = userId
+            };
+
+            await _context.WorkOrder.AddAsync(workOrder, cancellation);
+            await _context.SaveChangesAsync(cancellation);
+
+            // Agregar repuestos aprobados
+            var parts = quote.Details
+                .Where(d => d.IsApproved && d.ItemType == "Product")
+                .Select(d => new WorkOrderPart
+                {
+                    WorkOrderId = workOrder.Id,
+                    ProductId = d.ProductId,
+                    PartName = d.Description,
+                    Quantity = d.Quantity,
+                    UnitPrice = d.UnitPrice,
+                    IsApproved = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                }).ToList();
+
+            if (parts.Any())
+            {
+                await _context.WorkOrderPart.AddRangeAsync(parts, cancellation);
+            }
+
+            // Agregar servicios aprobados
+            var services = quote.Details
+                .Where(d => d.IsApproved && d.ItemType == "Service")
+                .Select(d => new WorkOrderService
+                {
+                    WorkOrderId = workOrder.Id,
+                    Description = d.Description,
+                    Price = d.UnitPrice,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                }).ToList();
+
+            if (services.Any())
+            {
+                await _context.WorkOrderService.AddRangeAsync(services, cancellation);
+            }
+
+            // Marcar cotización como Convertida
+            quote.Status = "Converted";
+            quote.WorkOrderId = workOrder.Id;
+            quote.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync(cancellation);
+            return workOrder.Id;
+        }
+
+        public async Task<int> ConvertToDirectSaleAsync(int quotationId, int paymentMethodId, string? referenceCode, CancellationToken cancellation)
+        {
+            var quote = await _context.Quotation
+                .Include(q => q.Details)
+                .FirstOrDefaultAsync(q => q.Id == quotationId && q.IsActive, cancellation);
+
+            if (quote == null) throw new InvalidOperationException("Cotización no encontrada");
+
+            int? userId = GetCurrentUserId();
+            int tenantId = quote.WorkshopId;
+
+            // Obtener o crear cliente
+            int customerId = quote.CustomerId ?? 0;
+            if (customerId == 0)
+            {
+                var defaultCust = await _context.Customer.FirstOrDefaultAsync(c => c.IsActive, cancellation);
+                customerId = defaultCust?.Id ?? 1;
+            }
+
+            // Datos comerciales
+            var settings = await _context.WorkshopSettings.Where(s => s.IsActive).ToListAsync(cancellation);
+            string name = settings.FirstOrDefault(s => s.SettingKey == "workshop_name")?.SettingValue ?? "DAVID MOTOS";
+            string slogan = settings.FirstOrDefault(s => s.SettingKey == "workshop_slogan")?.SettingValue ?? "SERVICIO TÉCNICO";
+            string? logo = settings.FirstOrDefault(s => s.SettingKey == "logo")?.SettingValue;
+
+            var sale = new Sale
+            {
+                WorkOrderId = null,
+                CustomerId = customerId,
+                SaleDate = DateTime.Now,
+                Subtotal = quote.Subtotal,
+                DiscountPercent = quote.DiscountPercent,
+                DiscountAmount = quote.DiscountAmount,
+                Total = quote.Total,
+                DownPayment = 0,
+                Balance = 0,
+                Observations = $"Venta directa generada desde Cotización #{quote.QuotationNumber}. {quote.Observations}".Trim(),
+                WorkshopName = name,
+                WorkshopSlogan = slogan,
+                LogoBase64 = logo,
+                WorkshopId = tenantId,
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                ResponsibleUserId = userId
+            };
+
+            await _context.Sale.AddAsync(sale, cancellation);
+            await _context.SaveChangesAsync(cancellation);
+
+            // Guardar detalles y descontar inventario
+            var approvedDetails = quote.Details.Where(d => d.IsApproved).ToList();
+            var saleDetails = approvedDetails.Select(d => new SaleDetail
+            {
+                SaleId = sale.Id,
+                ProductId = d.ProductId,
+                ServiceCatalogId = d.ServiceCatalogId,
+                Description = d.Description,
+                Quantity = d.Quantity,
+                UnitPrice = d.UnitPrice,
+                Total = d.Total,
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                ResponsibleUserId = userId
+            }).ToList();
+
+            await _context.SaleDetail.AddRangeAsync(saleDetails, cancellation);
+
+            foreach (var d in saleDetails.Where(x => x.ProductId.HasValue && x.ProductId.Value > 0))
+            {
+                var inv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == d.ProductId!.Value, cancellation);
+                if (inv == null)
+                {
+                    inv = new Domain.Models.Inventory
+                    {
+                        ProductId = d.ProductId!.Value,
+                        StockQuantity = -d.Quantity,
+                        MinStock = 0,
+                        CreatedAt = DateTime.Now,
+                        IsActive = true,
+                        ResponsibleUserId = userId
+                    };
+                    await _context.Inventory.AddAsync(inv, cancellation);
+                }
+                else
+                {
+                    inv.StockQuantity -= d.Quantity;
+                    inv.LastUpdate = DateTime.Now;
+                    inv.UpdatedAt = DateTime.Now;
+                }
+
+                var history = new InventoryHistory
+                {
+                    ProductId = d.ProductId!.Value,
+                    MovementType = "Salida",
+                    Quantity = d.Quantity,
+                    ReferenceId = sale.Id,
+                    Observations = $"Venta de Cotización #{quote.QuotationNumber} (Venta #{sale.Id})",
+                    CreatedAt = DateTime.Now,
+                    IsActive = true,
+                    ResponsibleUserId = userId
+                };
+                await _context.InventoryHistory.AddAsync(history, cancellation);
+            }
+
+            // Registrar pago
+            var payment = new SalePayment
+            {
+                SaleId = sale.Id,
+                PaymentMethodId = paymentMethodId > 0 ? paymentMethodId : 1,
+                Amount = quote.Total,
+                ReferenceCode = !string.IsNullOrWhiteSpace(referenceCode) ? referenceCode : "N/A",
+                IsActive = true,
+                CreatedAt = DateTime.Now,
+                ResponsibleUserId = userId
+            };
+            await _context.SalePayment.AddAsync(payment, cancellation);
+
+            // Actualizar cotización
+            quote.Status = "Converted";
+            quote.SaleId = sale.Id;
+            quote.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync(cancellation);
+            return sale.Id;
+        }
+
+        public async Task<bool> DeleteAsync(int id, CancellationToken cancellation)
+        {
+            var entity = await _context.Quotation.FirstOrDefaultAsync(q => q.Id == id, cancellation);
+            if (entity == null) return false;
+
+            entity.IsActive = false;
+            entity.UpdatedAt = DateTime.Now;
+            return await _context.SaveChangesAsync(cancellation) > 0;
+        }
+
+        private static QuotationDto MapToDto(Quotation q)
+        {
+            string custName = q.Customer != null ? $"{q.Customer.FirstName} {q.Customer.LastName}".Trim() : null!;
+            string vehPlate = q.Vehicle?.Plate;
+            string vehModel = q.Vehicle != null ? $"{q.Vehicle.BrandNavigation?.Name} {q.Vehicle.ModelNavigation?.Models}".Trim() : null!;
+
+            return new QuotationDto
+            {
+                Id = q.Id,
+                QuotationNumber = q.QuotationNumber,
+                WorkshopId = q.WorkshopId,
+                CustomerId = q.CustomerId,
+                CustomerName = custName,
+                CustomerEmail = q.Customer?.Email,
+                CustomerPhone = q.Customer?.PhoneNumber,
+                VehicleId = q.VehicleId,
+                VehiclePlate = vehPlate,
+                VehicleModel = vehModel,
+                ProspectName = q.ProspectName,
+                ProspectEmail = q.ProspectEmail,
+                ProspectPhone = q.ProspectPhone,
+                ProspectVehicleInfo = q.ProspectVehicleInfo,
+                Status = q.Status,
+                Subtotal = q.Subtotal,
+                DiscountPercent = q.DiscountPercent,
+                DiscountAmount = q.DiscountAmount,
+                Total = q.Total,
+                CreatedAt = q.CreatedAt,
+                ExpirationDate = q.ExpirationDate,
+                PublicToken = q.PublicToken,
+                Observations = q.Observations,
+                TermsAndConditions = q.TermsAndConditions,
+                WorkOrderId = q.WorkOrderId,
+                SaleId = q.SaleId,
+                SentAt = q.SentAt,
+                ApprovedAt = q.ApprovedAt,
+                RejectedAt = q.RejectedAt,
+                RejectionReason = q.RejectionReason,
+                HasServices = q.Details.Any(d => d.ItemType == "Service"),
+                HasProducts = q.Details.Any(d => d.ItemType == "Product"),
+                Details = q.Details.Where(d => d.IsActive).Select(d => new QuotationDetailDto
+                {
+                    Id = d.Id,
+                    QuotationId = d.QuotationId,
+                    ItemType = d.ItemType,
+                    ProductId = d.ProductId,
+                    ProductName = d.Product?.ProductName,
+                    ServiceCatalogId = d.ServiceCatalogId,
+                    ServiceCatalogName = d.ServiceCatalog?.Name,
+                    Description = d.Description,
+                    Quantity = d.Quantity,
+                    UnitPrice = d.UnitPrice,
+                    Total = d.Total,
+                    IsApproved = d.IsApproved
+                }).ToList(),
+                Attachments = q.Attachments.Where(a => a.IsActive).Select(a => new QuotationAttachmentDto
+                {
+                    Id = a.Id,
+                    QuotationId = a.QuotationId,
+                    FileName = a.FileName,
+                    ContentType = a.ContentType,
+                    FileSizeBytes = a.FileSizeBytes,
+                    Category = a.Category,
+                    DataBase64 = a.DataBase64,
+                    FilePath = a.FilePath
+                }).ToList()
+            };
+        }
+    }
+}
