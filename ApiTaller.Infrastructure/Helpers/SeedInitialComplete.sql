@@ -109,7 +109,9 @@ INSERT IGNORE INTO module (id, name, is_active, created_at, update_at, responsib
 (28, 'Agenda', 1, NOW(), NOW(), 1),
 (29, 'Centro de Control', 1, NOW(), NOW(), 1),
 (30, 'Contabilidad', 1, NOW(), NOW(), 1),
-(31, 'Gestión SaaS', 1, NOW(), NOW(), 1);
+(31, 'Gestión SaaS', 1, NOW(), NOW(), 1),
+(32, 'Punto de Venta', 1, NOW(), NOW(), 1),
+(33, 'Cotizaciones', 1, NOW(), NOW(), 1);
 
 -- ==============================================================================
 -- PASO 8: ACCIONES Y PERMISOS (Slugs Sincronizados con Frontend y API)
@@ -289,7 +291,18 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 -- 31. GESTIÓN SAAS (Plataforma Global)
 ((SELECT id FROM module WHERE name = 'Gestión SaaS'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Gestión SaaS', 'Ver_Gestion_Saas', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Gestión SaaS'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Gestión SaaS', 'Guardar_Gestion_Saas', 1, NOW(), NOW(), 1),
-((SELECT id FROM module WHERE name = 'Gestión SaaS'), (SELECT id FROM operation WHERE name = 'Editar'), 'Editar Gestión SaaS', 'Editar_Gestion_Saas', 1, NOW(), NOW(), 1);
+((SELECT id FROM module WHERE name = 'Gestión SaaS'), (SELECT id FROM operation WHERE name = 'Editar'), 'Editar Gestión SaaS', 'Editar_Gestion_Saas', 1, NOW(), NOW(), 1),
+
+-- 32. PUNTO DE VENTA (POS)
+((SELECT id FROM module WHERE name = 'Punto de Venta'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Punto de Venta', 'Ver_Punto_Venta', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Punto de Venta'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Procesar Venta Directa', 'Procesar_Venta_Directa', 1, NOW(), NOW(), 1),
+
+-- 33. COTIZACIONES Y PRESUPUESTOS
+((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Cotizaciones', 'Ver_Cotizaciones', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Cotizaciones', 'Guardar_Cotizaciones', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Editar'), 'Editar Cotizaciones', 'Editar_Cotizaciones', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Enviar Cotizaciones Email', 'Enviar_Cotizaciones_Email', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Cambiar_Estado'), 'Convertir Cotizaciones', 'Convertir_Cotizaciones', 1, NOW(), NOW(), 1);
 
 -- ==============================================================================
 -- PASO 9: ASIGNACIÓN DE MÓDULOS Y ACCIONES A ROLES
