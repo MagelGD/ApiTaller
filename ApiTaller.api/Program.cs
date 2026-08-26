@@ -67,7 +67,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.SetIsOriginAllowed(_ => true)
+        policy.SetIsOriginAllowed(origin => true)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -75,7 +75,23 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.SetIsOriginAllowed(_ => true)
+        policy.SetIsOriginAllowed(origin => true)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+
+    options.AddPolicy("DevPolicy", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:4200",
+                "https://localhost:4200",
+                "http://localhost:8100",
+                "https://localhost:8100",
+                "http://127.0.0.1:4200",
+                "https://garagemotor.co",
+                "https://app.garagemotor.co"
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
