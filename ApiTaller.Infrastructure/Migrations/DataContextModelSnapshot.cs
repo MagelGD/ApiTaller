@@ -1392,6 +1392,235 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.ToTable("product_type", (string)null);
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.Quotation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime?>("ExpirationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Observations")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProspectEmail")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProspectName")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProspectPhone")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProspectVehicleInfo")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PublicToken")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("QuotationNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("RejectedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int?>("SaleId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("TermsAndConditions")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("VehicleId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int?>("WorkOrderId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int>("WorkshopId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ResponsibleUserIdNavigationId");
+
+                    b.HasIndex("SaleId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.HasIndex("WorkOrderId");
+
+                    b.ToTable("Quotation");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.QuotationAttachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DataBase64")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FilePath")
+                        .HasColumnType("longtext");
+
+                    b.Property<long>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("QuotationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuotationId");
+
+                    b.HasIndex("ResponsibleUserIdNavigationId");
+
+                    b.ToTable("QuotationAttachment");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.QuotationDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("ItemType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuotationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ResponsibleUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ResponsibleUserIdNavigationId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<int?>("ServiceCatalogId")
+                        .HasColumnType("int(11)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("QuotationId");
+
+                    b.HasIndex("ResponsibleUserIdNavigationId");
+
+                    b.HasIndex("ServiceCatalogId");
+
+                    b.ToTable("QuotationDetail");
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.RoleAction", b =>
                 {
                     b.Property<int>("Id")
@@ -3107,6 +3336,91 @@ namespace ApiTaller.Infrastructure.Migrations
                     b.Navigation("ResponsibleUserIdNavigation");
                 });
 
+            modelBuilder.Entity("ApiTaller.Domain.Models.Quotation", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApiTaller.Domain.Models.Sale", "Sale")
+                        .WithMany()
+                        .HasForeignKey("SaleId");
+
+                    b.HasOne("ApiTaller.Domain.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId");
+
+                    b.HasOne("ApiTaller.Domain.Models.WorkOrder", "WorkOrder")
+                        .WithMany()
+                        .HasForeignKey("WorkOrderId");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("Sale");
+
+                    b.Navigation("Vehicle");
+
+                    b.Navigation("WorkOrder");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.QuotationAttachment", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.Quotation", "Quotation")
+                        .WithMany("Attachments")
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quotation");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.QuotationDetail", b =>
+                {
+                    b.HasOne("ApiTaller.Domain.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId");
+
+                    b.HasOne("ApiTaller.Domain.Models.Quotation", "Quotation")
+                        .WithMany("Details")
+                        .HasForeignKey("QuotationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApiTaller.Domain.Models.User", "ResponsibleUserIdNavigation")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleUserIdNavigationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ApiTaller.Domain.Models.ServiceCatalog", "ServiceCatalog")
+                        .WithMany()
+                        .HasForeignKey("ServiceCatalogId");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Quotation");
+
+                    b.Navigation("ResponsibleUserIdNavigation");
+
+                    b.Navigation("ServiceCatalog");
+                });
+
             modelBuilder.Entity("ApiTaller.Domain.Models.RoleAction", b =>
                 {
                     b.HasOne("ApiTaller.Domain.Models.Action", "ActionIdNavigation")
@@ -3550,6 +3864,13 @@ namespace ApiTaller.Infrastructure.Migrations
             modelBuilder.Entity("ApiTaller.Domain.Models.MechanicPaymentSettlement", b =>
                 {
                     b.Navigation("Services");
+                });
+
+            modelBuilder.Entity("ApiTaller.Domain.Models.Quotation", b =>
+                {
+                    b.Navigation("Attachments");
+
+                    b.Navigation("Details");
                 });
 
             modelBuilder.Entity("ApiTaller.Domain.Models.Sale", b =>

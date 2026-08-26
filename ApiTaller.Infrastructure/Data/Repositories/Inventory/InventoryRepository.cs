@@ -27,6 +27,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
             IQueryable<InventoryDto> query = from p in _context.Product
                         join i in _context.Inventory on p.Id equals i.ProductId into inv
                         from subInv in inv.DefaultIfEmpty()
+                        join pt in _context.ProductType on p.ProducTypeId equals pt.Id into prodType
+                        from subPt in prodType.DefaultIfEmpty()
                         where p.IsActive
                         select new InventoryDto
                         {
@@ -35,6 +37,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                             ProductName = p.ProductName,
                             StockQuantity = subInv != null ? subInv.StockQuantity : 0,
                             MinStock = subInv != null ? subInv.MinStock : 0,
+                            Price = p.Price,
+                            SalePrice = p.SalePrice,
+                            Reference = p.Reference,
+                            Code = p.Code,
+                            CategoryName = subPt != null ? subPt.Type : "General",
+                            VehicleType = p.VehicleType,
                             LastUpdate = subInv != null ? subInv.LastUpdate : p.CreatedAt,
                             IsActive = p.IsActive,
                             CreatedAt = p.CreatedAt,
@@ -48,6 +56,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
             IQueryable<InventoryDto> query = from p in _context.Product
                         join i in _context.Inventory on p.Id equals i.ProductId into inv
                         from subInv in inv.DefaultIfEmpty()
+                        join pt in _context.ProductType on p.ProducTypeId equals pt.Id into prodType
+                        from subPt in prodType.DefaultIfEmpty()
                         where p.Id == productId
                         select new InventoryDto
                         {
@@ -56,6 +66,12 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Inventory
                             ProductName = p.ProductName,
                             StockQuantity = subInv != null ? subInv.StockQuantity : 0,
                             MinStock = subInv != null ? subInv.MinStock : 0,
+                            Price = p.Price,
+                            SalePrice = p.SalePrice,
+                            Reference = p.Reference,
+                            Code = p.Code,
+                            CategoryName = subPt != null ? subPt.Type : "General",
+                            VehicleType = p.VehicleType,
                             LastUpdate = subInv != null ? subInv.LastUpdate : p.CreatedAt,
                             IsActive = p.IsActive,
                             CreatedAt = p.CreatedAt,
