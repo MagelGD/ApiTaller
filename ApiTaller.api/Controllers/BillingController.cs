@@ -180,6 +180,11 @@ namespace ApiTaller.api.Controllers
             {
                 return Ok(await _billingService.SaveSaleAsync(value, cancellation));
             }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Validación de negocio al registrar venta: {Message}", ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al guardar la factura");

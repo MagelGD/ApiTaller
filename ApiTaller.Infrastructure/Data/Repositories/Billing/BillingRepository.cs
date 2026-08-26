@@ -70,7 +70,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                 await _context.Sale.AddAsync(sale, cancellation);
                 await _context.SaveChangesAsync(cancellation);
 
-                // 3. Guardar detalles con validación estricta de Foreign Keys
+                // 3. Validar y guardar detalles
                 if (saleDto.Details != null && saleDto.Details.Any())
                 {
                     List<SaleDetail> details = new List<SaleDetail>();
@@ -81,8 +81,26 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
 
                         if (validProductId.HasValue)
                         {
-                            bool exists = await _context.Product.AnyAsync(p => p.Id == validProductId.Value, cancellation);
-                            if (!exists) validProductId = null;
+                            var product = await _context.Product.FirstOrDefaultAsync(p => p.Id == validProductId.Value && p.IsActive, cancellation);
+                            if (product == null)
+                            {
+                                if (!saleDto.WorkOrderId.HasValue)
+                                {
+                                    throw new InvalidOperationException($"El producto solicitado no existe o está inactivo en el sistema.");
+                                }
+                                validProductId = null;
+                            }
+                            else if (!saleDto.WorkOrderId.HasValue) // Venta Directa (POS)
+                            {
+                                var currentInv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == validProductId.Value, cancellation);
+                                int availableStock = currentInv?.StockQuantity ?? 0;
+                                int requestedQty = detailDto.Quantity > 0 ? detailDto.Quantity : 1;
+
+                                if (availableStock < requestedQty)
+                                {
+                                    throw new InvalidOperationException($"Stock insuficiente para '{product.ProductName}'. Disponible: {availableStock}, Solicitado: {requestedQty}.");
+                                }
+                            }
                         }
 
                         if (validServiceId.HasValue)
@@ -147,6 +165,10 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                         };
                         await _context.InventoryHistory.AddAsync(history, cancellation);
                     }
+                }
+                else if (!saleDto.WorkOrderId.HasValue)
+                {
+                    throw new InvalidOperationException("No se pueden registrar ventas de mostrador sin productos.");
                 }
 
                 // 4. Guardar pagos con ReferenceCode seguro
