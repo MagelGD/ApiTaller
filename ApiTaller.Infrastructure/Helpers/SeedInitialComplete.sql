@@ -1,4 +1,4 @@
-USE TallerMotoCar;
+USE `db_acd660_tallerpwa`;
 
 -- ==============================================================================
 -- SCRIPT MAESTRO DE INICIALIZACIÓN COMPLETA (SEED DATA MULTI-MODAL)
@@ -7,17 +7,19 @@ USE TallerMotoCar;
 -- Propósito: Despliegue en producción o nueva instancia de desarrollo desde cero
 -- ==============================================================================
 
--- 1. Desactivar temporalmente la verificación de llaves foráneas
+-- 1. Desactivar temporalmente la verificación de llaves foráneas y safe updates
 SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_SAFE_UPDATES = 0;
 
 -- ==============================================================================
 -- PASO 1: LIMPIEZA Y RESTRICCIONES DE INTEGRIDAD
 -- ==============================================================================
-TRUNCATE TABLE roleaction;
-TRUNCATE TABLE user_role_module;
-TRUNCATE TABLE action;
-TRUNCATE TABLE module;
-TRUNCATE TABLE operation;
+DELETE FROM roleaction;
+DELETE FROM user_role_module;
+DELETE FROM workshop_module;
+DELETE FROM action;
+DELETE FROM module;
+DELETE FROM operation;
 
 -- ==============================================================================
 -- PASO 2: SAAS TENANT RAÍZ (Taller Maestro / Plantilla Base Universal)
@@ -45,9 +47,7 @@ INSERT IGNORE INTO identification_type (id, identification, workshop_id, is_acti
 -- ==============================================================================
 INSERT IGNORE INTO userrole (id, role, workshop_id, is_active, created_at, update_at, responsible_user_id) VALUES 
 (1, 'SuperAdmin', NULL, 1, NOW(), NOW(), 1),
-(2, 'Administrador', 1, 1, NOW(), NOW(), 1),
-(3, 'Mecanico', 1, 1, NOW(), NOW(), 1),
-(4, 'Cliente', 1, 1, NOW(), NOW(), 1);
+(2, 'Administrador', 1, 1, NOW(), NOW(), 1);
 
 -- ==============================================================================
 -- PASO 5: USUARIO SUPERADMINISTRADOR
@@ -354,6 +354,13 @@ WHERE ur.role = 'Administrador' AND ur.workshop_id = 1
       SELECT 1 FROM roleaction ra 
       WHERE ra.role_id = ur.id AND ra.action_id = a.id
   );
+
+-- E. Asignar módulos de negocio activos al Taller 1 (Feature Toggling Multi-Tenant)
+INSERT IGNORE INTO workshop_module (workshop_id, module_id, is_active, created_at, updated_at, responsible_user_id)
+SELECT 1, m.id, 1, NOW(), NOW(), 1
+FROM module m
+WHERE m.is_active = 1
+  AND m.name NOT IN ('Roles', 'Configuracion Roles', 'Modulos', 'Operaciones', 'Acciones', 'Gestión SaaS', 'Modo Vehicular', 'Tipos Identificacion');
 
 -- ==============================================================================
 -- PASO 10: MÉTODOS DE PAGO (Taller 1)
@@ -968,6 +975,7 @@ END //
 DELIMITER ;
 
 -- ==============================================================================
--- FINALIZACIÓN: Reactivar validación de llaves foráneas
+-- FINALIZACIÓN: Reactivar validación de llaves foráneas y modo seguro
 -- ==============================================================================
 SET FOREIGN_KEY_CHECKS = 1;
+SET SQL_SAFE_UPDATES = 1;

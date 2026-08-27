@@ -354,6 +354,13 @@ WHERE ur.role = 'Administrador' AND ur.workshop_id = 1
       WHERE ra.role_id = ur.id AND ra.action_id = a.id
   );
 
+-- E. Asignar módulos de negocio activos al Taller 1 (Feature Toggling Multi-Tenant)
+INSERT IGNORE INTO workshop_module (workshop_id, module_id, is_active, created_at, updated_at, responsible_user_id)
+SELECT 1, m.id, 1, NOW(), NOW(), 1
+FROM module m
+WHERE m.is_active = 1
+  AND m.name NOT IN ('Roles', 'Configuracion Roles', 'Modulos', 'Operaciones', 'Acciones', 'Gestión SaaS', 'Modo Vehicular', 'Tipos Identificacion');
+
 -- ==============================================================================
 -- PASO 10: MÉTODOS DE PAGO (Taller 1)
 -- ==============================================================================
