@@ -20,6 +20,7 @@ namespace ApiTaller.Infrastructure.Data
 
         // SAAS-0: Raíz del Multi-Tenant
         public DbSet<Workshop> Workshop { get; set; }
+        public DbSet<WorkshopModule> WorkshopModule { get; set; }
 
         public DbSet<User> User {  get; set; }
         public DbSet<Domain.Models.Action> Action {  get; set; }
@@ -112,6 +113,7 @@ namespace ApiTaller.Infrastructure.Data
             modelBuilder.Entity<AgendaBlock>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<AgendaDayConfig>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<EmailSettings>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
+            modelBuilder.Entity<WorkshopModule>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
 
             base.OnModelCreating(modelBuilder);
         }

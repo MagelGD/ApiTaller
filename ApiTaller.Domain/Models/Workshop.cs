@@ -48,5 +48,6 @@ namespace ApiTaller.Domain.Models
         public virtual ICollection<User> Users { get; set; } = new List<User>();
         public virtual ICollection<WorkshopSettings> Settings { get; set; } = new List<WorkshopSettings>();
         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public virtual ICollection<WorkshopModule> WorkshopModules { get; set; } = new List<WorkshopModule>();
     }
 }

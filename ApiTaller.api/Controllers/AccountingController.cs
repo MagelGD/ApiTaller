@@ -9,11 +9,15 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ApiTaller.Domain.Constants;
+using ApiTaller.api.Filters;
+
 namespace ApiTaller.Api.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
+    [RequireTenantModule(ModuleConstants.Accounting)]
     public class AccountingController : ControllerBase
     {
         private readonly IAccountingService _accountingService;

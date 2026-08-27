@@ -11,11 +11,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ApiTaller.Domain.Constants;
+using ApiTaller.api.Filters;
+
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireTenantModule(ModuleConstants.Pos)]
     public class BillingController : ControllerBase
     {
         private readonly ILogger<BillingController> _logger;

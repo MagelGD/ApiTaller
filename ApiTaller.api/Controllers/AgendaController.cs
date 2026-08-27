@@ -7,11 +7,15 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ApiTaller.Domain.Constants;
+using ApiTaller.api.Filters;
+
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireTenantModule(ModuleConstants.Agenda)]
     public class AgendaController : ControllerBase
     {
         private readonly ILogger<AgendaController> _logger;

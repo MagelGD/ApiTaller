@@ -7,11 +7,15 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ApiTaller.Domain.Constants;
+using ApiTaller.api.Filters;
+
 namespace ApiTaller.api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [RequireTenantModule(ModuleConstants.WorkOrders)]
     public class WorkOrdersController : ControllerBase
     {
         private readonly ILogger<WorkOrdersController> _logger;

@@ -23,5 +23,8 @@ namespace ApiTaller.Domain.Dtos.Workshop
         // Opciones de Carga Inicial
         public bool SeedProducts { get; set; } = false;
         public bool SeedServices { get; set; } = false;
+
+        // Selección Paramétrica de Módulos (Feature Toggling)
+        public List<int>? SelectedModuleIds { get; set; }
     }
 }

@@ -10,5 +10,8 @@ namespace ApiTaller.Domain.Interfaces.Services.Workshop
         Task<bool> UpdateWorkshopAsync(int id, UpdateWorkshopDto dto, CancellationToken ct = default);
         Task<bool> ToggleStatusAsync(int id, bool isActive, CancellationToken ct = default);
         Task<WorkshopTypeChangeValidationDto> ValidateTypeChangeAsync(int workshopId, string newType, CancellationToken ct = default);
+        Task<IEnumerable<WorkshopModuleDto>> GetAvailableModulesAsync(CancellationToken ct = default);
+        Task<IEnumerable<WorkshopModuleDto>> GetWorkshopModulesAsync(int workshopId, CancellationToken ct = default);
+        Task<bool> UpdateWorkshopModulesAsync(int workshopId, UpdateWorkshopModulesDto dto, CancellationToken ct = default);
     }
 }
