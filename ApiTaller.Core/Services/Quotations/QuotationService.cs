@@ -56,24 +56,53 @@ namespace ApiTaller.Core.Services.Quotations
             var created = await _quotationRepository.CreateAsync(dto, cancellation);
             var quoteDto = await _quotationRepository.GetByIdAsync(created.Id, cancellation);
 
-            if (dto.SendEmailImmediately && quoteDto != null && !string.IsNullOrWhiteSpace(quoteDto.ClientDisplayEmail))
+            if (quoteDto == null)
             {
-                try
+                quoteDto = new QuotationDto
                 {
-                    await SendEmailAsync(new SendQuotationEmailDto
-                    {
-                        QuotationId = quoteDto.Id,
-                        ToEmail = quoteDto.ClientDisplayEmail,
-                        CustomerName = quoteDto.ClientDisplayName
-                    }, cancellation);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "No se pudo enviar el correo de inmediato para la cotización {QuotationId}", quoteDto.Id);
-                }
+                    Id = created.Id,
+                    QuotationNumber = created.QuotationNumber,
+                    WorkshopId = created.WorkshopId,
+                    CustomerId = created.CustomerId,
+                    ProspectName = created.ProspectName,
+                    ProspectEmail = created.ProspectEmail,
+                    ProspectPhone = created.ProspectPhone,
+                    ProspectVehicleInfo = created.ProspectVehicleInfo,
+                    Status = created.Status,
+                    Subtotal = created.Subtotal,
+                    DiscountPercent = created.DiscountPercent,
+                    DiscountAmount = created.DiscountAmount,
+                    Total = created.Total,
+                    ExpirationDate = created.ExpirationDate,
+                    PublicToken = created.PublicToken,
+                    Observations = created.Observations,
+                    TermsAndConditions = created.TermsAndConditions,
+                    CreatedAt = created.CreatedAt
+                };
             }
 
-            return quoteDto!;
+            if (dto.SendEmailImmediately && !string.IsNullOrWhiteSpace(quoteDto.ClientDisplayEmail))
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                        await SendEmailAsync(new SendQuotationEmailDto
+                        {
+                            QuotationId = quoteDto.Id,
+                            ToEmail = quoteDto.ClientDisplayEmail,
+                            CustomerName = quoteDto.ClientDisplayName
+                        }, cts.Token);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "No se pudo enviar el correo en segundo plano para la cotización {QuotationId}", quoteDto.Id);
+                    }
+                });
+            }
+
+            return quoteDto;
         }
 
         public async Task<bool> UpdateAsync(int id, QuotationCreateDto dto, CancellationToken cancellation)

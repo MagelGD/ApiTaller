@@ -66,6 +66,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
         public async Task<QuotationDto?> GetByIdAsync(int id, CancellationToken cancellation)
         {
             var entity = await _context.Quotation
+                .AsNoTracking()
                 .Include(q => q.Customer)
                 .Include(q => q.Vehicle)
                     .ThenInclude(v => v.BrandNavigation)
@@ -84,6 +85,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
         public async Task<QuotationDto?> GetByTokenAsync(string token, CancellationToken cancellation)
         {
             var entity = await _context.Quotation
+                .AsNoTracking()
                 .IgnoreQueryFilters() // Para permitir acceso a clientes públicos por token
                 .Include(q => q.Customer)
                 .Include(q => q.Vehicle)
@@ -103,6 +105,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
         public async Task<IEnumerable<QuotationDto>> GetByCustomerIdAsync(int customerId, CancellationToken cancellation)
         {
             var list = await _context.Quotation
+                .AsNoTracking()
                 .Include(q => q.Customer)
                 .Include(q => q.Vehicle)
                     .ThenInclude(v => v.BrandNavigation)
@@ -125,9 +128,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
             int? userId = GetCurrentUserId();
             int tenantId = _context.CurrentTenantId;
 
-            // Generar número consecutivo COT-0001
-            int countToday = await _context.Quotation.CountAsync(cancellation) + 1;
-            string quoteNumber = $"COT-{countToday:D4}";
+            // Generar número consecutivo seguro COT-0001
+            int lastId = await _context.Quotation.IgnoreQueryFilters().Where(q => q.WorkshopId == tenantId).MaxAsync(q => (int?)q.Id, cancellation) ?? 0;
+            int count = await _context.Quotation.IgnoreQueryFilters().CountAsync(q => q.WorkshopId == tenantId, cancellation) + 1;
+            int nextNumber = Math.Max(count, lastId + 1);
+            string quoteNumber = $"COT-{nextNumber:D4}";
 
             var quotation = new Quotation
             {
@@ -161,9 +166,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
                 var details = dto.Details.Select(d => new QuotationDetail
                 {
                     QuotationId = quotation.Id,
-                    ItemType = d.ItemType,
-                    ProductId = d.ProductId > 0 ? d.ProductId : null,
-                    ServiceCatalogId = d.ServiceCatalogId > 0 ? d.ServiceCatalogId : null,
+                    ItemType = !string.IsNullOrWhiteSpace(d.ItemType) ? d.ItemType : "Product",
+                    ProductId = (d.ProductId.HasValue && d.ProductId.Value > 0) ? d.ProductId.Value : null,
+                    ServiceCatalogId = (d.ServiceCatalogId.HasValue && d.ServiceCatalogId.Value > 0) ? d.ServiceCatalogId.Value : null,
                     Description = !string.IsNullOrWhiteSpace(d.Description) ? d.Description : "Ítem de Cotización",
                     Quantity = d.Quantity > 0 ? d.Quantity : 1,
                     UnitPrice = d.UnitPrice,
@@ -755,9 +760,9 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
                 ApprovedAt = q.ApprovedAt,
                 RejectedAt = q.RejectedAt,
                 RejectionReason = q.RejectionReason,
-                HasServices = q.Details.Any(d => d.ItemType == "Service"),
-                HasProducts = q.Details.Any(d => d.ItemType == "Product"),
-                Details = q.Details.Where(d => d.IsActive).Select(d => new QuotationDetailDto
+                HasServices = q.Details != null && q.Details.Any(d => d.ItemType == "Service"),
+                HasProducts = q.Details != null && q.Details.Any(d => d.ItemType == "Product"),
+                Details = q.Details != null ? q.Details.Where(d => d.IsActive).Select(d => new QuotationDetailDto
                 {
                     Id = d.Id,
                     QuotationId = d.QuotationId,
@@ -771,8 +776,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
                     UnitPrice = d.UnitPrice,
                     Total = d.Total,
                     IsApproved = d.IsApproved
-                }).ToList(),
-                Attachments = q.Attachments.Where(a => a.IsActive).Select(a => new QuotationAttachmentDto
+                }).ToList() : new List<QuotationDetailDto>(),
+                Attachments = q.Attachments != null ? q.Attachments.Where(a => a.IsActive).Select(a => new QuotationAttachmentDto
                 {
                     Id = a.Id,
                     QuotationId = a.QuotationId,
@@ -782,7 +787,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
                     Category = a.Category,
                     DataBase64 = a.DataBase64,
                     FilePath = a.FilePath
-                }).ToList()
+                }).ToList() : new List<QuotationAttachmentDto>()
             };
         }
     }
