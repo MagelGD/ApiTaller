@@ -19,9 +19,9 @@ public partial class Product : GeneralEntity
     public string VehicleType { get; set; } = "both";
     /// <summary>SAAS-1: ID del taller al que pertenece este producto</summary>
     public int WorkshopId { get; set; }
+    public string? ImageBase64 { get; set; }
+    public bool IsCombo { get; set; } = false;
    
     public virtual ProductType ProductTypeIdNavigation { get; set; } = null!;
-
-
-
+    public virtual ICollection<ProductComboItem> ComboItems { get; set; } = new List<ProductComboItem>();
 }

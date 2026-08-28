@@ -16,6 +16,8 @@ namespace ApiTaller.Domain.Dtos.Inventory
         public string? Code { get; set; }
         public string? CategoryName { get; set; }
         public string? VehicleType { get; set; }
+        public string? ImageBase64 { get; set; }
+        public bool IsCombo { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

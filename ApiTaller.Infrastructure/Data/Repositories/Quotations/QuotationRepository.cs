@@ -1,4 +1,5 @@
 using ApiTaller.Domain.Dtos.Quotations;
+using ApiTaller.Domain.Dtos.Billing;
 using ApiTaller.Domain.Interfaces.Repositories.Quotations;
 using ApiTaller.Domain.Interfaces.Services;
 using ApiTaller.Domain.Models;
@@ -448,23 +449,69 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
             return workOrder.Id;
         }
 
-        public async Task<int> ConvertToDirectSaleAsync(int quotationId, int paymentMethodId, string? referenceCode, CancellationToken cancellation)
+        public Task<int> ConvertToDirectSaleAsync(int quotationId, int paymentMethodId, string? referenceCode, CancellationToken cancellation)
+        {
+            var dto = new QuotationConvertToSaleDto
+            {
+                QuotationId = quotationId,
+                Payments = new List<SalePaymentDto>
+                {
+                    new SalePaymentDto
+                    {
+                        PaymentMethodId = paymentMethodId > 0 ? paymentMethodId : 1,
+                        ReferenceCode = referenceCode ?? "POS-DIRECT"
+                    }
+                }
+            };
+            return ConvertToDirectSaleDtoAsync(dto, cancellation);
+        }
+
+        public async Task<int> ConvertToDirectSaleDtoAsync(QuotationConvertToSaleDto dto, CancellationToken cancellation)
         {
             var quote = await _context.Quotation
                 .Include(q => q.Details)
-                .FirstOrDefaultAsync(q => q.Id == quotationId && q.IsActive, cancellation);
+                .Include(q => q.Customer)
+                .FirstOrDefaultAsync(q => q.Id == dto.QuotationId && q.IsActive, cancellation);
 
-            if (quote == null) throw new InvalidOperationException("Cotización no encontrada");
+            if (quote == null) throw new InvalidOperationException($"La cotización #{dto.QuotationId} no fue encontrada.");
+            if (quote.Status == "Converted") throw new InvalidOperationException("Esta cotización ya fue convertida previamente.");
 
             int? userId = GetCurrentUserId();
             int tenantId = quote.WorkshopId;
 
-            // Obtener o crear cliente
-            int customerId = quote.CustomerId ?? 0;
+            // Determinar o crear cliente
+            int customerId = dto.CustomerId ?? quote.CustomerId ?? 0;
             if (customerId == 0)
             {
-                var defaultCust = await _context.Customer.FirstOrDefaultAsync(c => c.IsActive, cancellation);
-                customerId = defaultCust?.Id ?? 1;
+                var existingCust = await _context.Customer
+                    .FirstOrDefaultAsync(c => c.IsActive && ((quote.ProspectEmail != null && c.Email == quote.ProspectEmail) || (quote.ProspectPhone != null && c.PhoneNumber == quote.ProspectPhone)), cancellation);
+
+                if (existingCust != null)
+                {
+                    customerId = existingCust.Id;
+                }
+                else
+                {
+                    string pName = !string.IsNullOrWhiteSpace(quote.ProspectName) ? quote.ProspectName : "Cliente Mostrador";
+                    var parts = pName.Split(' ', 2);
+                    var newCust = new Customer
+                    {
+                        FirstName = parts[0],
+                        LastName = parts.Length > 1 ? parts[1] : "",
+                        PhoneNumber = quote.ProspectPhone ?? "N/A",
+                        Email = quote.ProspectEmail ?? "cliente@pos.local",
+                        Address = "N/A",
+                        IdentificationNumber = "N/A",
+                        IdentificationTypeId = 1,
+                        WorkshopId = tenantId,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now,
+                        ResponsibleUserId = userId
+                    };
+                    await _context.Customer.AddAsync(newCust, cancellation);
+                    await _context.SaveChangesAsync(cancellation);
+                    customerId = newCust.Id;
+                }
             }
 
             // Datos comerciales
@@ -472,6 +519,13 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
             string name = settings.FirstOrDefault(s => s.SettingKey == "workshop_name")?.SettingValue ?? "DAVID MOTOS";
             string slogan = settings.FirstOrDefault(s => s.SettingKey == "workshop_slogan")?.SettingValue ?? "SERVICIO TÉCNICO";
             string? logo = settings.FirstOrDefault(s => s.SettingKey == "logo")?.SettingValue;
+
+            // Calcular montos de abono y saldo
+            decimal totalPayments = dto.Payments != null && dto.Payments.Any() ? dto.Payments.Sum(p => p.Amount) : 0;
+            decimal downPayment = dto.DownPayment > 0 ? dto.DownPayment : totalPayments;
+            decimal balance = dto.Balance >= 0 && (dto.DownPayment > 0 || totalPayments > 0)
+                ? dto.Balance
+                : Math.Max(0, quote.Total - downPayment);
 
             var sale = new Sale
             {
@@ -482,9 +536,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
                 DiscountPercent = quote.DiscountPercent,
                 DiscountAmount = quote.DiscountAmount,
                 Total = quote.Total,
-                DownPayment = 0,
-                Balance = 0,
-                Observations = $"Venta directa generada desde Cotización #{quote.QuotationNumber}. {quote.Observations}".Trim(),
+                DownPayment = downPayment,
+                Balance = balance,
+                Observations = !string.IsNullOrWhiteSpace(dto.Observations) 
+                    ? dto.Observations 
+                    : $"Venta directa generada desde Cotización #{quote.QuotationNumber}. {quote.Observations}".Trim(),
                 WorkshopName = name,
                 WorkshopSlogan = slogan,
                 LogoBase64 = logo,
@@ -499,6 +555,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
 
             // Guardar detalles y descontar inventario
             var approvedDetails = quote.Details.Where(d => d.IsApproved).ToList();
+            if (!approvedDetails.Any())
+            {
+                approvedDetails = quote.Details.Where(d => d.IsActive).ToList();
+            }
+
             var saleDetails = approvedDetails.Select(d => new SaleDetail
             {
                 SaleId = sale.Id,
@@ -517,53 +578,125 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
 
             foreach (var d in saleDetails.Where(x => x.ProductId.HasValue && x.ProductId.Value > 0))
             {
-                var inv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == d.ProductId!.Value, cancellation);
-                if (inv == null)
+                var prod = await _context.Product
+                    .Include(p => p.ComboItems)
+                        .ThenInclude(ci => ci.ChildProduct)
+                    .FirstOrDefaultAsync(p => p.Id == d.ProductId!.Value, cancellation);
+
+                if (prod != null && prod.IsCombo && prod.ComboItems.Any(ci => ci.IsActive))
                 {
-                    inv = new Domain.Models.Inventory
+                    // Descontar componentes de combo
+                    foreach (var ci in prod.ComboItems.Where(ci => ci.IsActive))
+                    {
+                        int qtyToDeduct = d.Quantity * ci.Quantity;
+                        var compInv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == ci.ChildProductId, cancellation);
+                        if (compInv == null)
+                        {
+                            compInv = new Domain.Models.Inventory
+                            {
+                                ProductId = ci.ChildProductId,
+                                StockQuantity = -qtyToDeduct,
+                                MinStock = 0,
+                                CreatedAt = DateTime.Now,
+                                IsActive = true,
+                                ResponsibleUserId = userId
+                            };
+                            await _context.Inventory.AddAsync(compInv, cancellation);
+                        }
+                        else
+                        {
+                            compInv.StockQuantity -= qtyToDeduct;
+                            compInv.LastUpdate = DateTime.Now;
+                            compInv.UpdatedAt = DateTime.Now;
+                        }
+
+                        var compHistory = new InventoryHistory
+                        {
+                            ProductId = ci.ChildProductId,
+                            MovementType = "Salida",
+                            Quantity = qtyToDeduct,
+                            ReferenceId = sale.Id,
+                            Observations = $"Combo '{prod.ProductName}' en Cotización #{quote.QuotationNumber} (Venta #{sale.Id})",
+                            CreatedAt = DateTime.Now,
+                            IsActive = true,
+                            ResponsibleUserId = userId
+                        };
+                        await _context.InventoryHistory.AddAsync(compHistory, cancellation);
+                    }
+                }
+                else
+                {
+                    var inv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == d.ProductId!.Value, cancellation);
+                    if (inv == null)
+                    {
+                        inv = new Domain.Models.Inventory
+                        {
+                            ProductId = d.ProductId!.Value,
+                            StockQuantity = -d.Quantity,
+                            MinStock = 0,
+                            CreatedAt = DateTime.Now,
+                            IsActive = true,
+                            ResponsibleUserId = userId
+                        };
+                        await _context.Inventory.AddAsync(inv, cancellation);
+                    }
+                    else
+                    {
+                        inv.StockQuantity -= d.Quantity;
+                        inv.LastUpdate = DateTime.Now;
+                        inv.UpdatedAt = DateTime.Now;
+                    }
+
+                    var history = new InventoryHistory
                     {
                         ProductId = d.ProductId!.Value,
-                        StockQuantity = -d.Quantity,
-                        MinStock = 0,
+                        MovementType = "Salida",
+                        Quantity = d.Quantity,
+                        ReferenceId = sale.Id,
+                        Observations = $"Venta de Cotización #{quote.QuotationNumber} (Venta #{sale.Id})",
                         CreatedAt = DateTime.Now,
                         IsActive = true,
                         ResponsibleUserId = userId
                     };
-                    await _context.Inventory.AddAsync(inv, cancellation);
+                    await _context.InventoryHistory.AddAsync(history, cancellation);
                 }
-                else
-                {
-                    inv.StockQuantity -= d.Quantity;
-                    inv.LastUpdate = DateTime.Now;
-                    inv.UpdatedAt = DateTime.Now;
-                }
-
-                var history = new InventoryHistory
-                {
-                    ProductId = d.ProductId!.Value,
-                    MovementType = "Salida",
-                    Quantity = d.Quantity,
-                    ReferenceId = sale.Id,
-                    Observations = $"Venta de Cotización #{quote.QuotationNumber} (Venta #{sale.Id})",
-                    CreatedAt = DateTime.Now,
-                    IsActive = true,
-                    ResponsibleUserId = userId
-                };
-                await _context.InventoryHistory.AddAsync(history, cancellation);
             }
 
-            // Registrar pago
-            var payment = new SalePayment
+            // Registrar pagos
+            if (dto.Payments != null && dto.Payments.Any())
             {
-                SaleId = sale.Id,
-                PaymentMethodId = paymentMethodId > 0 ? paymentMethodId : 1,
-                Amount = quote.Total,
-                ReferenceCode = !string.IsNullOrWhiteSpace(referenceCode) ? referenceCode : "N/A",
-                IsActive = true,
-                CreatedAt = DateTime.Now,
-                ResponsibleUserId = userId
-            };
-            await _context.SalePayment.AddAsync(payment, cancellation);
+                foreach (var pay in dto.Payments.Where(p => p.Amount > 0))
+                {
+                    var payment = new SalePayment
+                    {
+                        SaleId = sale.Id,
+                        PaymentMethodId = pay.PaymentMethodId > 0 ? pay.PaymentMethodId : 1,
+                        Amount = pay.Amount,
+                        ReferenceCode = !string.IsNullOrWhiteSpace(pay.ReferenceCode) ? pay.ReferenceCode : "POS-QUOTE",
+                        PaymentDate = pay.PaymentDate ?? DateTime.Now,
+                        Notes = pay.Notes,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now,
+                        ResponsibleUserId = userId
+                    };
+                    await _context.SalePayment.AddAsync(payment, cancellation);
+                }
+            }
+            else if (downPayment > 0)
+            {
+                var payment = new SalePayment
+                {
+                    SaleId = sale.Id,
+                    PaymentMethodId = 1,
+                    Amount = downPayment,
+                    ReferenceCode = "POS-QUOTE",
+                    PaymentDate = DateTime.Now,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now,
+                    ResponsibleUserId = userId
+                };
+                await _context.SalePayment.AddAsync(payment, cancellation);
+            }
 
             // Actualizar cotización
             quote.Status = "Converted";

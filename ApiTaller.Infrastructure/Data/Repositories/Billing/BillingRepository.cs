@@ -81,7 +81,11 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
 
                         if (validProductId.HasValue)
                         {
-                            var product = await _context.Product.FirstOrDefaultAsync(p => p.Id == validProductId.Value && p.IsActive, cancellation);
+                            var product = await _context.Product
+                                .Include(p => p.ComboItems)
+                                    .ThenInclude(ci => ci.ChildProduct)
+                                .FirstOrDefaultAsync(p => p.Id == validProductId.Value && p.IsActive, cancellation);
+
                             if (product == null)
                             {
                                 if (!saleDto.WorkOrderId.HasValue)
@@ -92,13 +96,32 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
                             }
                             else if (!saleDto.WorkOrderId.HasValue) // Venta Directa (POS)
                             {
-                                var currentInv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == validProductId.Value, cancellation);
-                                int availableStock = currentInv?.StockQuantity ?? 0;
                                 int requestedQty = detailDto.Quantity > 0 ? detailDto.Quantity : 1;
 
-                                if (availableStock < requestedQty)
+                                if (product.IsCombo && product.ComboItems.Any(ci => ci.IsActive))
                                 {
-                                    throw new InvalidOperationException($"Stock insuficiente para '{product.ProductName}'. Disponible: {availableStock}, Solicitado: {requestedQty}.");
+                                    // Validar stock de cada componente del combo
+                                    foreach (var ci in product.ComboItems.Where(ci => ci.IsActive))
+                                    {
+                                        var compInv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == ci.ChildProductId, cancellation);
+                                        int compAvailable = compInv?.StockQuantity ?? 0;
+                                        int compRequired = requestedQty * ci.Quantity;
+                                        if (compAvailable < compRequired)
+                                        {
+                                            string compName = ci.ChildProduct?.ProductName ?? $"Producto #{ci.ChildProductId}";
+                                            throw new InvalidOperationException($"Stock insuficiente en componente '{compName}' para el combo '{product.ProductName}'. Disponible: {compAvailable}, Requerido: {compRequired}.");
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    var currentInv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == validProductId.Value, cancellation);
+                                    int availableStock = currentInv?.StockQuantity ?? 0;
+
+                                    if (availableStock < requestedQty)
+                                    {
+                                        throw new InvalidOperationException($"Stock insuficiente para '{product.ProductName}'. Disponible: {availableStock}, Solicitado: {requestedQty}.");
+                                    }
                                 }
                             }
                         }
@@ -126,44 +149,96 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Billing
 
                     await _context.SaleDetail.AddRangeAsync(details, cancellation);
 
-                    // Descontar inventario automáticamente para los productos vendidos
+                    // Descontar inventario automáticamente para los productos vendidos (incluyendo combos)
                     foreach (var d in details.Where(x => x.ProductId.HasValue && x.ProductId.Value > 0))
                     {
-                        var inv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == d.ProductId!.Value, cancellation);
-                        if (inv == null)
+                        var prod = await _context.Product
+                            .Include(p => p.ComboItems)
+                                .ThenInclude(ci => ci.ChildProduct)
+                            .FirstOrDefaultAsync(p => p.Id == d.ProductId!.Value, cancellation);
+
+                        if (prod != null && prod.IsCombo && prod.ComboItems.Any(ci => ci.IsActive))
                         {
-                            inv = new Domain.Models.Inventory
+                            // Descontar cada componente del combo
+                            foreach (var ci in prod.ComboItems.Where(ci => ci.IsActive))
+                            {
+                                int qtyToDeduct = d.Quantity * ci.Quantity;
+                                var compInv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == ci.ChildProductId, cancellation);
+                                if (compInv == null)
+                                {
+                                    compInv = new Domain.Models.Inventory
+                                    {
+                                        ProductId = ci.ChildProductId,
+                                        StockQuantity = -qtyToDeduct,
+                                        MinStock = 0,
+                                        CreatedAt = DateTime.Now,
+                                        IsActive = true,
+                                        ResponsibleUserId = finalUserId
+                                    };
+                                    await _context.Inventory.AddAsync(compInv, cancellation);
+                                }
+                                else
+                                {
+                                    compInv.StockQuantity -= qtyToDeduct;
+                                    compInv.LastUpdate = DateTime.Now;
+                                    compInv.UpdatedAt = DateTime.Now;
+                                }
+
+                                var compHistory = new InventoryHistory
+                                {
+                                    ProductId = ci.ChildProductId,
+                                    MovementType = "Salida",
+                                    Quantity = qtyToDeduct,
+                                    ReferenceId = sale.WorkOrderId ?? sale.Id,
+                                    Observations = sale.WorkOrderId.HasValue 
+                                        ? $"Combo '{prod.ProductName}' en OT #{sale.WorkOrderId.Value} (Venta #{sale.Id})"
+                                        : $"Combo '{prod.ProductName}' en Venta Directa #{sale.Id}",
+                                    CreatedAt = DateTime.Now,
+                                    IsActive = true,
+                                    ResponsibleUserId = finalUserId
+                                };
+                                await _context.InventoryHistory.AddAsync(compHistory, cancellation);
+                            }
+                        }
+                        else
+                        {
+                            // Producto normal
+                            var inv = await _context.Inventory.FirstOrDefaultAsync(i => i.ProductId == d.ProductId!.Value, cancellation);
+                            if (inv == null)
+                            {
+                                inv = new Domain.Models.Inventory
+                                {
+                                    ProductId = d.ProductId!.Value,
+                                    StockQuantity = -d.Quantity,
+                                    MinStock = 0,
+                                    CreatedAt = DateTime.Now,
+                                    IsActive = true,
+                                    ResponsibleUserId = finalUserId
+                                };
+                                await _context.Inventory.AddAsync(inv, cancellation);
+                            }
+                            else
+                            {
+                                inv.StockQuantity -= d.Quantity;
+                                inv.LastUpdate = DateTime.Now;
+                                inv.UpdatedAt = DateTime.Now;
+                            }
+
+                            var history = new InventoryHistory
                             {
                                 ProductId = d.ProductId!.Value,
-                                StockQuantity = -d.Quantity,
-                                MinStock = 0,
+                                MovementType = "Salida",
+                                Quantity = d.Quantity,
+                                ReferenceId = sale.WorkOrderId ?? sale.Id,
+                                Observations = sale.WorkOrderId.HasValue 
+                                    ? $"Facturación OT #{sale.WorkOrderId.Value} (Venta #{sale.Id})"
+                                    : $"Venta Directa de Mostrador #{sale.Id}",
                                 CreatedAt = DateTime.Now,
                                 IsActive = true,
                                 ResponsibleUserId = finalUserId
                             };
-                            await _context.Inventory.AddAsync(inv, cancellation);
+                            await _context.InventoryHistory.AddAsync(history, cancellation);
                         }
-                        else
-                        {
-                            inv.StockQuantity -= d.Quantity;
-                            inv.LastUpdate = DateTime.Now;
-                            inv.UpdatedAt = DateTime.Now;
-                        }
-
-                        var history = new InventoryHistory
-                        {
-                            ProductId = d.ProductId!.Value,
-                            MovementType = "Salida",
-                            Quantity = d.Quantity,
-                            ReferenceId = sale.WorkOrderId ?? sale.Id,
-                            Observations = sale.WorkOrderId.HasValue 
-                                ? $"Facturación OT #{sale.WorkOrderId.Value} (Venta #{sale.Id})"
-                                : $"Venta Directa de Mostrador #{sale.Id}",
-                            CreatedAt = DateTime.Now,
-                            IsActive = true,
-                            ResponsibleUserId = finalUserId
-                        };
-                        await _context.InventoryHistory.AddAsync(history, cancellation);
                     }
                 }
                 else if (!saleDto.WorkOrderId.HasValue)

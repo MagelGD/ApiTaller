@@ -31,6 +31,7 @@ namespace ApiTaller.Infrastructure.Data
         public DbSet<Operation> Operation {  get; set; }
         public DbSet<ProductType> ProductType {  get; set; }
         public DbSet<Product> Product {  get; set; }
+        public DbSet<ProductComboItem> ProductComboItem { get; set; }
         public DbSet<UserRole> UserRole {  get; set; }
         public DbSet<UserRoleModule> UserRoleModule {  get; set; }
         public DbSet<Module> Module {  get; set; }
@@ -90,6 +91,7 @@ namespace ApiTaller.Infrastructure.Data
             modelBuilder.Entity<BrandModels>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<BrandModelVersion>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<Product>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
+            modelBuilder.Entity<ProductComboItem>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<ProductType>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<Customer>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);
             modelBuilder.Entity<WorkOrder>().HasQueryFilter(x => (IsPlatformAdmin && CurrentTenantId == 0) || x.WorkshopId == CurrentTenantId);

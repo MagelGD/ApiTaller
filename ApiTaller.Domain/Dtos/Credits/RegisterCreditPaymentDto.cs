@@ -1,14 +1,14 @@
-namespace ApiTaller.Domain.Dtos.Billing
+using System;
+
+namespace ApiTaller.Domain.Dtos.Credits
 {
-    public class SalePaymentDto
+    public class RegisterCreditPaymentDto
     {
-        public int Id { get; set; }
+        public int SaleId { get; set; }
         public int PaymentMethodId { get; set; }
-        public string? PaymentMethodName { get; set; }
         public decimal Amount { get; set; }
         public string? ReferenceCode { get; set; }
         public DateTime? PaymentDate { get; set; }
         public string? Notes { get; set; }
-        public DateTime? CreatedAt { get; set; }
     }
 }

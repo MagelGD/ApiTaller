@@ -35,14 +35,27 @@ namespace ApiTaller.Core.Services.Products
                     Description = product.Description,
                     VehicleType = string.IsNullOrEmpty(product.VehicleType) ? "both" : product.VehicleType,
                     ProducTypeId = product.ProductType?.Id ?? 0,
+                    ImageBase64 = product.ImageBase64,
+                    IsCombo = product.IsCombo,
                     IsActive = product.IsActive,
                     CreatedAt = product.Id == 0 ? DateTime.Now : product.CreatedAt,
-                    UpdatedAt = DateTime.Now
+                    UpdatedAt = DateTime.Now,
+                    ComboItems = product.IsCombo && product.ComboItems != null
+                        ? product.ComboItems.Select(ci => new ApiTaller.Domain.Models.ProductComboItem
+                        {
+                            Id = ci.Id,
+                            ParentProductId = product.Id,
+                            ChildProductId = ci.ChildProductId,
+                            Quantity = ci.Quantity > 0 ? ci.Quantity : 1,
+                            IsActive = true,
+                            CreatedAt = DateTime.Now
+                        }).ToList()
+                        : new List<ApiTaller.Domain.Models.ProductComboItem>()
                 };
 
                 if (saveData.Id == 0)
                 {
-                     await _repository.CreateAsync(saveData, cancellationToken);
+                    await _repository.CreateAsync(saveData, cancellationToken);
                     result = await _repository.GetByIdAsync(saveData.Id, cancellationToken) ?? new GetProductDto();
                 }
                 else

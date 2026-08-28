@@ -71,6 +71,15 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasColumnType("int(11)")
                 .HasColumnName("workshop_id");
 
+            entity.Property(e => e.ImageBase64)
+                .HasColumnType("longtext")
+                .HasColumnName("image_base64");
+
+            entity.Property(e => e.IsCombo)
+                .HasColumnType("bit(1)")
+                .HasColumnName("is_combo")
+                .HasDefaultValue(false);
+
             entity.HasOne(d => d.ProductTypeIdNavigation).WithMany()
                 .HasForeignKey(d => d.ProducTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

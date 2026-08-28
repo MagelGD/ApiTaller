@@ -100,6 +100,7 @@ namespace ApiTaller.Core.Services.ServiceConfigurations
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Quotations.IQuotationService, ApiTaller.Core.Services.Quotations.QuotationService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Accounting.IAccountingService, ApiTaller.Core.Services.Accounting.AccountingService>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.BulkImport.IBulkImportService, ApiTaller.Core.Services.BulkImport.BulkImportService>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Services.Credits.ICreditService, ApiTaller.Core.Services.Credits.CreditService>();
             return services;
         }
     }

@@ -189,12 +189,16 @@ namespace ApiTaller.api.Controllers
         }
 
         [HttpPost("convert-to-sale")]
-        public async Task<IActionResult> ConvertToSale([FromBody] ConvertToSaleRequest request, CancellationToken cancellation)
+        public async Task<IActionResult> ConvertToSale([FromBody] QuotationConvertToSaleDto request, CancellationToken cancellation)
         {
             try
             {
-                int saleId = await _quotationService.ConvertToDirectSaleAsync(request.QuotationId, request.PaymentMethodId, request.ReferenceCode, cancellation);
+                int saleId = await _quotationService.ConvertToDirectSaleDtoAsync(request, cancellation);
                 return Ok(new { success = true, saleId = saleId, message = $"Cotización convertida en Venta Directa #{saleId}" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
             }
             catch (Exception ex)
             {

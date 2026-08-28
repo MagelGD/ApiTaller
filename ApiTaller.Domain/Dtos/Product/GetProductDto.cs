@@ -15,9 +15,12 @@ namespace ApiTaller.Domain.Dtos.Product
         public string Reference { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string VehicleType { get; set; } = "both";
+        public string? ImageBase64 { get; set; }
+        public bool IsCombo { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public GetProductTypeDto ProductType { get; set; } = null!;
+        public List<ProductComboItemDto> ComboItems { get; set; } = new List<ProductComboItemDto>();
     }
 }

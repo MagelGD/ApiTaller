@@ -55,7 +55,8 @@ INSERT IGNORE INTO module (id, name, is_active, created_at, update_at, responsib
 (30, 'Contabilidad', 1, NOW(), NOW(), 1),
 (31, 'Gestión SaaS', 1, NOW(), NOW(), 1),
 (32, 'Punto de Venta', 1, NOW(), NOW(), 1),
-(33, 'Cotizaciones', 1, NOW(), NOW(), 1);
+(33, 'Cotizaciones', 1, NOW(), NOW(), 1),
+(34, 'Cartera', 1, NOW(), NOW(), 1);
 
 -- ==============================================================================
 -- PASO 3: CATÁLOGO DE ACCIONES Y SLUGS RBAC (Idempotente)
@@ -246,7 +247,12 @@ INSERT IGNORE INTO action (module_id, operation_id, name, slug, is_active, creat
 ((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Cotizaciones', 'Guardar_Cotizaciones', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Editar'), 'Editar Cotizaciones', 'Editar_Cotizaciones', 1, NOW(), NOW(), 1),
 ((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Enviar Cotizaciones Email', 'Enviar_Cotizaciones_Email', 1, NOW(), NOW(), 1),
-((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Cambiar_Estado'), 'Convertir Cotizaciones', 'Convertir_Cotizaciones', 1, NOW(), NOW(), 1);
+((SELECT id FROM module WHERE name = 'Cotizaciones'), (SELECT id FROM operation WHERE name = 'Cambiar_Estado'), 'Convertir Cotizaciones', 'Convertir_Cotizaciones', 1, NOW(), NOW(), 1),
+
+-- 34. CARTERA Y CRÉDITOS
+((SELECT id FROM module WHERE name = 'Cartera'), (SELECT id FROM operation WHERE name = 'Ver'), 'Ver Cartera', 'Ver_Cartera_Creditos', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Cartera'), (SELECT id FROM operation WHERE name = 'Guardar'), 'Guardar Abonos Cartera', 'Guardar_Abonos_Credito', 1, NOW(), NOW(), 1),
+((SELECT id FROM module WHERE name = 'Cartera'), (SELECT id FROM operation WHERE name = 'Ver'), 'Imprimir Recibo Abono', 'Imprimir_Recibo_Abono', 1, NOW(), NOW(), 1);
 
 -- ==============================================================================
 -- PASO 4: SINCRONIZACIÓN DE ROLES (Multi-Taller / Idempotente)

@@ -99,6 +99,7 @@ namespace ApiTaller.Infrastructure.Data.Repositories.RepositoryConfigurations
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.IDashboardRepository, ApiTaller.Infrastructure.Data.Repositories.Dashboard.DashboardRepository>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Quotations.IQuotationRepository, ApiTaller.Infrastructure.Data.Repositories.Quotations.QuotationRepository>();
             services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Accounting.IAccountingRepository, ApiTaller.Infrastructure.Data.Repositories.Accounting.AccountingRepository>();
+            services.TryAddScoped<ApiTaller.Domain.Interfaces.Repositories.Credits.ICreditRepository, ApiTaller.Infrastructure.Data.Repositories.Credits.CreditRepository>();
             return services;
         }
     }

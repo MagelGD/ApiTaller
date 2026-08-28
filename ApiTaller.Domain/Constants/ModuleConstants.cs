@@ -11,6 +11,7 @@ namespace ApiTaller.Domain.Constants
         public const string Inventory = "Inventario";
         public const string Agenda = "Agenda";
         public const string Accounting = "Contabilidad";
+        public const string Credits = "Cartera";
 
         // Módulos de Catálogos y Configuración del Taller
         public const string Brands = "Marcas";

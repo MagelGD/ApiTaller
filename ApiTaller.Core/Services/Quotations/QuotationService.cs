@@ -288,6 +288,11 @@ namespace ApiTaller.Core.Services.Quotations
             return await _quotationRepository.ConvertToDirectSaleAsync(quotationId, paymentMethodId, referenceCode, cancellation);
         }
 
+        public async Task<int> ConvertToDirectSaleDtoAsync(QuotationConvertToSaleDto dto, CancellationToken cancellation)
+        {
+            return await _quotationRepository.ConvertToDirectSaleDtoAsync(dto, cancellation);
+        }
+
         public async Task<bool> DeleteAsync(int id, CancellationToken cancellation)
         {
             return await _quotationRepository.DeleteAsync(id, cancellation);

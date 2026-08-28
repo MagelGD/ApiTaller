@@ -35,6 +35,14 @@ namespace ApiTaller.Infrastructure.Data.Configurations
                 .HasMaxLength(255)
                 .HasColumnName("reference_code");
 
+            entity.Property(e => e.PaymentDate)
+                .HasColumnType("datetime")
+                .HasColumnName("payment_date");
+
+            entity.Property(e => e.Notes)
+                .HasMaxLength(500)
+                .HasColumnName("notes");
+
             entity.Property(e => e.IsActive)
                 .HasColumnType("bit(1)")
                 .HasColumnName("is_active");

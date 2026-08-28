@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ApiTaller.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class VersionFull : Migration
+    public partial class VersionCompleta : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -19,6 +19,7 @@ namespace ApiTaller.Domain.Interfaces.Repositories.Quotations
         Task<bool> ProcessApprovalAsync(int id, QuotationApprovalRequestDto approvalDto, CancellationToken cancellation);
         Task<int> ConvertToWorkOrderAsync(QuotationConvertToOrderDto dto, CancellationToken cancellation);
         Task<int> ConvertToDirectSaleAsync(int quotationId, int paymentMethodId, string? referenceCode, CancellationToken cancellation);
+        Task<int> ConvertToDirectSaleDtoAsync(QuotationConvertToSaleDto dto, CancellationToken cancellation);
         Task<bool> DeleteAsync(int id, CancellationToken cancellation);
     }
 }

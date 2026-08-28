@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ApiTaller.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260827142739_VersionFull")]
-    partial class VersionFull
+    [Migration("20260827171425_VersionCompleta")]
+    partial class VersionCompleta
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

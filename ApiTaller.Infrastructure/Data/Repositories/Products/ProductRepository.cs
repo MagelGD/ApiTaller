@@ -30,12 +30,14 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                 }
                 create.CreatedAt = DateTime.Now;
                 await _context.Product.AddAsync(create, cancellation);
+                var saved = await _context.SaveChangesAsync(cancellation) > 0;
+                return saved;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating product");
             }
-            return await _context.SaveChangesAsync(cancellation) > 0;
+            return false;
         }
 
         public async Task<IEnumerable<GetProductDto>> GetAllActiveAsync(CancellationToken cancellation)
@@ -55,6 +57,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                         Reference = p.Reference,
                         Description = p.Description,
                         VehicleType = p.VehicleType,
+                        ImageBase64 = p.ImageBase64,
+                        IsCombo = p.IsCombo,
                         IsActive = p.IsActive,
                         CreatedAt = p.CreatedAt,
                         UpdatedAt = p.UpdatedAt,
@@ -65,7 +69,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                             IsActive = p.ProductTypeIdNavigation.IsActive,
                             CreatedAt = p.ProductTypeIdNavigation.CreatedAt,
                             UpdatedAt = p.ProductTypeIdNavigation.UpdatedAt
-                        }
+                        },
+                        ComboItems = p.ComboItems.Where(ci => ci.IsActive).Select(ci => new ProductComboItemDto
+                        {
+                            Id = ci.Id,
+                            ParentProductId = ci.ParentProductId,
+                            ChildProductId = ci.ChildProductId,
+                            ChildProductName = ci.ChildProduct.ProductName,
+                            ChildProductCode = ci.ChildProduct.Code,
+                            ChildProductPrice = ci.ChildProduct.Price,
+                            ChildProductSalePrice = ci.ChildProduct.SalePrice,
+                            Quantity = ci.Quantity
+                        }).ToList()
                     }).ToListAsync(cancellation);
             }
             catch (Exception ex)
@@ -91,6 +106,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                         Reference = p.Reference,
                         Description = p.Description,
                         VehicleType = p.VehicleType,
+                        ImageBase64 = p.ImageBase64,
+                        IsCombo = p.IsCombo,
                         IsActive = p.IsActive,
                         CreatedAt = p.CreatedAt,
                         UpdatedAt = p.UpdatedAt,
@@ -101,7 +118,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                             IsActive = p.ProductTypeIdNavigation.IsActive,
                             CreatedAt = p.ProductTypeIdNavigation.CreatedAt,
                             UpdatedAt = p.ProductTypeIdNavigation.UpdatedAt
-                        }
+                        },
+                        ComboItems = p.ComboItems.Where(ci => ci.IsActive).Select(ci => new ProductComboItemDto
+                        {
+                            Id = ci.Id,
+                            ParentProductId = ci.ParentProductId,
+                            ChildProductId = ci.ChildProductId,
+                            ChildProductName = ci.ChildProduct.ProductName,
+                            ChildProductCode = ci.ChildProduct.Code,
+                            ChildProductPrice = ci.ChildProduct.Price,
+                            ChildProductSalePrice = ci.ChildProduct.SalePrice,
+                            Quantity = ci.Quantity
+                        }).ToList()
                     }).ToListAsync(cancellation);
             }
             catch (Exception ex)
@@ -128,6 +156,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                         Reference = p.Reference,
                         Description = p.Description,
                         VehicleType = p.VehicleType,
+                        ImageBase64 = p.ImageBase64,
+                        IsCombo = p.IsCombo,
                         IsActive = p.IsActive,
                         CreatedAt = p.CreatedAt,
                         UpdatedAt = p.UpdatedAt,
@@ -138,7 +168,18 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                             IsActive = p.ProductTypeIdNavigation.IsActive,
                             CreatedAt = p.ProductTypeIdNavigation.CreatedAt,
                             UpdatedAt = p.ProductTypeIdNavigation.UpdatedAt
-                        }
+                        },
+                        ComboItems = p.ComboItems.Where(ci => ci.IsActive).Select(ci => new ProductComboItemDto
+                        {
+                            Id = ci.Id,
+                            ParentProductId = ci.ParentProductId,
+                            ChildProductId = ci.ChildProductId,
+                            ChildProductName = ci.ChildProduct.ProductName,
+                            ChildProductCode = ci.ChildProduct.Code,
+                            ChildProductPrice = ci.ChildProduct.Price,
+                            ChildProductSalePrice = ci.ChildProduct.SalePrice,
+                            Quantity = ci.Quantity
+                        }).ToList()
                     }).FirstOrDefaultAsync(cancellation);
             }
             catch (Exception ex)
@@ -157,11 +198,77 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                     update.ResponsibleUserId = userId;
                 }
                 update.UpdatedAt = DateTime.Now;
-                _context.Product.Update(update);
+
+                // Cargar entidad existente de la BD incluyendo sus ComboItems
+                var existing = await _context.Product
+                    .Include(p => p.ComboItems)
+                    .FirstOrDefaultAsync(p => p.Id == update.Id, cancellation);
+
+                if (existing == null) return false;
+
+                existing.ProductName = update.ProductName;
+                existing.Price = update.Price;
+                existing.SalePrice = update.SalePrice;
+                existing.Code = update.Code;
+                existing.Reference = update.Reference;
+                existing.Description = update.Description;
+                existing.VehicleType = update.VehicleType;
+                existing.ProducTypeId = update.ProducTypeId;
+                existing.ImageBase64 = update.ImageBase64;
+                existing.IsCombo = update.IsCombo;
+                existing.IsActive = update.IsActive;
+                existing.UpdatedAt = DateTime.Now;
+                existing.ResponsibleUserId = update.ResponsibleUserId;
+
+                // Sincronizar ComboItems
+                if (update.IsCombo)
+                {
+                    // Remover items que ya no están
+                    var newChildIds = update.ComboItems.Select(ci => ci.ChildProductId).ToHashSet();
+                    var toRemove = existing.ComboItems.Where(ci => !newChildIds.Contains(ci.ChildProductId)).ToList();
+                    foreach (var rem in toRemove)
+                    {
+                        _context.ProductComboItem.Remove(rem);
+                    }
+
+                    // Actualizar o agregar nuevos
+                    foreach (var item in update.ComboItems)
+                    {
+                        var existItem = existing.ComboItems.FirstOrDefault(ci => ci.ChildProductId == item.ChildProductId);
+                        if (existItem != null)
+                        {
+                            existItem.Quantity = item.Quantity;
+                            existItem.IsActive = true;
+                            existItem.UpdatedAt = DateTime.Now;
+                        }
+                        else
+                        {
+                            existing.ComboItems.Add(new ProductComboItem
+                            {
+                                ParentProductId = existing.Id,
+                                ChildProductId = item.ChildProductId,
+                                Quantity = item.Quantity,
+                                WorkshopId = existing.WorkshopId,
+                                IsActive = true,
+                                CreatedAt = DateTime.Now,
+                                ResponsibleUserId = update.ResponsibleUserId
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    // Si ya no es combo, eliminar cualquier item que tuviera
+                    if (existing.ComboItems.Any())
+                    {
+                        _context.ProductComboItem.RemoveRange(existing.ComboItems);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating product with id {update.Id}");
+                return false;
             }
             return await _context.SaveChangesAsync(cancellation) > 0;
         }
@@ -183,6 +290,8 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Products
                         Reference = p.Reference,
                         Description = p.Description,
                         VehicleType = p.VehicleType,
+                        ImageBase64 = p.ImageBase64,
+                        IsCombo = p.IsCombo,
                         IsActive = p.IsActive,
                         CreatedAt = p.CreatedAt,
                         UpdatedAt = p.UpdatedAt,
