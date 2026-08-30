@@ -158,49 +158,47 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
                 ResponsibleUserId = userId
             };
 
-            await _context.Quotation.AddAsync(quotation, cancellation);
-            await _context.SaveChangesAsync(cancellation);
-
             if (dto.Details != null && dto.Details.Any())
             {
-                var details = dto.Details.Select(d => new QuotationDetail
+                foreach (var d in dto.Details)
                 {
-                    QuotationId = quotation.Id,
-                    ItemType = !string.IsNullOrWhiteSpace(d.ItemType) ? d.ItemType : "Product",
-                    ProductId = (d.ProductId.HasValue && d.ProductId.Value > 0) ? d.ProductId.Value : null,
-                    ServiceCatalogId = (d.ServiceCatalogId.HasValue && d.ServiceCatalogId.Value > 0) ? d.ServiceCatalogId.Value : null,
-                    Description = !string.IsNullOrWhiteSpace(d.Description) ? d.Description : "Ítem de Cotización",
-                    Quantity = d.Quantity > 0 ? d.Quantity : 1,
-                    UnitPrice = d.UnitPrice,
-                    Total = d.Total > 0 ? d.Total : (d.Quantity * d.UnitPrice),
-                    IsApproved = true,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now,
-                    ResponsibleUserId = userId
-                }).ToList();
-
-                await _context.QuotationDetail.AddRangeAsync(details, cancellation);
+                    quotation.Details.Add(new QuotationDetail
+                    {
+                        ItemType = !string.IsNullOrWhiteSpace(d.ItemType) ? d.ItemType : "Product",
+                        ProductId = (d.ProductId.HasValue && d.ProductId.Value > 0) ? d.ProductId.Value : null,
+                        ServiceCatalogId = (d.ServiceCatalogId.HasValue && d.ServiceCatalogId.Value > 0) ? d.ServiceCatalogId.Value : null,
+                        Description = !string.IsNullOrWhiteSpace(d.Description) ? d.Description : "Ítem de Cotización",
+                        Quantity = d.Quantity > 0 ? d.Quantity : 1,
+                        UnitPrice = d.UnitPrice,
+                        Total = d.Total > 0 ? d.Total : (d.Quantity * d.UnitPrice),
+                        IsApproved = true,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now,
+                        ResponsibleUserId = userId
+                    });
+                }
             }
 
             if (dto.Attachments != null && dto.Attachments.Any())
             {
-                var attachments = dto.Attachments.Select(a => new QuotationAttachment
+                foreach (var a in dto.Attachments)
                 {
-                    QuotationId = quotation.Id,
-                    FileName = a.FileName,
-                    ContentType = a.ContentType,
-                    FileSizeBytes = a.FileSizeBytes,
-                    Category = a.Category ?? "Photo",
-                    DataBase64 = a.DataBase64,
-                    FilePath = a.FilePath,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now,
-                    ResponsibleUserId = userId
-                }).ToList();
-
-                await _context.QuotationAttachment.AddRangeAsync(attachments, cancellation);
+                    quotation.Attachments.Add(new QuotationAttachment
+                    {
+                        FileName = a.FileName,
+                        ContentType = a.ContentType,
+                        FileSizeBytes = a.FileSizeBytes,
+                        Category = a.Category ?? "Photo",
+                        DataBase64 = a.DataBase64,
+                        FilePath = a.FilePath,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now,
+                        ResponsibleUserId = userId
+                    });
+                }
             }
 
+            await _context.Quotation.AddAsync(quotation, cancellation);
             await _context.SaveChangesAsync(cancellation);
             return quotation;
         }
@@ -234,42 +232,46 @@ namespace ApiTaller.Infrastructure.Data.Repositories.Quotations
             _context.QuotationDetail.RemoveRange(entity.Details);
             if (dto.Details != null && dto.Details.Any())
             {
-                var details = dto.Details.Select(d => new QuotationDetail
+                foreach (var d in dto.Details)
                 {
-                    QuotationId = entity.Id,
-                    ItemType = d.ItemType,
-                    ProductId = d.ProductId > 0 ? d.ProductId : null,
-                    ServiceCatalogId = d.ServiceCatalogId > 0 ? d.ServiceCatalogId : null,
-                    Description = !string.IsNullOrWhiteSpace(d.Description) ? d.Description : "Ítem de Cotización",
-                    Quantity = d.Quantity > 0 ? d.Quantity : 1,
-                    UnitPrice = d.UnitPrice,
-                    Total = d.Total > 0 ? d.Total : (d.Quantity * d.UnitPrice),
-                    IsApproved = true,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now,
-                    ResponsibleUserId = userId
-                }).ToList();
-                await _context.QuotationDetail.AddRangeAsync(details, cancellation);
+                    entity.Details.Add(new QuotationDetail
+                    {
+                        QuotationId = entity.Id,
+                        ItemType = !string.IsNullOrWhiteSpace(d.ItemType) ? d.ItemType : "Product",
+                        ProductId = (d.ProductId.HasValue && d.ProductId.Value > 0) ? d.ProductId.Value : null,
+                        ServiceCatalogId = (d.ServiceCatalogId.HasValue && d.ServiceCatalogId.Value > 0) ? d.ServiceCatalogId.Value : null,
+                        Description = !string.IsNullOrWhiteSpace(d.Description) ? d.Description : "Ítem de Cotización",
+                        Quantity = d.Quantity > 0 ? d.Quantity : 1,
+                        UnitPrice = d.UnitPrice,
+                        Total = d.Total > 0 ? d.Total : (d.Quantity * d.UnitPrice),
+                        IsApproved = true,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now,
+                        ResponsibleUserId = userId
+                    });
+                }
             }
 
             // Actualizar adjuntos si vienen nuevos
             if (dto.Attachments != null && dto.Attachments.Any())
             {
                 _context.QuotationAttachment.RemoveRange(entity.Attachments);
-                var attachments = dto.Attachments.Select(a => new QuotationAttachment
+                foreach (var a in dto.Attachments)
                 {
-                    QuotationId = entity.Id,
-                    FileName = a.FileName,
-                    ContentType = a.ContentType,
-                    FileSizeBytes = a.FileSizeBytes,
-                    Category = a.Category ?? "Photo",
-                    DataBase64 = a.DataBase64,
-                    FilePath = a.FilePath,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now,
-                    ResponsibleUserId = userId
-                }).ToList();
-                await _context.QuotationAttachment.AddRangeAsync(attachments, cancellation);
+                    entity.Attachments.Add(new QuotationAttachment
+                    {
+                        QuotationId = entity.Id,
+                        FileName = a.FileName,
+                        ContentType = a.ContentType,
+                        FileSizeBytes = a.FileSizeBytes,
+                        Category = a.Category ?? "Photo",
+                        DataBase64 = a.DataBase64,
+                        FilePath = a.FilePath,
+                        IsActive = true,
+                        CreatedAt = DateTime.Now,
+                        ResponsibleUserId = userId
+                    });
+                }
             }
 
             return await _context.SaveChangesAsync(cancellation) > 0;

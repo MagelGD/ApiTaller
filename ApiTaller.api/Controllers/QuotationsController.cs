@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using ApiTaller.Domain.Constants;
 using ApiTaller.api.Filters;
+using ApiTaller.api.Helpers;
 
 namespace ApiTaller.api.Controllers
 {
@@ -42,8 +43,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener listado de cotizaciones");
-                return StatusCode(500, new { message = "Error al obtener cotizaciones", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener listado de cotizaciones: {Error}", detailedError);
+                return StatusCode(500, new { message = "Error al obtener cotizaciones", error = detailedError });
             }
         }
 
@@ -58,8 +60,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener cotización {Id}", id);
-                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener cotización {Id}: {Error}", id, detailedError);
+                return StatusCode(500, new { message = "Error interno al consultar la cotización", error = detailedError });
             }
         }
 
@@ -75,8 +78,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener cotización pública con token {Token}", token);
-                return StatusCode(500, new { message = "Error interno al cargar la cotización pública." });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener cotización pública con token {Token}: {Error}", token, detailedError);
+                return StatusCode(500, new { message = "Error interno al cargar la cotización pública.", error = detailedError });
             }
         }
 
@@ -90,8 +94,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al crear cotización");
-                return StatusCode(500, new { message = "Error al crear la cotización", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al crear cotización: {Error}", detailedError);
+                return StatusCode(500, new { message = "Error al crear la cotización", error = detailedError });
             }
         }
 
@@ -106,8 +111,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar cotización {Id}", id);
-                return StatusCode(500, new { message = "Error al actualizar la cotización", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al actualizar cotización {Id}: {Error}", id, detailedError);
+                return StatusCode(500, new { message = "Error al actualizar la cotización", error = detailedError });
             }
         }
 
@@ -121,8 +127,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al enviar correo de cotización {QuotationId}", dto.QuotationId);
-                return StatusCode(500, new { message = "Error al enviar el correo", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al enviar correo de cotización {QuotationId}: {Error}", dto.QuotationId, detailedError);
+                return StatusCode(500, new { message = "Error al enviar el correo", error = detailedError });
             }
         }
 
@@ -136,8 +143,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al procesar aprobación para cotización {Id}", id);
-                return StatusCode(500, new { message = "Error al procesar la aprobación", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al procesar aprobación para cotización {Id}: {Error}", id, detailedError);
+                return StatusCode(500, new { message = "Error al procesar la aprobación", error = detailedError });
             }
         }
 
@@ -153,8 +161,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al aprobar cotización pública con token {Token}", token);
-                return StatusCode(500, new { message = "Error al procesar la aprobación pública", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al aprobar cotización pública con token {Token}: {Error}", token, detailedError);
+                return StatusCode(500, new { message = "Error al procesar la aprobación pública", error = detailedError });
             }
         }
 
@@ -168,8 +177,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al rechazar cotización {Id}", id);
-                return StatusCode(500, new { message = "Error al rechazar la cotización", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al rechazar cotización {Id}: {Error}", id, detailedError);
+                return StatusCode(500, new { message = "Error al rechazar la cotización", error = detailedError });
             }
         }
 
@@ -183,8 +193,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al convertir cotización a orden de trabajo");
-                return StatusCode(500, new { message = "Error al convertir a orden de trabajo", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al convertir cotización a orden de trabajo: {Error}", detailedError);
+                return StatusCode(500, new { message = "Error al convertir a orden de trabajo", error = detailedError });
             }
         }
 
@@ -202,8 +213,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al convertir cotización a venta directa");
-                return StatusCode(500, new { message = "Error al convertir a venta directa", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al convertir cotización a venta directa: {Error}", detailedError);
+                return StatusCode(500, new { message = "Error al convertir a venta directa", error = detailedError });
             }
         }
 
@@ -217,8 +229,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar cotización {Id}", id);
-                return StatusCode(500, new { message = "Error al eliminar cotización", error = ex.Message });
+                string detailedError = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al eliminar cotización {Id}: {Error}", id, detailedError);
+                return StatusCode(500, new { message = "Error al eliminar cotización", error = detailedError });
             }
         }
     }

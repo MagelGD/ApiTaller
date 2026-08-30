@@ -2,6 +2,7 @@ using ApiTaller.Domain.Dtos.Portal;
 using ApiTaller.Domain.Dtos.Quotations;
 using ApiTaller.Domain.Interfaces.Services.Portal;
 using ApiTaller.Domain.Interfaces.Services.Quotations;
+using ApiTaller.api.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -57,8 +58,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener las órdenes desde el portal");
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener las órdenes desde el portal: {Error}", detailed);
+                return StatusCode(500, new { message = "Error interno al obtener órdenes", error = detailed });
             }
         }
 
@@ -77,8 +79,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener los vehículos desde el portal");
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener los vehículos desde el portal: {Error}", detailed);
+                return StatusCode(500, new { message = "Error interno al obtener vehículos", error = detailed });
             }
         }
 
@@ -91,7 +94,6 @@ namespace ApiTaller.api.Controllers
                 PortalOrderDetailDto? order = await _portalService.GetOrderDetailAsync(id, customerId, cancellation);
                 if (order == null)
                 {
-                    // Regla clave: retornar 403 Forbidden si el customer_id no coincide con el dueño de la orden
                     return Forbid("No tienes permisos para acceder a esta orden.");
                 }
                 return Ok(order);
@@ -102,8 +104,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el detalle de la orden {OrderId}", id);
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener el detalle de la orden {OrderId}: {Error}", id, detailed);
+                return StatusCode(500, new { message = "Error interno al consultar la orden", error = detailed });
             }
         }
 
@@ -126,8 +129,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al aprobar ítems para la orden {OrderId}", id);
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al aprobar ítems para la orden {OrderId}: {Error}", id, detailed);
+                return StatusCode(500, new { message = "Error interno al aprobar ítems", error = detailed });
             }
         }
 
@@ -157,8 +161,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al descargar factura para la orden {OrderId}", id);
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al descargar factura para la orden {OrderId}: {Error}", id, detailed);
+                return StatusCode(500, new { message = "Error al generar la factura", error = detailed });
             }
         }
 
@@ -181,8 +186,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener las fotos de la orden {OrderId}", id);
-                return StatusCode(500, new { message = "Error interno del servidor" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener las fotos de la orden {OrderId}: {Error}", id, detailed);
+                return StatusCode(500, new { message = "Error al obtener fotos", error = detailed });
             }
         }
 
@@ -203,8 +209,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener cotizaciones del cliente");
-                return StatusCode(500, new { message = "Error al obtener cotizaciones" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener cotizaciones del cliente: {Error}", detailed);
+                return StatusCode(500, new { message = "Error al obtener cotizaciones", error = detailed });
             }
         }
 
@@ -227,8 +234,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener detalle de la cotización {Id}", id);
-                return StatusCode(500, new { message = "Error al obtener cotización" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al obtener detalle de la cotización {Id}: {Error}", id, detailed);
+                return StatusCode(500, new { message = "Error al obtener cotización", error = detailed });
             }
         }
 
@@ -253,8 +261,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al aprobar cotización {Id}", id);
-                return StatusCode(500, new { message = "Error al aprobar la cotización" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al aprobar cotización {Id}: {Error}", id, detailed);
+                return StatusCode(500, new { message = "Error al aprobar la cotización", error = detailed });
             }
         }
 
@@ -279,8 +288,9 @@ namespace ApiTaller.api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al rechazar cotización {Id}", id);
-                return StatusCode(500, new { message = "Error al rechazar cotización" });
+                string detailed = ExceptionHelper.GetDetailedMessage(ex);
+                _logger.LogError(ex, "Error al rechazar cotización {Id}: {Error}", id, detailed);
+                return StatusCode(500, new { message = "Error al rechazar cotización", error = detailed });
             }
         }
     }
